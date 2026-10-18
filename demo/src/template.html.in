@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f4ee">
+  <title>__EDITION_TITLE__</title>
+  <style>/*__STYLES__*/</style>
+</head>
+<body>
+  <a class="skip" href="#main">跳到正文</a>
+  <div id="app"><p style="padding:32px;font:16px sans-serif">正在打开法典笔记。若此处一直没有变化，请使用项目中的「打开演示.command」启动网页版。</p></div>
+  <noscript><p>请在浏览器中允许 JavaScript，以阅读法条和保存笔记。</p></noscript>
+  <dialog id="modal" aria-labelledby="modal-title"></dialog>
+  <div id="selection-tools" class="selection-tools" aria-label="所选词语的操作" hidden></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script id="content-data" type="application/json">/*__DATA__*/</script>
+  <script>window.addEventListener('error',function(){var a=document.getElementById('app');if(a&&!a.querySelector('main'))a.innerHTML='<p style="padding:32px">页面未能启动。请通过「打开演示.command」重新打开；已有本机笔记不会被自动清空。</p>';});</script>
+  <script>/*__SCRIPT__*/</script>
+</body>
+</html>

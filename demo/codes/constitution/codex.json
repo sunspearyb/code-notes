@@ -1,0 +1,297 @@
+{
+  "about": "宪法数据包。界面中凡是“这部法典”的名称、引用格式、目录结构和专属功能，都从这里读取；扩展到其他法典时，另建一个数据包，见 codes/README.md。",
+  "id": "cn-constitution",
+  "name": "中华人民共和国宪法",
+  "short": "宪法",
+  "whole": "整部宪法",
+  "amendment": "宪法修正案",
+  "citation": {
+    "latest": "《中华人民共和国宪法》",
+    "original": "《中华人民共和国宪法》（{year} 年）",
+    "amended": "《中华人民共和国宪法》（{year} 年修正）",
+    "aliases": [
+      "中华人民共和国宪法",
+      "宪法"
+    ],
+    "note": "首次引用写全称，此后可简称《宪法》。引用修正前的文本，应注明年份。"
+  },
+  "files": {
+    "history": "versions.json",
+    "subtitles": "subtitles.json",
+    "guide": "guide.json",
+    "revisionHistory": "revision-history.json",
+    "english": "english.json",
+    "reviewHistory": "review-history.json",
+    "relatedLaws": "related-laws.json"
+  },
+  "levels": {
+    "preamble": {
+      "name": "序言",
+      "numbered": false
+    },
+    "chapter": {
+      "name": "章",
+      "numbered": true
+    },
+    "section": {
+      "name": "节",
+      "numbered": true
+    }
+  },
+  "structure": [
+    {
+      "id": "preamble",
+      "level": "preamble",
+      "name": "序言",
+      "from": "p1",
+      "to": "p13"
+    },
+    {
+      "id": "general",
+      "level": "chapter",
+      "name": "总纲",
+      "from": "a1",
+      "to": "a32"
+    },
+    {
+      "id": "rights",
+      "level": "chapter",
+      "name": "公民的基本权利和义务",
+      "from": "a33",
+      "to": "a56"
+    },
+    {
+      "id": "state",
+      "level": "chapter",
+      "name": "国家机构",
+      "from": "a57",
+      "to": "a140",
+      "children": [
+        {
+          "id": "npc",
+          "level": "section",
+          "name": "全国人民代表大会",
+          "from": "a57",
+          "to": "a78"
+        },
+        {
+          "id": "president",
+          "level": "section",
+          "name": "中华人民共和国主席",
+          "from": "a79",
+          "to": "a84"
+        },
+        {
+          "id": "council",
+          "level": "section",
+          "name": "国务院",
+          "from": "a85",
+          "to": "a92"
+        },
+        {
+          "id": "military",
+          "level": "section",
+          "name": "中央军事委员会",
+          "from": "a93",
+          "to": "a94"
+        },
+        {
+          "id": "local",
+          "level": "section",
+          "name": "地方各级人民代表大会和地方各级人民政府",
+          "from": "a95",
+          "to": "a111"
+        },
+        {
+          "id": "autonomy",
+          "level": "section",
+          "name": "民族自治地方的自治机关",
+          "from": "a112",
+          "to": "a122"
+        },
+        {
+          "id": "supervision",
+          "level": "section",
+          "name": "监察委员会",
+          "from": "a123",
+          "to": "a127"
+        },
+        {
+          "id": "courts",
+          "level": "section",
+          "name": "人民法院和人民检察院",
+          "from": "a128",
+          "to": "a140"
+        }
+      ]
+    },
+    {
+      "id": "symbols",
+      "level": "chapter",
+      "name": "国旗、国歌、国徽、首都",
+      "names": {
+        "1982": "国旗、国徽、首都",
+        "2004": "国旗、国歌、国徽、首都"
+      },
+      "from": "a141",
+      "to": "a143"
+    }
+  ],
+  "welcome": {
+    "body": "读一条宪法，先弄清字句的意思，再看它在整部宪法中的位置、怎样制定和修正、要实现什么目的，最后写下自己的判断。这本笔记就按这几步来记。",
+    "start": "a33",
+    "startLabel": "从第三十三条读起"
+  },
+  "searchQuery": "宪法 合宪性审查 备案审查 site:npc.gov.cn",
+  "features": {
+    "amendments": true,
+    "revisionHistory": true,
+    "english": true,
+    "reviewHistory": true,
+    "rightsTemplate": {
+      "from": "a33",
+      "to": "a51"
+    },
+    "relatedLaws": true
+  },
+  "relationCategories": {
+    "related": {
+      "name": "宪法相关法",
+      "materialType": "相关法律",
+      "official": "relatedLaws",
+      "intro": "全国人大常委会法工委《现行有效法律目录》列为“宪法相关法”的 56 件法律，以及它们与宪法条文的关系。只到法律为止，点名称打开国家法律法规数据库中的原文。",
+      "hintTitle": "怎样读",
+      "hint": "宪法条文中写“由法律规定”的，是宪法要求以法律规定的事项；写“依照法律规定”“依法”的，是要求依照法律行使或者保护的事项。在法条精读中，这些字句带有下划线，点开可以查看已经关联的法律，也可以自己去找，或者请助手帮你找。笔记中“尚未关联”，只说明这本笔记还没有记录，不等于没有立法。",
+      "fields": [
+        [
+          "relation",
+          "关系",
+          [
+            "具体化",
+            "实施",
+            "授权立法",
+            "其他"
+          ]
+        ]
+      ],
+      "newLabel": "记录一部相关法律",
+      "reasonLabel": "关系与理由",
+      "titlePlaceholder": "法律名称，如：中华人民共和国国籍法",
+      "reasonTemplate": "这部法律怎样具体化或实施本条：",
+      "filterPlaceholder": "查找法律名称或条文",
+      "emptyTitle": "还没有自己记录的相关法律。",
+      "empty": "在法条精读中点带下划线的字句，记录你找到的法律。"
+    },
+    "comparative": {
+      "name": "比较阅读",
+      "method": "比较法解释",
+      "materialType": "比较法",
+      "fields": [
+        [
+          "subject",
+          "比较对象",
+          [
+            "外国宪法条款",
+            "外国宪法全文",
+            "概念或制度",
+            "论文或著作"
+          ]
+        ],
+        [
+          "jurisdiction",
+          "国家或地区"
+        ],
+        [
+          "provision",
+          "条款或出处"
+        ]
+      ],
+      "intro": "输入一个概念、一条外国宪法条文，或导入一部外国宪法、一篇论文，再与本国宪法的条文、章节或整部宪法建立关联。",
+      "hintTitle": "比较法解释",
+      "hint": "参照外国宪法的条款、概念和制度，理解本国宪法。外国法是理解的参照，不是解释本国宪法的依据；同一个词在不同宪法中含义可能不同，比较时留意各自的制度背景。",
+      "emptyTitle": "从一个概念开始比较。",
+      "empty": "例如“人的尊严”：我国宪法第三十八条写“人格尊严不受侵犯”，可以对照其他国家宪法的相应条款，写下相同与不同。",
+      "newLabel": "新建比较笔记",
+      "reasonLabel": "我的比较",
+      "titlePlaceholder": "如：德国基本法第一条；人的尊严；某篇论文的题目",
+      "reasonTemplate": "相同点：\n不同点：\n对理解本国宪法的帮助：",
+      "filterPlaceholder": "查找国家、条款、概念或笔记中的字句",
+      "jurisdictions": [
+        "德国",
+        "美国",
+        "日本",
+        "法国",
+        "英国",
+        "韩国",
+        "意大利",
+        "西班牙",
+        "瑞士",
+        "奥地利",
+        "加拿大",
+        "澳大利亚",
+        "印度",
+        "南非",
+        "巴西",
+        "俄罗斯",
+        "欧洲联盟",
+        "欧洲人权公约"
+      ]
+    },
+    "review": {
+      "name": "备案审查",
+      "method": "",
+      "materialType": "备案审查",
+      "fields": [
+        [
+          "document",
+          "被审查的规范性文件"
+        ],
+        [
+          "issuer",
+          "制定机关"
+        ],
+        [
+          "standard",
+          "审查角度",
+          [
+            "合宪性",
+            "合法性",
+            "适当性"
+          ],
+          "multi"
+        ],
+        [
+          "outcome",
+          "处理结果"
+        ]
+      ],
+      "intro": "读工作报告和公布的审查案例，看宪法条文怎样用来审查法规、司法解释和其他规范性文件。",
+      "hintTitle": "什么是备案审查",
+      "hint": "依照宪法和法律，行政法规、监察法规、地方性法规、自治条例和单行条例、司法解释等报送全国人大常委会备案，由全国人大常委会审查。全国人大常委会法制工作委员会每年报告备案审查工作情况。备案审查包括合宪性审查，可以在“比较阅读”中与其他国家的合宪性审查（constitutional review）对照。",
+      "emptyTitle": "还没有审查笔记。",
+      "empty": "读到一段审查理由时，点“据此写笔记”，写下审查对象、宪法依据、结论和自己的看法。",
+      "newLabel": "记录审查案例",
+      "reasonLabel": "我的分析",
+      "titlePlaceholder": "如：某地方性法规关于强制亲子鉴定的规定",
+      "reasonTemplate": "审查对象：\n宪法依据：\n审查结论：\n我的看法：",
+      "filterPlaceholder": "查找条文、规范性文件或字句",
+      "official": "reviewHistory",
+      "officialTitle": "报告和案例中援引宪法条文的段落",
+      "officialLink": "工作报告和审查案例中援引本条的"
+    }
+  },
+  "delegationTerms": [
+    "由法律另行规定",
+    "由法律规定",
+    "以法律规定",
+    "依照法律规定",
+    "依照法律",
+    "法律规定的",
+    "依法"
+  ],
+  "delegationStrict": [
+    "由法律另行规定",
+    "由法律规定",
+    "以法律规定"
+  ]
+}

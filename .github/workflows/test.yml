@@ -1,0 +1,36 @@
+# 每次推送和改进请求都运行全部检查。
+name: 检查
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 生成页面
+        run: python3 demo/build.py
+      - name: 页面与提交的版本一致
+        run: git diff --exit-code -- 'demo/法典笔记*.html' || (echo "请在提交前运行 python3 demo/build.py" && exit 1)
+      - name: 数据包
+        run: |
+          for dir in demo/codes/*/; do
+            pack=$(basename "$dir")
+            case "$pack" in _*) continue ;; esac
+            [ -f "$dir/codex.json" ] && python3 demo/codes/check_pack.py "$pack"
+          done
+      - name: 数据模型
+        run: |
+          node demo/test-clean.cjs
+          node demo/test-learning.cjs
+          node demo/test-reflection.cjs
+          node demo/test-codex.cjs
+      - name: 本机服务
+        working-directory: demo
+        run: python3 -m unittest test_service test_agent test_help

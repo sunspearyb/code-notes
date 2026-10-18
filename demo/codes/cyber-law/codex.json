@@ -1,0 +1,481 @@
+{
+  "about": "网络法典是三部法律合编的数据包名称。各法律保留自己的名称、条号、版本和引用格式。",
+  "id": "cn-cyber-law",
+  "name": "网络法典",
+  "short": "网络法典",
+  "whole": "网络法典",
+  "amendment": "修正",
+  "portOffset": 2,
+  "webFolder": "cyber-law",
+  "citation": {
+    "latest": "《网络法典》",
+    "original": "《网络法典》（{year} 年）",
+    "amended": "《网络法典》（{year} 年修正）",
+    "aliases": [
+      "网络法典"
+    ],
+    "note": "引用时注明法律全称、条款；引用以往文本时注明版本年份。"
+  },
+  "files": {
+    "history": "versions.json",
+    "subtitles": "subtitles.json",
+    "guide": "guide.json",
+    "english": "english.json"
+  },
+  "levels": {
+    "law": {
+      "name": "",
+      "numbered": false
+    },
+    "chapter": {
+      "name": "章",
+      "numbered": true
+    },
+    "section": {
+      "name": "节",
+      "numbered": true
+    }
+  },
+  "structure": [
+    {
+      "id": "cybersecurity",
+      "level": "law",
+      "name": "网络安全法",
+      "from": "cs1",
+      "to": "cs81",
+      "law": {
+        "name": "中华人民共和国网络安全法",
+        "short": "网络安全法",
+        "aliases": [
+          "网安法"
+        ],
+        "citation": {
+          "latest": "《中华人民共和国网络安全法》",
+          "original": "《中华人民共和国网络安全法》（{year} 年）",
+          "amended": "《中华人民共和国网络安全法》（{year} 年修正）",
+          "aliases": [
+            "中华人民共和国网络安全法",
+            "网络安全法",
+            "网安法"
+          ],
+          "note": "引用时注明法律全称、条款；引用以往文本时注明版本年份。",
+          "byYear": {
+            "2016": "《中华人民共和国网络安全法》（2016 年）",
+            "2021": "《中华人民共和国网络安全法》（2016 年）",
+            "2025": "《中华人民共和国网络安全法》"
+          }
+        }
+      },
+      "children": [
+        {
+          "id": "cs-node-1",
+          "level": "chapter",
+          "name": "总　　则",
+          "title": "第一章　总　　则",
+          "from": "cs1",
+          "number": 1,
+          "to": "cs15"
+        },
+        {
+          "id": "cs-node-2",
+          "level": "chapter",
+          "name": "网络安全支持与促进",
+          "title": "第二章　网络安全支持与促进",
+          "from": "cs16",
+          "number": 2,
+          "to": "cs22"
+        },
+        {
+          "id": "cs-node-3",
+          "level": "chapter",
+          "name": "网络运行安全",
+          "title": "第三章　网络运行安全",
+          "from": "cs23",
+          "number": 3,
+          "children": [
+            {
+              "id": "cs-node-4",
+              "level": "section",
+              "name": "一般规定",
+              "title": "第一节　一般规定",
+              "from": "cs23",
+              "number": 1,
+              "to": "cs32"
+            },
+            {
+              "id": "cs-node-5",
+              "level": "section",
+              "name": "关键信息基础设施的运行安全",
+              "title": "第二节　关键信息基础设施的运行安全",
+              "from": "cs33",
+              "number": 2,
+              "to": "cs41"
+            }
+          ],
+          "to": "cs41"
+        },
+        {
+          "id": "cs-node-6",
+          "level": "chapter",
+          "name": "网络信息安全",
+          "title": "第四章　网络信息安全",
+          "from": "cs42",
+          "number": 4,
+          "to": "cs52"
+        },
+        {
+          "id": "cs-node-7",
+          "level": "chapter",
+          "name": "监测预警与应急处置",
+          "title": "第五章　监测预警与应急处置",
+          "from": "cs53",
+          "number": 5,
+          "to": "cs60"
+        },
+        {
+          "id": "cs-node-8",
+          "level": "chapter",
+          "name": "法律责任",
+          "title": "第六章　法律责任",
+          "from": "cs61",
+          "number": 6,
+          "to": "cs77"
+        },
+        {
+          "id": "cs-node-9",
+          "level": "chapter",
+          "name": "附　　则",
+          "title": "第七章　附　　则",
+          "from": "cs78",
+          "number": 7,
+          "to": "cs81"
+        }
+      ]
+    },
+    {
+      "id": "data-security",
+      "level": "law",
+      "name": "数据安全法",
+      "from": "ds1",
+      "to": "ds55",
+      "law": {
+        "name": "中华人民共和国数据安全法",
+        "short": "数据安全法",
+        "aliases": [
+          "数安法"
+        ],
+        "citation": {
+          "latest": "《中华人民共和国数据安全法》",
+          "original": "《中华人民共和国数据安全法》（{year} 年）",
+          "amended": "《中华人民共和国数据安全法》（{year} 年修正）",
+          "aliases": [
+            "中华人民共和国数据安全法",
+            "数据安全法",
+            "数安法"
+          ],
+          "note": "引用时注明法律全称、条款；引用以往文本时注明版本年份。",
+          "byYear": {
+            "2021": "《中华人民共和国数据安全法》",
+            "2025": "《中华人民共和国数据安全法》"
+          }
+        }
+      },
+      "children": [
+        {
+          "id": "ds-node-1",
+          "level": "chapter",
+          "name": "总　　则",
+          "title": "第一章　总　　则",
+          "from": "ds1",
+          "number": 1,
+          "to": "ds12"
+        },
+        {
+          "id": "ds-node-2",
+          "level": "chapter",
+          "name": "数据安全与发展",
+          "title": "第二章　数据安全与发展",
+          "from": "ds13",
+          "number": 2,
+          "to": "ds20"
+        },
+        {
+          "id": "ds-node-3",
+          "level": "chapter",
+          "name": "数据安全制度",
+          "title": "第三章　数据安全制度",
+          "from": "ds21",
+          "number": 3,
+          "to": "ds26"
+        },
+        {
+          "id": "ds-node-4",
+          "level": "chapter",
+          "name": "数据安全保护义务",
+          "title": "第四章　数据安全保护义务",
+          "from": "ds27",
+          "number": 4,
+          "to": "ds36"
+        },
+        {
+          "id": "ds-node-5",
+          "level": "chapter",
+          "name": "政务数据安全与开放",
+          "title": "第五章　政务数据安全与开放",
+          "from": "ds37",
+          "number": 5,
+          "to": "ds43"
+        },
+        {
+          "id": "ds-node-6",
+          "level": "chapter",
+          "name": "法律责任",
+          "title": "第六章　法律责任",
+          "from": "ds44",
+          "number": 6,
+          "to": "ds52"
+        },
+        {
+          "id": "ds-node-7",
+          "level": "chapter",
+          "name": "附　　则",
+          "title": "第七章　附　　则",
+          "from": "ds53",
+          "number": 7,
+          "to": "ds55"
+        }
+      ]
+    },
+    {
+      "id": "personal-information",
+      "level": "law",
+      "name": "个人信息保护法",
+      "from": "pi1",
+      "to": "pi74",
+      "law": {
+        "name": "中华人民共和国个人信息保护法",
+        "short": "个人信息保护法",
+        "aliases": [
+          "个保法"
+        ],
+        "citation": {
+          "latest": "《中华人民共和国个人信息保护法》",
+          "original": "《中华人民共和国个人信息保护法》（{year} 年）",
+          "amended": "《中华人民共和国个人信息保护法》（{year} 年修正）",
+          "aliases": [
+            "中华人民共和国个人信息保护法",
+            "个人信息保护法",
+            "个保法"
+          ],
+          "note": "引用时注明法律全称、条款；引用以往文本时注明版本年份。",
+          "byYear": {
+            "2021": "《中华人民共和国个人信息保护法》",
+            "2025": "《中华人民共和国个人信息保护法》"
+          }
+        }
+      },
+      "children": [
+        {
+          "id": "pi-node-1",
+          "level": "chapter",
+          "name": "总　　则",
+          "title": "第一章　总　　则",
+          "from": "pi1",
+          "number": 1,
+          "to": "pi12"
+        },
+        {
+          "id": "pi-node-2",
+          "level": "chapter",
+          "name": "个人信息处理规则",
+          "title": "第二章　个人信息处理规则",
+          "from": "pi13",
+          "number": 2,
+          "children": [
+            {
+              "id": "pi-node-3",
+              "level": "section",
+              "name": "一般规定",
+              "title": "第一节　一般规定",
+              "from": "pi13",
+              "number": 1,
+              "to": "pi27"
+            },
+            {
+              "id": "pi-node-4",
+              "level": "section",
+              "name": "敏感个人信息的处理规则",
+              "title": "第二节　敏感个人信息的处理规则",
+              "from": "pi28",
+              "number": 2,
+              "to": "pi32"
+            },
+            {
+              "id": "pi-node-5",
+              "level": "section",
+              "name": "国家机关处理个人信息的特别规定",
+              "title": "第三节　国家机关处理个人信息的特别规定",
+              "from": "pi33",
+              "number": 3,
+              "to": "pi37"
+            }
+          ],
+          "to": "pi37"
+        },
+        {
+          "id": "pi-node-6",
+          "level": "chapter",
+          "name": "个人信息跨境提供的规则",
+          "title": "第三章　个人信息跨境提供的规则",
+          "from": "pi38",
+          "number": 3,
+          "to": "pi43"
+        },
+        {
+          "id": "pi-node-7",
+          "level": "chapter",
+          "name": "个人在个人信息处理活动中的权利",
+          "title": "第四章　个人在个人信息处理活动中的权利",
+          "from": "pi44",
+          "number": 4,
+          "to": "pi50"
+        },
+        {
+          "id": "pi-node-8",
+          "level": "chapter",
+          "name": "个人信息处理者的义务",
+          "title": "第五章　个人信息处理者的义务",
+          "from": "pi51",
+          "number": 5,
+          "to": "pi59"
+        },
+        {
+          "id": "pi-node-9",
+          "level": "chapter",
+          "name": "履行个人信息保护职责的部门",
+          "title": "第六章　履行个人信息保护职责的部门",
+          "from": "pi60",
+          "number": 6,
+          "to": "pi65"
+        },
+        {
+          "id": "pi-node-10",
+          "level": "chapter",
+          "name": "法律责任",
+          "title": "第七章　法律责任",
+          "from": "pi66",
+          "number": 7,
+          "to": "pi71"
+        },
+        {
+          "id": "pi-node-11",
+          "level": "chapter",
+          "name": "附　　则",
+          "title": "第八章　附　　则",
+          "from": "pi72",
+          "number": 8,
+          "to": "pi74"
+        }
+      ]
+    }
+  ],
+  "yearLabels": {
+    "2016": "2016 年（网络安全法通过文本）",
+    "2021": "2021 年（三部法律通过后）",
+    "2025": "2025 年（网络安全法修正，2026年施行）"
+  },
+  "welcome": {
+    "body": "合读网络安全法、数据安全法与个人信息保护法，查阅各法条文、修正前后文本，并记录条文与配套规定、案例之间的联系。各条小标题为依据条款拟定的条旨草稿，可在研读时修改。",
+    "start": "pi13",
+    "startLabel": "从个人信息保护法第十三条读起"
+  },
+  "searchQuery": "网络安全法 数据安全法 个人信息保护法 site:cac.gov.cn",
+  "features": {
+    "amendments": true,
+    "english": true
+  },
+  "relationCategories": {
+    "supporting": {
+      "name": "配套规定",
+      "materialType": "配套规定",
+      "fields": [
+        [
+          "document",
+          "名称"
+        ],
+        [
+          "type",
+          "类别",
+          [
+            "行政法规",
+            "部门规章",
+            "国家标准"
+          ]
+        ],
+        [
+          "issuer",
+          "发布机关"
+        ],
+        [
+          "number",
+          "文号或标准号"
+        ],
+        [
+          "status",
+          "效力",
+          [
+            "有效",
+            "已修改",
+            "已废止"
+          ]
+        ]
+      ]
+    },
+    "case": {
+      "name": "典型案例",
+      "materialType": "案例",
+      "fields": [
+        [
+          "document",
+          "案例名称"
+        ],
+        [
+          "issuer",
+          "发布机关"
+        ],
+        [
+          "number",
+          "案号或编号"
+        ],
+        [
+          "holding",
+          "处理要点"
+        ]
+      ]
+    },
+    "comparative": {
+      "name": "比较阅读",
+      "method": "比较法解释",
+      "materialType": "比较法",
+      "fields": [
+        [
+          "subject",
+          "比较对象"
+        ],
+        [
+          "jurisdiction",
+          "国家或地区"
+        ],
+        [
+          "provision",
+          "条款或出处"
+        ]
+      ],
+      "intro": "填写比较对象及出处，将其与本数据包的法律条文建立关联。",
+      "newLabel": "新建比较笔记",
+      "titlePlaceholder": "如：欧盟《通用数据保护条例》第六条",
+      "reasonLabel": "我的比较",
+      "reasonTemplate": "相同点：\n不同点：\n制度背景：\n对理解本国条文的帮助："
+    }
+  }
+}

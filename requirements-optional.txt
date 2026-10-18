@@ -1,0 +1,2 @@
+# Optional: PDF text extraction. Other local features use the standard library.
+pypdf>=6.10,<7

@@ -1,0 +1,30 @@
+name: 条文勘误
+description: 条文、修正对照、英文本、条旨或官方资料中的错误
+labels: ["勘误"]
+body:
+  - type: input
+    id: place
+    attributes:
+      label: 位置
+      placeholder: 例如：第三十七条第二款，2004 年文本；或“备案审查”中某一段
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: 现在显示的文字
+    validations:
+      required: true
+  - type: textarea
+    id: correct
+    attributes:
+      label: 应为
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 官方原文出处
+      description: 请给出可以核对的出处，例如国家法律法规数据库或中国人大网的链接、公报的期号和页码。
+    validations:
+      required: true

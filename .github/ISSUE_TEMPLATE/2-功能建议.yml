@@ -1,0 +1,31 @@
+name: 功能建议
+description: 希望增加或改变的功能
+labels: ["建议"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决什么问题
+      description: 读条文、记笔记、复习或讨论时，遇到了什么不便？和哪种解释方法有关？
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: 设想的做法
+      description: 可以画个草图、举个例子，也可以只说想法。
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 适用范围
+      options:
+        - 宪法
+        - 各部法典通用
+        - 扩展到其他法典或立法
+        - 不确定
+  - type: checkboxes
+    id: help
+    attributes:
+      label: 参与
+      options:
+        - label: 我愿意自己（或请编程助手）尝试实现，并提交改进请求

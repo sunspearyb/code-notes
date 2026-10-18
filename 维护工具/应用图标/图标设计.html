@@ -1,0 +1,68 @@
+<!doctype html>
+<!-- 法典笔记的应用图标。制作图标.py 用 Chrome 打开本页截图：?design=方案&mode=square|round|fg|bg。
+     每个方案分为背景（bg）和图形（fg）两层：安卓自适应图标需要分开的两层，其他平台合成一张。
+     文字使用 demo/src/fonts.css 中的思源宋体子集，与软件正文一致。 -->
+<html lang="zh-CN"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../demo/src/fonts.css">
+<style>html,body{margin:0;background:transparent;overflow:hidden}svg{display:block;width:100vw;height:100vh}</style>
+</head><body>
+<svg id="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"></svg>
+<script>
+const q=new URLSearchParams(location.search);
+const SERIF='font-family="Fadian Serif,Songti SC,serif" font-weight="600" text-anchor="middle"';
+const YEARS=['#a6a3a3','#8eaadb','#f4b183','#e6c560','#9cc480'];  // 1988、1993、1999、2004、2018 年修正的标色
+const DESIGNS={
+  // 索引贴：法规汇编的侧边贴满彩色索引贴，五种颜色就是软件中五次修正的标色。封面题“法典”，竖排（?title=horizontal 为横排）。
+  index:{
+    name:'索引贴',
+    bg:`<defs><linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8f4ea"/><stop offset="1" stop-color="#ece5d3"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#paper)"/>`,
+    fg:`<defs><linearGradient id="cover" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b5f4f"/><stop offset="1" stop-color="#173a30"/></linearGradient><clipPath id="coverClip"><rect x="236" y="168" width="476" height="688" rx="30"/></clipPath></defs>
+      <rect x="250" y="190" width="490" height="660" rx="22" fill="#000" opacity=".10" transform="translate(14 18)"/>
+      ${YEARS.map((c,i)=>`<rect x="652" y="${238+i*110}" width="150" height="82" rx="16" fill="${c}"/>`).join('')}
+      <rect x="276" y="186" width="456" height="664" rx="20" fill="#fbf8f0"/>
+      <g clip-path="url(#coverClip)"><rect x="236" y="168" width="476" height="688" fill="url(#cover)"/><rect x="236" y="168" width="62" height="688" fill="#0d2820" opacity=".45"/></g>
+      <g stroke="#d6b66c" fill="none"><path d="M352 318H640M352 336H640M352 690H640M352 708H640" stroke-width="5"/></g>
+      ${(q.get('title')||'vertical')==='vertical'?`<text x="496" y="486" font-size="154" fill="#e2c37a" ${SERIF}>法</text><text x="496" y="654" font-size="154" fill="#e2c37a" ${SERIF}>典</text>`:`<text x="496" y="582" font-size="150" fill="#e2c37a" ${SERIF} letter-spacing="6">法典</text>`}`
+  },
+  // 朱批：摊开的书，一行字下划了朱笔，红色书签带垂下来。
+  annotate:{
+    name:'朱批',
+    bg:`<defs><radialGradient id="green" cx=".3" cy=".22" r="1"><stop offset="0" stop-color="#2d6352"/><stop offset="1" stop-color="#173a30"/></radialGradient></defs><rect width="1024" height="1024" fill="url(#green)"/>`,
+    fg:`<path d="M512 352C430 312 300 312 190 340V784C300 756 430 756 512 796Z" fill="#cfc6b0" transform="translate(0 16)"/><path d="M512 352C594 312 724 312 834 340V784C724 756 594 756 512 796Z" fill="#cfc6b0" transform="translate(0 16)"/>
+      <path d="M512 352C430 312 300 312 190 340V784C300 756 430 756 512 796Z" fill="#fbf8f0"/><path d="M512 352C594 312 724 312 834 340V784C724 756 594 756 512 796Z" fill="#f6f1e4"/>
+      <g stroke="#c9c0aa" stroke-width="16" stroke-linecap="round">${[420,480,540,600,660].map((y,i)=>`<path d="M248 ${y}H${i===4?380:460}"/>`).join('')}${[420,480,620,680].map((y,i)=>`<path d="M570 ${y}H${i===3?690:778}"/>`).join('')}<path d="M570 540H778" stroke="#7d7461"/></g>
+      <path d="M562 572C640 566 712 572 786 566" stroke="#a33a2a" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M676 330V868L700 840L724 868V330Z" fill="#a33a2a"/>`
+  },
+  // 书脊：书架上的宪法、民法典、刑法，一本笔记可以扩展到多部法典。
+  spines:{
+    name:'书脊',
+    bg:`<defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8f4ea"/><stop offset="1" stop-color="#e9e1cd"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#wall)"/>`,
+    fg:`<rect x="168" y="808" width="688" height="26" rx="10" fill="#8b6a2b"/>
+      ${[['#1f4a3d',236,236,'宪'],['#a33a2a',428,196,'民'],['#2c3e5c',620,262,'刑']].map(([c,x,y,ch])=>`<rect x="${x}" y="${y}" width="168" height="${808-y}" rx="14" fill="${c}"/><rect x="${x}" y="${y+56}" width="168" height="12" fill="#d6b66c"/><rect x="${x}" y="${740}" width="168" height="12" fill="#d6b66c"/><text x="${x+84}" y="${(y+808)/2+52}" font-size="128" fill="#f2e3b6" ${SERIF}>${ch}</text>`).join('')}`
+  },
+  // 印：盖在文书上的一方朱印，“法”字阴刻。
+  seal:{
+    name:'印',
+    bg:`<defs><linearGradient id="sheet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#faf6ec"/><stop offset="1" stop-color="#eee6d2"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#sheet)"/>`,
+    fg:`<defs><filter id="rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="16"/></filter>
+      <filter id="ink"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="1" seed="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.3 1.75" result="spots"/><feComposite in="SourceGraphic" in2="spots" operator="in"/></filter>
+      <mask id="cut"><rect x="200" y="200" width="624" height="624" fill="#fff"/><rect x="238" y="238" width="548" height="548" rx="10" fill="none" stroke="#000" stroke-width="12"/><text x="512" y="676" font-size="430" fill="#000" ${SERIF}>法</text></mask></defs>
+      <g filter="url(#rough)"><g filter="url(#ink)"><rect x="200" y="200" width="624" height="624" rx="30" fill="#b23a2a" mask="url(#cut)"/></g></g>`
+  },
+  // 条旨：软件用【】标出条旨，这里把“法”放进【】里。
+  bracket:{
+    name:'条旨',
+    bg:`<defs><linearGradient id="note" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8f4ea"/><stop offset="1" stop-color="#ece5d3"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#note)"/>`,
+    fg:`<path d="M300 262H222C210 360 210 664 222 762H300C270 700 262 600 262 512C262 424 270 324 300 262Z" fill="#a33a2a"/><path d="M724 262H802C814 360 814 664 802 762H724C754 700 762 600 762 512C762 424 754 324 724 262Z" fill="#a33a2a"/>
+      <text x="512" y="640" font-size="350" fill="#1f4a3d" ${SERIF}>法</text>`
+  },
+};
+const d=DESIGNS[q.get('design')||'index'],mode=q.get('mode')||'square';
+// round: Windows, favicon and the legacy Android icon; fg/bg: the two layers of the Android adaptive icon,
+// with the drawing shrunk into the safe zone that every launcher mask keeps.
+const body=mode==='fg'?`<g transform="translate(512 512) scale(.74) translate(-512 -512)">${d.fg}</g>`:mode==='bg'?d.bg:d.bg+d.fg;
+document.getElementById('icon').innerHTML=mode==='round'?`<defs><clipPath id="r"><rect x="40" y="40" width="944" height="944" rx="210"/></clipPath></defs><g clip-path="url(#r)">${body}</g>`:body;
+document.title=d.name;
+</script>
+</body></html>

@@ -1,0 +1,42 @@
+name: 问题反馈
+description: 用的时候出了错，或者和说明不一致
+labels: ["问题"]
+body:
+  - type: markdown
+    attributes:
+      value: 谢谢反馈。请尽量写清楚，方便重现。不要粘贴自己的笔记内容或备份文件。
+  - type: dropdown
+    id: edition
+    attributes:
+      label: 使用的版本
+      options:
+        - PC&Mac 通用版（用启动文件打开）
+        - PC&Mac 通用版（直接打开网页）
+        - Windows 版
+        - 安卓版
+        - 网页版（苹果手机、iPad）
+        - 网页版（其他设备）
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: 设备和系统
+      placeholder: 例如：iPhone 15，iOS 18；Windows 11，Edge 浏览器
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 怎样出现的
+      description: 在哪个页面、点了什么、看到了什么提示。可以把截图拖到这里。
+      placeholder: |
+        1. 打开“法条精读”第三十七条
+        2. 点“修正对照”
+        3. ……
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 本来应该怎样

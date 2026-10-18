@@ -1,0 +1,1442 @@
+{
+ "description": "宪法相关法：全国人大常委会法制工作委员会《现行有效法律目录》中“宪法相关法”部门的法律，及其与宪法条文的对应。对应关系只到法律为止，由 Claude 拟定，待使用者核对。",
+ "source": {
+  "title": "现行有效法律目录（截至 2026-08-28）",
+  "publisher": "全国人大常委会法制工作委员会",
+  "url": "http://www.npc.gov.cn/npc/c2597/c5854/c5855/202609/P020260904396146393500.pdf",
+  "sha256": "e33b0f67293441f19ee519b2ed1619121da84867aa8396a3a16facd572586d83",
+  "checked": "2026-10-18"
+ },
+ "database": {
+  "name": "国家法律法规数据库",
+  "url": "https://flk.npc.gov.cn/"
+ },
+ "year": 2018,
+ "laws": [
+  {
+   "id": "law1",
+   "title": "中华人民共和国地方各级人民代表大会和地方各级人民政府组织法",
+   "short": "地方各级人民代表大会和地方各级人民政府组织法",
+   "history": [
+    "1979年通过",
+    "1982年修正",
+    "1986年修正",
+    "1995年修正",
+    "2004年修正",
+    "2015年修正",
+    "2022年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8081817f48d8de017f71b0aac01019&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9C%B0%E6%96%B9%E5%90%84%E7%BA%A7%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E5%92%8C%E5%9C%B0%E6%96%B9%E5%90%84%E7%BA%A7%E4%BA%BA%E6%B0%91%E6%94%BF%E5%BA%9C%E7%BB%84%E7%BB%87%E6%B3%95",
+   "units": [
+    "a95",
+    "a96",
+    "a99",
+    "a100",
+    "a101",
+    "a103",
+    "a104",
+    "a105",
+    "a107",
+    "a108",
+    "a110"
+   ],
+   "note": "地方各级人大和政府的组织、职权与工作程序",
+   "status": "拟定"
+  },
+  {
+   "id": "law2",
+   "title": "中华人民共和国全国人民代表大会和地方各级人民代表大会选举法",
+   "short": "全国人民代表大会和地方各级人民代表大会选举法",
+   "history": [
+    "1979年通过",
+    "1982年修正",
+    "1986年修正",
+    "1995年修正",
+    "2004年修正",
+    "2010年修正",
+    "2015年修正",
+    "2020年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff80808175265dd40175e47c7c140ecb&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%85%A8%E5%9B%BD%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E5%92%8C%E5%9C%B0%E6%96%B9%E5%90%84%E7%BA%A7%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E9%80%89%E4%B8%BE%E6%B3%95",
+   "units": [
+    "a34",
+    "a59",
+    "a97",
+    "a77",
+    "a102"
+   ],
+   "note": "选举权与被选举权；全国和地方各级人大代表的名额和产生办法",
+   "status": "拟定"
+  },
+  {
+   "id": "law3",
+   "title": "中华人民共和国人民法院组织法",
+   "short": "人民法院组织法",
+   "history": [
+    "1979年通过",
+    "1983年修正",
+    "1986年修正",
+    "2006年修正",
+    "2018年修订"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8080816f135f46016f1c5dbc0f106d&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E4%BA%BA%E6%B0%91%E6%B3%95%E9%99%A2%E7%BB%84%E7%BB%87%E6%B3%95",
+   "units": [
+    "a128",
+    "a129",
+    "a130",
+    "a131",
+    "a132",
+    "a133"
+   ],
+   "note": "人民法院的设置、组织与审判工作原则",
+   "status": "拟定"
+  },
+  {
+   "id": "law4",
+   "title": "中华人民共和国人民检察院组织法",
+   "short": "人民检察院组织法",
+   "history": [
+    "1979年通过",
+    "1983年修正",
+    "1986年修正",
+    "2018年修订"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8080816f135f46016f1cb8515010ba&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E4%BA%BA%E6%B0%91%E6%A3%80%E5%AF%9F%E9%99%A2%E7%BB%84%E7%BB%87%E6%B3%95",
+   "units": [
+    "a134",
+    "a135",
+    "a136",
+    "a137",
+    "a138"
+   ],
+   "note": "人民检察院的设置、组织与检察工作原则",
+   "status": "拟定"
+  },
+  {
+   "id": "law5",
+   "title": "中华人民共和国国籍法",
+   "short": "国籍法",
+   "history": [
+    "1980年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5aba10073&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E7%B1%8D%E6%B3%95",
+   "units": [
+    "a33"
+   ],
+   "note": "公民资格以国籍为前提",
+   "status": "拟定"
+  },
+  {
+   "id": "law6",
+   "title": "中国人民解放军选举全国人民代表大会和县级以上地方各级人民代表大会代表的办法",
+   "short": "中国人民解放军选举全国人民代表大会和县级以上地方各级人民代表大会代表的办法",
+   "history": [
+    "1981年通过",
+    "1996年修订",
+    "2012年修正",
+    "2021年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8081817ab22e0c017abd51fda1054a&title=%E4%B8%AD%E5%9B%BD%E4%BA%BA%E6%B0%91%E8%A7%A3%E6%94%BE%E5%86%9B%E9%80%89%E4%B8%BE%E5%85%A8%E5%9B%BD%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E5%92%8C%E5%8E%BF%E7%BA%A7%E4%BB%A5%E4%B8%8A%E5%9C%B0%E6%96%B9%E5%90%84%E7%BA%A7%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E4%BB%A3%E8%A1%A8%E7%9A%84%E5%8A%9E%E6%B3%95",
+   "units": [
+    "a59",
+    "a97"
+   ],
+   "note": "军队选出的人大代表",
+   "status": "拟定"
+  },
+  {
+   "id": "law7",
+   "title": "中华人民共和国全国人民代表大会组织法",
+   "short": "全国人民代表大会组织法",
+   "history": [
+    "1982年通过",
+    "2021年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff80808177e75f880178241833053c56&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%85%A8%E5%9B%BD%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E7%BB%84%E7%BB%87%E6%B3%95",
+   "units": [
+    "a57",
+    "a65",
+    "a70",
+    "a71",
+    "a78"
+   ],
+   "note": "全国人大及其常委会、专门委员会的组织",
+   "status": "拟定"
+  },
+  {
+   "id": "law8",
+   "title": "中华人民共和国国务院组织法",
+   "short": "国务院组织法",
+   "history": [
+    "1982年通过",
+    "2024年修订"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8081818d6a4464018e2de2868d1dfa&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E5%8A%A1%E9%99%A2%E7%BB%84%E7%BB%87%E6%B3%95",
+   "units": [
+    "a85",
+    "a86",
+    "a88",
+    "a90"
+   ],
+   "note": "国务院的组成、领导体制与工作制度",
+   "status": "拟定"
+  },
+  {
+   "id": "law9",
+   "title": "全国人民代表大会常务委员会关于县级以下人民代表大会代表直接选举的若干规定",
+   "short": "全国人民代表大会常务委员会关于县级以下人民代表大会代表直接选举的若干规定",
+   "history": [
+    "1983年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5aeb300a5&title=%E5%85%A8%E5%9B%BD%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E5%B8%B8%E5%8A%A1%E5%A7%94%E5%91%98%E4%BC%9A%E5%85%B3%E4%BA%8E%E5%8E%BF%E7%BA%A7%E4%BB%A5%E4%B8%8B%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E4%BB%A3%E8%A1%A8%E7%9B%B4%E6%8E%A5%E9%80%89%E4%B8%BE%E7%9A%84%E8%8B%A5%E5%B9%B2%E8%A7%84%E5%AE%9A",
+   "units": [
+    "a97"
+   ],
+   "note": "县、乡两级人大代表由选民直接选举",
+   "status": "拟定"
+  },
+  {
+   "id": "law10",
+   "title": "中华人民共和国民族区域自治法",
+   "short": "民族区域自治法",
+   "history": [
+    "1984年通过",
+    "2001年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf60d3f0267&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E6%B0%91%E6%97%8F%E5%8C%BA%E5%9F%9F%E8%87%AA%E6%B2%BB%E6%B3%95",
+   "units": [
+    "p11",
+    "a4",
+    "a112",
+    "a115",
+    "a116",
+    "a117",
+    "a118",
+    "a119",
+    "a120",
+    "a121",
+    "a122"
+   ],
+   "note": "民族区域自治制度与自治机关的自治权",
+   "status": "拟定"
+  },
+  {
+   "id": "law11",
+   "title": "全国人民代表大会常务委员会关于在沿海港口城市设立海事法院的决定",
+   "short": "全国人民代表大会常务委员会关于在沿海港口城市设立海事法院的决定",
+   "history": [
+    "1984年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5af4e00af&title=%E5%85%A8%E5%9B%BD%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E5%B8%B8%E5%8A%A1%E5%A7%94%E5%91%98%E4%BC%9A%E5%85%B3%E4%BA%8E%E5%9C%A8%E6%B2%BF%E6%B5%B7%E6%B8%AF%E5%8F%A3%E5%9F%8E%E5%B8%82%E8%AE%BE%E7%AB%8B%E6%B5%B7%E4%BA%8B%E6%B3%95%E9%99%A2%E7%9A%84%E5%86%B3%E5%AE%9A",
+   "units": [
+    "a129"
+   ],
+   "note": "设立专门人民法院",
+   "status": "拟定"
+  },
+  {
+   "id": "law12",
+   "title": "中华人民共和国外交特权与豁免条例",
+   "short": "外交特权与豁免条例",
+   "history": [
+    "1986年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5b0d600c3&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%A4%96%E4%BA%A4%E7%89%B9%E6%9D%83%E4%B8%8E%E8%B1%81%E5%85%8D%E6%9D%A1%E4%BE%8B",
+   "units": [
+    "p12",
+    "a81"
+   ],
+   "note": "对外交往；接受外国使节",
+   "status": "拟定"
+  },
+  {
+   "id": "law13",
+   "title": "中华人民共和国全国人民代表大会常务委员会议事规则",
+   "short": "全国人民代表大会常务委员会议事规则",
+   "history": [
+    "1987年通过",
+    "2009年修正",
+    "2022年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8081818291977701829f3b24f300d7&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%85%A8%E5%9B%BD%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E5%B8%B8%E5%8A%A1%E5%A7%94%E5%91%98%E4%BC%9A%E8%AE%AE%E4%BA%8B%E8%A7%84%E5%88%99",
+   "units": [
+    "a67",
+    "a68",
+    "a78"
+   ],
+   "note": "全国人大常委会的工作程序",
+   "status": "拟定"
+  },
+  {
+   "id": "law14",
+   "title": "全国人民代表大会常务委员会关于批准中央军事委员会《关于授予军队离休干部中国人民解放军功勋荣誉章的规定》的决定",
+   "short": "全国人民代表大会常务委员会关于批准中央军事委员会《关于授予军队离休干部中国人民解放军功勋荣誉章的规定》的决定",
+   "history": [
+    "1988年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5bfbf00d7&title=%E5%85%A8%E5%9B%BD%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E5%B8%B8%E5%8A%A1%E5%A7%94%E5%91%98%E4%BC%9A%E5%85%B3%E4%BA%8E%E6%89%B9%E5%87%86%E4%B8%AD%E5%A4%AE%E5%86%9B%E4%BA%8B%E5%A7%94%E5%91%98%E4%BC%9A%E3%80%8A%E5%85%B3%E4%BA%8E%E6%8E%88%E4%BA%88%E5%86%9B%E9%98%9F%E7%A6%BB%E4%BC%91%E5%B9%B2%E9%83%A8%E4%B8%AD%E5%9B%BD%E4%BA%BA%E6%B0%91%E8%A7%A3%E6%94%BE%E5%86%9B%E5%8A%9F%E5%8B%8B%E8%8D%A3%E8%AA%89%E7%AB%A0%E7%9A%84%E8%A7%84%E5%AE%9A%E3%80%8B%E7%9A%84%E5%86%B3%E5%AE%9A",
+   "units": [
+    "a67",
+    "a93"
+   ],
+   "note": "勋章和荣誉称号；中央军事委员会",
+   "status": "拟定"
+  },
+  {
+   "id": "law15",
+   "title": "中华人民共和国全国人民代表大会议事规则",
+   "short": "全国人民代表大会议事规则",
+   "history": [
+    "1989年通过",
+    "2021年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff80808177e75f88017823fdf7d73bf1&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%85%A8%E5%9B%BD%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E8%AE%AE%E4%BA%8B%E8%A7%84%E5%88%99",
+   "units": [
+    "a61",
+    "a62",
+    "a72",
+    "a73",
+    "a78"
+   ],
+   "note": "全国人大会议的工作程序",
+   "status": "拟定"
+  },
+  {
+   "id": "law16",
+   "title": "中华人民共和国集会游行示威法",
+   "short": "集会游行示威法",
+   "history": [
+    "1989年通过",
+    "2009年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf6a98a04dd&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E9%9B%86%E4%BC%9A%E6%B8%B8%E8%A1%8C%E7%A4%BA%E5%A8%81%E6%B3%95",
+   "units": [
+    "a35",
+    "a51"
+   ],
+   "note": "集会、游行、示威的自由及其行使",
+   "status": "拟定"
+  },
+  {
+   "id": "law17",
+   "title": "中华人民共和国城市居民委员会组织法",
+   "short": "城市居民委员会组织法",
+   "history": [
+    "1989年通过",
+    "2018年修正",
+    "2025年修订"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=5d9b0a64413e4a80b060a0bd742f5fb6&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9F%8E%E5%B8%82%E5%B1%85%E6%B0%91%E5%A7%94%E5%91%98%E4%BC%9A%E7%BB%84%E7%BB%87%E6%B3%95",
+   "units": [
+    "a111"
+   ],
+   "note": "居民委员会是基层群众性自治组织",
+   "status": "拟定"
+  },
+  {
+   "id": "law18",
+   "title": "中华人民共和国香港特别行政区基本法",
+   "short": "香港特别行政区基本法",
+   "history": [
+    "1990年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5c6680131&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E9%A6%99%E6%B8%AF%E7%89%B9%E5%88%AB%E8%A1%8C%E6%94%BF%E5%8C%BA%E5%9F%BA%E6%9C%AC%E6%B3%95",
+   "units": [
+    "a31",
+    "a62"
+   ],
+   "note": "特别行政区内实行的制度",
+   "status": "拟定"
+  },
+  {
+   "id": "law19",
+   "title": "中华人民共和国国旗法",
+   "short": "国旗法",
+   "history": [
+    "1990年通过",
+    "2009年修正",
+    "2020年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff80808175265dd40175e4c1504b0f2e&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E6%97%97%E6%B3%95",
+   "units": [
+    "a141"
+   ],
+   "note": "国旗",
+   "status": "拟定"
+  },
+  {
+   "id": "law20",
+   "title": "中华人民共和国领事特权与豁免条例",
+   "short": "领事特权与豁免条例",
+   "history": [
+    "1990年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5c7ce013b&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E9%A2%86%E4%BA%8B%E7%89%B9%E6%9D%83%E4%B8%8E%E8%B1%81%E5%85%8D%E6%9D%A1%E4%BE%8B",
+   "units": [
+    "p12"
+   ],
+   "note": "对外交往",
+   "status": "拟定"
+  },
+  {
+   "id": "law21",
+   "title": "中华人民共和国缔结条约程序法",
+   "short": "缔结条约程序法",
+   "history": [
+    "1990年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5c87c0145&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E7%BC%94%E7%BB%93%E6%9D%A1%E7%BA%A6%E7%A8%8B%E5%BA%8F%E6%B3%95",
+   "units": [
+    "a67",
+    "a81",
+    "a89"
+   ],
+   "note": "条约和重要协定的缔结、批准与废除",
+   "status": "拟定"
+  },
+  {
+   "id": "law22",
+   "title": "中华人民共和国国徽法",
+   "short": "国徽法",
+   "history": [
+    "1991年通过",
+    "2009年修正",
+    "2020年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff808081752b7d430175e4c797ed15ff&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E5%BE%BD%E6%B3%95",
+   "units": [
+    "a142"
+   ],
+   "note": "国徽",
+   "status": "拟定"
+  },
+  {
+   "id": "law23",
+   "title": "中华人民共和国领海及毗连区法",
+   "short": "领海及毗连区法",
+   "history": [
+    "1992年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5c9fd014f&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E9%A2%86%E6%B5%B7%E5%8F%8A%E6%AF%97%E8%BF%9E%E5%8C%BA%E6%B3%95",
+   "units": [
+    "p12"
+   ],
+   "note": "主权和领土完整",
+   "status": "拟定"
+  },
+  {
+   "id": "law24",
+   "title": "中华人民共和国全国人民代表大会和地方各级人民代表大会代表法",
+   "short": "全国人民代表大会和地方各级人民代表大会代表法",
+   "history": [
+    "1992年通过",
+    "2009年修正",
+    "2010年修正",
+    "2015年修正",
+    "2025年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff808181927b083b0195881cfb1458aa&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%85%A8%E5%9B%BD%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E5%92%8C%E5%9C%B0%E6%96%B9%E5%90%84%E7%BA%A7%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E4%BB%A3%E8%A1%A8%E6%B3%95",
+   "units": [
+    "a72",
+    "a73",
+    "a74",
+    "a75",
+    "a76",
+    "a77",
+    "a102"
+   ],
+   "note": "人大代表的权利、义务与监督",
+   "status": "拟定"
+  },
+  {
+   "id": "law25",
+   "title": "中华人民共和国澳门特别行政区基本法",
+   "short": "澳门特别行政区基本法",
+   "history": [
+    "1993年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5d0280195&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E6%BE%B3%E9%97%A8%E7%89%B9%E5%88%AB%E8%A1%8C%E6%94%BF%E5%8C%BA%E5%9F%BA%E6%9C%AC%E6%B3%95",
+   "units": [
+    "a31",
+    "a62"
+   ],
+   "note": "特别行政区内实行的制度",
+   "status": "拟定"
+  },
+  {
+   "id": "law26",
+   "title": "中华人民共和国国家赔偿法",
+   "short": "国家赔偿法",
+   "history": [
+    "1994年通过",
+    "2010年修正",
+    "2012年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf74c26069f&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E5%AE%B6%E8%B5%94%E5%81%BF%E6%B3%95",
+   "units": [
+    "a41"
+   ],
+   "note": "依照法律规定取得赔偿的权利",
+   "status": "拟定"
+  },
+  {
+   "id": "law27",
+   "title": "中华人民共和国法官法",
+   "short": "法官法",
+   "history": [
+    "1995年通过",
+    "2001年修正",
+    "2017年修正",
+    "2019年修订"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8080816f135f46016f21669bcd1abd&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E6%B3%95%E5%AE%98%E6%B3%95",
+   "units": [
+    "a128",
+    "a131",
+    "a67",
+    "a101",
+    "a104"
+   ],
+   "note": "法官的任免与独立行使审判权",
+   "status": "拟定"
+  },
+  {
+   "id": "law28",
+   "title": "中华人民共和国检察官法",
+   "short": "检察官法",
+   "history": [
+    "1995年通过",
+    "2001年修正",
+    "2017年修正",
+    "2019年修订"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8080816f135f46016f2170ba331afb&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E6%A3%80%E5%AF%9F%E5%AE%98%E6%B3%95",
+   "units": [
+    "a134",
+    "a136",
+    "a67",
+    "a101",
+    "a104"
+   ],
+   "note": "检察官的任免与独立行使检察权",
+   "status": "拟定"
+  },
+  {
+   "id": "law29",
+   "title": "中华人民共和国戒严法",
+   "short": "戒严法",
+   "history": [
+    "1996年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5dcaf01bd&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E6%88%92%E4%B8%A5%E6%B3%95",
+   "units": [
+    "a67",
+    "a80",
+    "a89"
+   ],
+   "note": "紧急状态的决定与宣布（2004 年修正前称戒严）",
+   "status": "拟定"
+  },
+  {
+   "id": "law30",
+   "title": "中华人民共和国香港特别行政区驻军法",
+   "short": "香港特别行政区驻军法",
+   "history": [
+    "1996年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5df9701e5&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E9%A6%99%E6%B8%AF%E7%89%B9%E5%88%AB%E8%A1%8C%E6%94%BF%E5%8C%BA%E9%A9%BB%E5%86%9B%E6%B3%95",
+   "units": [
+    "a31",
+    "a29",
+    "a93"
+   ],
+   "note": "武装力量；特别行政区",
+   "status": "拟定"
+  },
+  {
+   "id": "law31",
+   "title": "中华人民共和国国防法",
+   "short": "国防法",
+   "history": [
+    "1997年通过",
+    "2009年修正",
+    "2020年修订"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff808081752b7d430176a89d613a3565&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E9%98%B2%E6%B3%95",
+   "units": [
+    "a29",
+    "a55",
+    "a62",
+    "a67",
+    "a80",
+    "a89",
+    "a93"
+   ],
+   "note": "国防与武装力量",
+   "status": "拟定"
+  },
+  {
+   "id": "law32",
+   "title": "中华人民共和国专属经济区和大陆架法",
+   "short": "专属经济区和大陆架法",
+   "history": [
+    "1998年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf5eaf60203&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E4%B8%93%E5%B1%9E%E7%BB%8F%E6%B5%8E%E5%8C%BA%E5%92%8C%E5%A4%A7%E9%99%86%E6%9E%B6%E6%B3%95",
+   "units": [
+    "p12",
+    "a9"
+   ],
+   "note": "主权权利；自然资源",
+   "status": "拟定"
+  },
+  {
+   "id": "law33",
+   "title": "中华人民共和国村民委员会组织法",
+   "short": "村民委员会组织法",
+   "history": [
+    "1998年通过",
+    "2010年修订",
+    "2018年修正",
+    "2025年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=090f4cc550f84241941e1109c8772e76&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E6%9D%91%E6%B0%91%E5%A7%94%E5%91%98%E4%BC%9A%E7%BB%84%E7%BB%87%E6%B3%95",
+   "units": [
+    "a111"
+   ],
+   "note": "村民委员会是基层群众性自治组织",
+   "status": "拟定"
+  },
+  {
+   "id": "law34",
+   "title": "中华人民共和国澳门特别行政区驻军法",
+   "short": "澳门特别行政区驻军法",
+   "history": [
+    "1999年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf6072e0221&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E6%BE%B3%E9%97%A8%E7%89%B9%E5%88%AB%E8%A1%8C%E6%94%BF%E5%8C%BA%E9%A9%BB%E5%86%9B%E6%B3%95",
+   "units": [
+    "a31",
+    "a29",
+    "a93"
+   ],
+   "note": "武装力量；特别行政区",
+   "status": "拟定"
+  },
+  {
+   "id": "law35",
+   "title": "中华人民共和国立法法",
+   "short": "立法法",
+   "history": [
+    "2000年通过",
+    "2015年修正",
+    "2023年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff808181865edc140186d9d6f1cb2503&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E7%AB%8B%E6%B3%95%E6%B3%95",
+   "units": [
+    "a5",
+    "a58",
+    "a62",
+    "a67",
+    "a89",
+    "a90",
+    "a100",
+    "a116"
+   ],
+   "note": "立法权限与程序；法制统一",
+   "status": "拟定"
+  },
+  {
+   "id": "law36",
+   "title": "中华人民共和国国家通用语言文字法",
+   "short": "国家通用语言文字法",
+   "history": [
+    "2000年通过",
+    "2025年修订"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=f77ee28fe50241918f872785b51904f4&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E5%AE%B6%E9%80%9A%E7%94%A8%E8%AF%AD%E8%A8%80%E6%96%87%E5%AD%97%E6%B3%95",
+   "units": [
+    "a19",
+    "a4"
+   ],
+   "note": "推广全国通用的普通话；各民族使用和发展语言文字的自由",
+   "status": "拟定"
+  },
+  {
+   "id": "law37",
+   "title": "反分裂国家法",
+   "short": "反分裂国家法",
+   "history": [
+    "2005年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf62dde02fd&title=%E5%8F%8D%E5%88%86%E8%A3%82%E5%9B%BD%E5%AE%B6%E6%B3%95",
+   "units": [
+    "p9",
+    "a52"
+   ],
+   "note": "国家统一",
+   "status": "拟定"
+  },
+  {
+   "id": "law38",
+   "title": "中华人民共和国外国中央银行财产司法强制措施豁免法",
+   "short": "外国中央银行财产司法强制措施豁免法",
+   "history": [
+    "2005年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf634330311&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%A4%96%E5%9B%BD%E4%B8%AD%E5%A4%AE%E9%93%B6%E8%A1%8C%E8%B4%A2%E4%BA%A7%E5%8F%B8%E6%B3%95%E5%BC%BA%E5%88%B6%E6%8E%AA%E6%96%BD%E8%B1%81%E5%85%8D%E6%B3%95",
+   "units": [
+    "p12"
+   ],
+   "note": "对外交往",
+   "status": "拟定"
+  },
+  {
+   "id": "law39",
+   "title": "中华人民共和国各级人民代表大会常务委员会监督法",
+   "short": "各级人民代表大会常务委员会监督法",
+   "history": [
+    "2006年通过",
+    "2024年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff808181927b083b019390be74054832&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%90%84%E7%BA%A7%E4%BA%BA%E6%B0%91%E4%BB%A3%E8%A1%A8%E5%A4%A7%E4%BC%9A%E5%B8%B8%E5%8A%A1%E5%A7%94%E5%91%98%E4%BC%9A%E7%9B%91%E7%9D%A3%E6%B3%95",
+   "units": [
+    "a3",
+    "a5",
+    "a67",
+    "a92",
+    "a99",
+    "a104"
+   ],
+   "note": "人大常委会的监督职权与规范性文件备案审查",
+   "status": "拟定"
+  },
+  {
+   "id": "law40",
+   "title": "中华人民共和国国家安全法",
+   "short": "国家安全法",
+   "history": [
+    "2015年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf7e067082f&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E5%AE%B6%E5%AE%89%E5%85%A8%E6%B3%95",
+   "units": [
+    "a28",
+    "a52",
+    "a54"
+   ],
+   "note": "维护国家安全",
+   "status": "拟定"
+  },
+  {
+   "id": "law41",
+   "title": "中华人民共和国国家勋章和国家荣誉称号法",
+   "short": "国家勋章和国家荣誉称号法",
+   "history": [
+    "2015年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf7faa70893&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E5%AE%B6%E5%8B%8B%E7%AB%A0%E5%92%8C%E5%9B%BD%E5%AE%B6%E8%8D%A3%E8%AA%89%E7%A7%B0%E5%8F%B7%E6%B3%95",
+   "units": [
+    "a67",
+    "a80"
+   ],
+   "note": "国家的勋章和荣誉称号",
+   "status": "拟定"
+  },
+  {
+   "id": "law42",
+   "title": "中华人民共和国国歌法",
+   "short": "国歌法",
+   "history": [
+    "2017年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf85f470a2d&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E6%AD%8C%E6%B3%95",
+   "units": [
+    "a141"
+   ],
+   "note": "国歌",
+   "status": "拟定"
+  },
+  {
+   "id": "law43",
+   "title": "中华人民共和国监察法",
+   "short": "监察法",
+   "history": [
+    "2018年通过",
+    "2024年修正"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff808181944069720194960dcea345a2&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E7%9B%91%E5%AF%9F%E6%B3%95",
+   "units": [
+    "a123",
+    "a124",
+    "a125",
+    "a126",
+    "a127"
+   ],
+   "note": "监察委员会的组织与监察权",
+   "status": "拟定"
+  },
+  {
+   "id": "law44",
+   "title": "中华人民共和国人民陪审员法",
+   "short": "人民陪审员法",
+   "history": [
+    "2018年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf89dfc0b4f&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E4%BA%BA%E6%B0%91%E9%99%AA%E5%AE%A1%E5%91%98%E6%B3%95",
+   "units": [
+    "a2",
+    "a128"
+   ],
+   "note": "人民依法参与管理国家事务；审判",
+   "status": "拟定"
+  },
+  {
+   "id": "law45",
+   "title": "中华人民共和国英雄烈士保护法",
+   "short": "英雄烈士保护法",
+   "history": [
+    "2018年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=2c909fdd678bf17901678bf8a38c0b59&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E8%8B%B1%E9%9B%84%E7%83%88%E5%A3%AB%E4%BF%9D%E6%8A%A4%E6%B3%95",
+   "units": [
+    "p2",
+    "a24"
+   ],
+   "note": "革命传统；社会主义核心价值观",
+   "status": "拟定"
+  },
+  {
+   "id": "law46",
+   "title": "中华人民共和国公职人员政务处分法",
+   "short": "公职人员政务处分法",
+   "history": [
+    "2020年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff80808172b5f24f0172e4dc755418c0&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%85%AC%E8%81%8C%E4%BA%BA%E5%91%98%E6%94%BF%E5%8A%A1%E5%A4%84%E5%88%86%E6%B3%95",
+   "units": [
+    "a27",
+    "a123"
+   ],
+   "note": "国家工作人员；监察",
+   "status": "拟定"
+  },
+  {
+   "id": "law47",
+   "title": "中华人民共和国香港特别行政区维护国家安全法",
+   "short": "香港特别行政区维护国家安全法",
+   "history": [
+    "2020年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff80808172b5f24f0173094174de251e&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E9%A6%99%E6%B8%AF%E7%89%B9%E5%88%AB%E8%A1%8C%E6%94%BF%E5%8C%BA%E7%BB%B4%E6%8A%A4%E5%9B%BD%E5%AE%B6%E5%AE%89%E5%85%A8%E6%B3%95",
+   "units": [
+    "a31",
+    "a28",
+    "a52",
+    "a54"
+   ],
+   "note": "特别行政区；维护国家安全",
+   "status": "拟定"
+  },
+  {
+   "id": "law48",
+   "title": "中华人民共和国反外国制裁法",
+   "short": "反外国制裁法",
+   "history": [
+    "2021年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff80818179f5dd9f0179f89e7a1d05d3&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%8F%8D%E5%A4%96%E5%9B%BD%E5%88%B6%E8%A3%81%E6%B3%95",
+   "units": [
+    "p12"
+   ],
+   "note": "对外关系",
+   "status": "拟定"
+  },
+  {
+   "id": "law49",
+   "title": "中华人民共和国监察官法",
+   "short": "监察官法",
+   "history": [
+    "2021年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8081817b6472a3017b65724edf004f&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E7%9B%91%E5%AF%9F%E5%AE%98%E6%B3%95",
+   "units": [
+    "a123",
+    "a124",
+    "a127"
+   ],
+   "note": "监察官",
+   "status": "拟定"
+  },
+  {
+   "id": "law50",
+   "title": "中华人民共和国陆地国界法",
+   "short": "陆地国界法",
+   "history": [
+    "2021年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8081817cac2ab8017cac5b80d20123&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E9%99%86%E5%9C%B0%E5%9B%BD%E7%95%8C%E6%B3%95",
+   "units": [
+    "p12"
+   ],
+   "note": "主权和领土完整",
+   "status": "拟定"
+  },
+  {
+   "id": "law51",
+   "title": "中华人民共和国对外关系法",
+   "short": "对外关系法",
+   "history": [
+    "2023年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff80818188d7430b0189019c15ee0943&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%AF%B9%E5%A4%96%E5%85%B3%E7%B3%BB%E6%B3%95",
+   "units": [
+    "p12",
+    "a81",
+    "a89"
+   ],
+   "note": "对外关系",
+   "status": "拟定"
+  },
+  {
+   "id": "law52",
+   "title": "中华人民共和国外国国家豁免法",
+   "short": "外国国家豁免法",
+   "history": [
+    "2023年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8081818a21dc13018a51328e0c0c3c&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%A4%96%E5%9B%BD%E5%9B%BD%E5%AE%B6%E8%B1%81%E5%85%8D%E6%B3%95",
+   "units": [
+    "p12"
+   ],
+   "note": "对外交往",
+   "status": "拟定"
+  },
+  {
+   "id": "law53",
+   "title": "中华人民共和国爱国主义教育法",
+   "short": "爱国主义教育法",
+   "history": [
+    "2023年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=ff8081818a21dc13018b625b4a68173f&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E7%88%B1%E5%9B%BD%E4%B8%BB%E4%B9%89%E6%95%99%E8%82%B2%E6%B3%95",
+   "units": [
+    "a24",
+    "a54"
+   ],
+   "note": "爱国主义教育；维护祖国荣誉",
+   "status": "拟定"
+  },
+  {
+   "id": "law54",
+   "title": "中华人民共和国法治宣传教育法",
+   "short": "法治宣传教育法",
+   "history": [
+    "2025年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=189021012184442fa2ecd6b4c26dcba0&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E6%B3%95%E6%B2%BB%E5%AE%A3%E4%BC%A0%E6%95%99%E8%82%B2%E6%B3%95",
+   "units": [
+    "a5",
+    "a24"
+   ],
+   "note": "依法治国；法制教育",
+   "status": "拟定"
+  },
+  {
+   "id": "law55",
+   "title": "中华人民共和国民族团结进步促进法",
+   "short": "民族团结进步促进法",
+   "history": [
+    "2026年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=127e971ed95b44dd8ae375ab1aa8e531&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E6%B0%91%E6%97%8F%E5%9B%A2%E7%BB%93%E8%BF%9B%E6%AD%A5%E4%BF%83%E8%BF%9B%E6%B3%95",
+   "units": [
+    "p11",
+    "a4",
+    "a52"
+   ],
+   "note": "民族平等团结",
+   "status": "拟定"
+  },
+  {
+   "id": "law56",
+   "title": "中华人民共和国国家发展规划法",
+   "short": "国家发展规划法",
+   "history": [
+    "2026年通过"
+   ],
+   "url": "https://flk.npc.gov.cn/detail?id=9f5dd948936d475fab381916c37dd257&title=%E4%B8%AD%E5%8D%8E%E4%BA%BA%E6%B0%91%E5%85%B1%E5%92%8C%E5%9B%BD%E5%9B%BD%E5%AE%B6%E5%8F%91%E5%B1%95%E8%A7%84%E5%88%92%E6%B3%95",
+   "units": [
+    "a62",
+    "a67",
+    "a89",
+    "a99"
+   ],
+   "note": "国民经济和社会发展计划的编制、审批与执行",
+   "status": "拟定"
+  }
+ ],
+ "delegations": {
+  "a2": [
+   {
+    "block": 2,
+    "start": 2,
+    "end": 8,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a5": [
+   {
+    "block": 0,
+    "start": 9,
+    "end": 11,
+    "text": "依法",
+    "strict": false
+   }
+  ],
+  "a8": [
+   {
+    "block": 0,
+    "start": 93,
+    "end": 98,
+    "text": "法律规定的",
+    "strict": false
+   }
+  ],
+  "a9": [
+   {
+    "block": 0,
+    "start": 40,
+    "end": 45,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a10": [
+   {
+    "block": 1,
+    "start": 12,
+    "end": 17,
+    "text": "由法律规定",
+    "strict": true
+   },
+   {
+    "block": 2,
+    "start": 14,
+    "end": 20,
+    "text": "依照法律规定",
+    "strict": false
+   },
+   {
+    "block": 3,
+    "start": 37,
+    "end": 41,
+    "text": "依照法律",
+    "strict": false
+   }
+  ],
+  "a11": [
+   {
+    "block": 1,
+    "start": 58,
+    "end": 60,
+    "text": "依法",
+    "strict": false
+   }
+  ],
+  "a13": [
+   {
+    "block": 1,
+    "start": 2,
+    "end": 8,
+    "text": "依照法律规定",
+    "strict": false
+   },
+   {
+    "block": 2,
+    "start": 14,
+    "end": 20,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a15": [
+   {
+    "block": 2,
+    "start": 2,
+    "end": 4,
+    "text": "依法",
+    "strict": false
+   }
+  ],
+  "a16": [
+   {
+    "block": 0,
+    "start": 5,
+    "end": 10,
+    "text": "法律规定的",
+    "strict": false
+   },
+   {
+    "block": 1,
+    "start": 4,
+    "end": 10,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a17": [
+   {
+    "block": 1,
+    "start": 13,
+    "end": 19,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a19": [
+   {
+    "block": 3,
+    "start": 26,
+    "end": 32,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a27": [
+   {
+    "block": 2,
+    "start": 11,
+    "end": 17,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a31": [
+   {
+    "block": 0,
+    "start": 42,
+    "end": 47,
+    "text": "以法律规定",
+    "strict": true
+   }
+  ],
+  "a33": [
+   {
+    "block": 3,
+    "start": 9,
+    "end": 14,
+    "text": "法律规定的",
+    "strict": false
+   },
+   {
+    "block": 3,
+    "start": 26,
+    "end": 31,
+    "text": "法律规定的",
+    "strict": false
+   }
+  ],
+  "a34": [
+   {
+    "block": 0,
+    "start": 69,
+    "end": 73,
+    "text": "依照法律",
+    "strict": false
+   }
+  ],
+  "a40": [
+   {
+    "block": 0,
+    "start": 55,
+    "end": 61,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a41": [
+   {
+    "block": 2,
+    "start": 28,
+    "end": 34,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a44": [
+   {
+    "block": 0,
+    "start": 2,
+    "end": 8,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a55": [
+   {
+    "block": 1,
+    "start": 0,
+    "end": 4,
+    "text": "依照法律",
+    "strict": false
+   }
+  ],
+  "a56": [
+   {
+    "block": 0,
+    "start": 10,
+    "end": 14,
+    "text": "依照法律",
+    "strict": false
+   }
+  ],
+  "a59": [
+   {
+    "block": 2,
+    "start": 19,
+    "end": 24,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a72": [
+   {
+    "block": 0,
+    "start": 31,
+    "end": 37,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a73": [
+   {
+    "block": 0,
+    "start": 54,
+    "end": 60,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a77": [
+   {
+    "block": 0,
+    "start": 27,
+    "end": 33,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a78": [
+   {
+    "block": 0,
+    "start": 30,
+    "end": 35,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a86": [
+   {
+    "block": 9,
+    "start": 6,
+    "end": 11,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a89": [
+   {
+    "block": 16,
+    "start": 4,
+    "end": 10,
+    "text": "依照法律规定",
+    "strict": false
+   },
+   {
+    "block": 17,
+    "start": 14,
+    "end": 20,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a91": [
+   {
+    "block": 1,
+    "start": 14,
+    "end": 20,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a95": [
+   {
+    "block": 1,
+    "start": 22,
+    "end": 27,
+    "text": "由法律规定",
+    "strict": true
+   },
+   {
+    "block": 2,
+    "start": 49,
+    "end": 54,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a97": [
+   {
+    "block": 1,
+    "start": 21,
+    "end": 26,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a99": [
+   {
+    "block": 0,
+    "start": 37,
+    "end": 43,
+    "text": "依照法律规定",
+    "strict": false
+   },
+   {
+    "block": 2,
+    "start": 12,
+    "end": 18,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a100": [
+   {
+    "block": 1,
+    "start": 57,
+    "end": 63,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a102": [
+   {
+    "block": 1,
+    "start": 22,
+    "end": 28,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a104": [
+   {
+    "block": 0,
+    "start": 109,
+    "end": 115,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a107": [
+   {
+    "block": 0,
+    "start": 12,
+    "end": 18,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a109": [
+   {
+    "block": 0,
+    "start": 28,
+    "end": 34,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a111": [
+   {
+    "block": 0,
+    "start": 86,
+    "end": 91,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a115": [
+   {
+    "block": 0,
+    "start": 56,
+    "end": 61,
+    "text": "法律规定的",
+    "strict": false
+   }
+  ],
+  "a124": [
+   {
+    "block": 6,
+    "start": 11,
+    "end": 16,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a127": [
+   {
+    "block": 0,
+    "start": 5,
+    "end": 11,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a129": [
+   {
+    "block": 2,
+    "start": 7,
+    "end": 12,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a130": [
+   {
+    "block": 0,
+    "start": 10,
+    "end": 15,
+    "text": "法律规定的",
+    "strict": false
+   }
+  ],
+  "a131": [
+   {
+    "block": 0,
+    "start": 4,
+    "end": 10,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ],
+  "a135": [
+   {
+    "block": 2,
+    "start": 8,
+    "end": 13,
+    "text": "由法律规定",
+    "strict": true
+   }
+  ],
+  "a136": [
+   {
+    "block": 0,
+    "start": 5,
+    "end": 11,
+    "text": "依照法律规定",
+    "strict": false
+   }
+  ]
+ },
+ "rule": "条文中写“由法律规定”“以法律规定”的，是宪法明确要求以法律规定的事项；“依照法律规定”“依照法律”“依法”“法律规定的”，是宪法要求依照法律行使或者保护的事项。"
+}

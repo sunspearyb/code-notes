@@ -1,0 +1,1118 @@
+{
+  "sources": {
+    "data-security:2021": {
+      "publisher": "全国人大英文网站",
+      "title": "Data Security Law of the People's Republic of China",
+      "url": "http://en.npc.gov.cn.cdurl.cn/2021-06/10/c_689311.htm",
+      "downloaded": "2026-10-18",
+      "files": [
+        {
+          "file": "data-en-1.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-06/10/c_689311.htm",
+          "sha256": "cab7dbab297e33cb7c4dc3e7f659fd9534b3096a23f92e3cfc4494dae06c649c"
+        },
+        {
+          "file": "data-en-2.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-06/10/c_689311_2.htm",
+          "sha256": "4332c15fbd343d15127f02ecb45b04a4f7c679b0bdc2a6aa43bec05d512fb789"
+        }
+      ],
+      "note": "2021年通过文本的官方参考译文；2025年合编快照沿用同一文本，以中文本为准。"
+    },
+    "data-security:2025": {
+      "publisher": "全国人大英文网站",
+      "title": "Data Security Law of the People's Republic of China",
+      "url": "http://en.npc.gov.cn.cdurl.cn/2021-06/10/c_689311.htm",
+      "downloaded": "2026-10-18",
+      "files": [
+        {
+          "file": "data-en-1.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-06/10/c_689311.htm",
+          "sha256": "cab7dbab297e33cb7c4dc3e7f659fd9534b3096a23f92e3cfc4494dae06c649c"
+        },
+        {
+          "file": "data-en-2.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-06/10/c_689311_2.htm",
+          "sha256": "4332c15fbd343d15127f02ecb45b04a4f7c679b0bdc2a6aa43bec05d512fb789"
+        }
+      ],
+      "note": "2021年通过文本的官方参考译文；2025年合编快照沿用同一文本，以中文本为准。"
+    },
+    "personal-information:2021": {
+      "publisher": "全国人大英文网站",
+      "title": "Personal Information Protection Law of the People's Republic of China",
+      "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559.htm",
+      "downloaded": "2026-10-18",
+      "files": [
+        {
+          "file": "personal-en-1.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559.htm",
+          "sha256": "f4536ca78eb647a204632a2e5236169255ab1cf4a27a8b2483e5b6673c55ac32"
+        },
+        {
+          "file": "personal-en-2.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559_2.htm",
+          "sha256": "acab86767e369f2d6ccf60242ce37f116986c76ba96bd7af739243a7fe0f09c5"
+        },
+        {
+          "file": "personal-en-3.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559_3.htm",
+          "sha256": "65f488fdee1355bc1d89fac4aaa513b807e744abce34a9483061d1676c8c636e"
+        }
+      ],
+      "note": "2021年通过文本的官方参考译文；2025年合编快照沿用同一文本，以中文本为准。"
+    },
+    "personal-information:2025": {
+      "publisher": "全国人大英文网站",
+      "title": "Personal Information Protection Law of the People's Republic of China",
+      "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559.htm",
+      "downloaded": "2026-10-18",
+      "files": [
+        {
+          "file": "personal-en-1.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559.htm",
+          "sha256": "f4536ca78eb647a204632a2e5236169255ab1cf4a27a8b2483e5b6673c55ac32"
+        },
+        {
+          "file": "personal-en-2.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559_2.htm",
+          "sha256": "acab86767e369f2d6ccf60242ce37f116986c76ba96bd7af739243a7fe0f09c5"
+        },
+        {
+          "file": "personal-en-3.html",
+          "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559_3.htm",
+          "sha256": "65f488fdee1355bc1d89fac4aaa513b807e744abce34a9483061d1676c8c636e"
+        }
+      ],
+      "note": "2021年通过文本的官方参考译文；2025年合编快照沿用同一文本，以中文本为准。"
+    }
+  },
+  "texts": {
+    "2021": {
+      "ds1": [
+        "This Law is enacted for the purpose of regulating data processing, ensuring data security, promoting development and utilization of data, protecting the lawful rights and interests of individuals and organizations, and safeguarding the sovereignty, security, and development interests of the state."
+      ],
+      "ds2": [
+        "This Law shall apply to data processing activities and security supervision and regulation of such activities within the territory of the People's Republic of China.",
+        "Where data processing outside the territory of People's Republic of China harms the national security, public interests, or the lawful rights and interests of individuals or organizations of the People's Republic of China, legal liability shall be investigated in accordance with the law."
+      ],
+      "ds3": [
+        "For the purpose of this Law, the term \"data\" refers to any record of information in electronic or any other form.",
+        "\"Data processing\" includes the collection, storage, use, processing, transmission, provision, and disclosure of data, among others.",
+        "\"Data security\" refers to ensuring that data is effectively protected and lawfully used through adopting necessary measures, and to possessing the capacity to guarantee the continuous security of data."
+      ],
+      "ds4": [
+        "In preserving data security, the holistic approach to national security shall be adopted, sound data security governance systems shall be established, and data security and protection capabilities shall be improved."
+      ],
+      "ds5": [
+        "The central leading authority for national security shall be responsible for the decision-making, deliberation and coordination of the national data security work; researching, formulating, and guiding the implementation of the national data security strategy and related major guidelines and policies; coordinating major matters and important work in respect of national data security; and establishing a coordination mechanism for national data security."
+      ],
+      "ds6": [
+        "All localities and departments shall bear responsibility for the management of the data collected or generated in their work as well as for the data security thereof.",
+        "The competent departments of industry, telecommunications, transport, finance, natural resources, health, education, technology and other relevant competent departments shall assume the responsibilities of supervising and regulating data security in their respective trades and sectors.",
+        "Public security organs and national security organs, etc. shall assume the responsibilities of supervising and regulating data security within the scopes of their respective duties in accordance with the provisions of this Law and other relevant laws and administrative regulations.",
+        "The national cyberspace affairs department shall be in charge of the overall planning and coordination of network data security and the related supervision and regulation in accordance with the provisions of this Law and other relevant laws and administrative regulations."
+      ],
+      "ds7": [
+        "The state shall protect the data-related rights and interests of individuals and organizations, encourage the lawful, reasonable, and effective use of data, ensure free flow of data in an orderly manner and in accordance with the law, and promote the development of a digital economy with data as the key factor."
+      ],
+      "ds8": [
+        "Whoever processes data shall observe laws and regulations, respect social morality and ethics, observe business and professional ethics, uphold honesty and trustworthiness, fulfill data security protection obligations, and undertake social responsibilities; and shall not endanger national security and public interests, nor harm the lawful rights and interests of individuals and organizations."
+      ],
+      "ds9": [
+        "The state supports the dissemination and popularization of knowledge of data security to raise public awareness in this regard and ability to protect data security, and promotes the joint participation by relevant departments, industry organizations, research institutions, enterprises, and individuals in data security protection, so as to create a good environment for members of the whole society to jointly protect data, ensure data security and promote development of relevant industries."
+      ],
+      "ds10": [
+        "Relevant industry associations shall, in accordance with their articles of association, formulate the code of conduct and standards to ensure data security according to the law, strengthen self-regulation in their respective industries, guide members to strengthen data security protection, improve their protection level and promote the healthy development of the industries."
+      ],
+      "ds11": [
+        "The state shall actively carry out international exchanges and cooperation in fields such as data security governance and data development and utilization, participate in the formulation of relevant international rules and standards for data security, and promote the safe and free flow of data across borders."
+      ],
+      "ds12": [
+        "Any individual or organization shall have the right to file complaints about or report violations of this Law to the competent departments. The departments receiving such complaints or reports shall deal with them in a timely manner in accordance with the law.",
+        "The competent departments shall keep confidential the relevant information of those making such complaints or reports, and protect their lawful rights and interests."
+      ],
+      "ds13": [
+        "The state shall make an overall plan to coordinate development and security, to promote data security through data development and utilization and through industrial development on one hand, and on the other hand, to ensure that data security facilitates data development and utilization as well as industrial development."
+      ],
+      "ds14": [
+        "The state shall implement the big data strategy, advance the construction of data infrastructure, and encourage and support the innovative application of data in all industries and fields.",
+        "People's governments at or above the provincial level shall incorporate the development of digital economy into their national economic and social development plans, and formulate development plans for the digital economy as needed."
+      ],
+      "ds15": [
+        "The state supports development and utilization of data to render public services smarter. In providing smarter public services, the needs of the elderly and the disabled shall be taken into full account to avoid posing obstacles to their daily lives."
+      ],
+      "ds16": [
+        "The state supports research on development and utilization of data and on data security related technologies, encourages popularization and commercial innovation of technologies in the foregoing fields, and fosters and develops products and industrial systems for development and utilization of data and for data security."
+      ],
+      "ds17": [
+        "The state shall advance the forming of the standards for data development and the standards for data utilization technologies and data security. The department in charge of standardization under the State Council and other relevant departments under the State Council shall, within the scopes of their respective duties and functions, organize the establishment of, and make revisions in due time to the standards for technologies and products for data development and data utilization and the standards for data security. The state shall support enterprises, social groups, and education or research institutions, etc. in their participation in the establishment of such standards."
+      ],
+      "ds18": [
+        "The state encourages the development of services such as data security testing, evaluation, and accreditation, and supports agencies specialized in data security testing, evaluation, accreditation, etc. to provide services according to the law.",
+        "The state supports collaboration among relevant departments, industry associations, enterprises, education and research institutions, relevant specialized agencies, etc. in the fields such as data security related risk assessment, prevention, and disposal ."
+      ],
+      "ds19": [
+        "The state shall establish sound systems for data trading management, standardize data trading activities, and foster a data trading market."
+      ],
+      "ds20": [
+        "The state supports education and research institutions, enterprises, and other entities in carrying out education and training on technologies for data development and utilization and on data security, cultivates professionals in data development and utilization technologies and in data security by a variety of means, and promotes talent exchanges."
+      ],
+      "ds21": [
+        "The state shall establish a categorized and classified system and carry out data protection based on the importance of the data in economic and social development, as well as the extent of harm to national security, public interests, or the lawful rights and interests of individuals or organizations that will be caused once the data are altered, destroyed, leaked, or illegally obtained or used. The coordination mechanism for national data security shall coordinate the relevant departments to formulate a catalog of important data and strengthen protection of important data.",
+        "Data concerning national security, lifelines of the national economy, important aspects of people's lives, major public interests, ect., are core data of the state, for which a stricter management system shall be implemented.",
+        "All localities and departments shall, in accordance with the categorized and classified data protection system, prepare specific catalogs of important data for their respective regions, departments, and relevant industries and sectors, and give priority to the data listed in the catalogs in terms of data protection."
+      ],
+      "ds22": [
+        "The state shall establish a centralized, unified, highly effective, and authoritative mechanism for assessing, reporting, information sharing, monitoring, and early alert of data security risks. The coordinating mechanism for national data security shall make an overall plan on and coordinate relevant departments in strengthening the work about acquiring, analyzing, researching and evaluating information of data security risks and the work about early alert of such risks."
+      ],
+      "ds23": [
+        "The state shall establish a data security emergency response mechanism. Where a data security incident occurs, the relevant competent departments shall initiate emergency response in accordance with the plan and the law, take corresponding measures to prevent further harm and eliminate security hazards, and send out warnings to the public by publishing information relevant thereto in a timely manner."
+      ],
+      "ds24": [
+        "The state shall establish a review system for data security, conducting national security reviews of data processing that affects or may affect national security.",
+        "Security review decisions made in accordance with the law are final decisions."
+      ],
+      "ds25": [
+        "The state shall apply export control in accordance with the law on data that are controlled items and concern national security and interests and the performance of international obligations."
+      ],
+      "ds26": [
+        "Where any country or region adopts discriminatory prohibitions, restrictions, or other similar measures against the People's Republic of China in respect of investment, trade or any other field related to data and data development and utilization technologies, the People's Republic of China may take countermeasures against that country or region in light of the actual circumstances."
+      ],
+      "ds27": [
+        "In data processing, the laws and regulations shall be complied with, a sound data security management system throughout the whole process shall be established, data security education and training shall be organized and conducted, and corresponding technical measures and other necessary measures shall be adopted to ensure data security. In data processing by making use of the internet or any other information networks, the abovementioned data security obligations shall be fulfilled on the basis of the classified protection system for cyber security.",
+        "Processors of important data shall be clear about their persons responsible for data security and the data security management bodies, and fulfill the responsibilities for data security."
+      ],
+      "ds28": [
+        "Data processing as well as research and development of new data technologies shall be conducive to furthering economic and social development, and improving the well-being of people, and shall conform to social morals and ethics."
+      ],
+      "ds29": [
+        "Closer risk monitoring shall be applied in data processing. Where data security defects, bugs, or other risks are discovered, remedial measures shall be taken immediately. Where a data security incident occurs, measures shall be taken immediately to address it, and users shall be notified and reports made to relevant competent departments in a timely manner in accordance with relevant provisions."
+      ],
+      "ds30": [
+        "Processors of important data shall, in accordance with the relevant provisions, conduct risk assessments of their data processing on a regular basis and submit risk assessment reports to relevant competent departments.",
+        "Risk assessment reports shall include the types and amounts of important data processed, information on data processing, data security risks and the response measures for them."
+      ],
+      "ds31": [
+        "The provisions of the Cyber Security Law of the People's Republic of China shall apply to the outbound security management of the important data collected or produced by critical information infrastructure operators during their operation within the territory of the People's Republic of China, and the measures for the outbound security management of the important data collected or produced by others data processors during their operation within the territory of the People's Republic of China shall be formulated by the national cyberspace authority in conjunction with the relevant departments under the State Council."
+      ],
+      "ds32": [
+        "An organization or individual shall collect data by lawful and proper means, and shall not acquire data by theft or in other illegal manners.",
+        "Where laws or administrative regulations have provisions on the purposes or scopes of data collection and use, data shall be collected and used for the purposes and within the scopes provided for by those laws and administrative regulations."
+      ],
+      "ds33": [
+        "When providing services, data transaction intermediaries shall require data providers to specify the sources of the data, verify the identities of both parties to the transactions, and retain the verification and transaction records."
+      ],
+      "ds34": [
+        "Where laws or administrative regulations require that administrative permissions be acquired for providing services related to data processing, service providers shall obtain such administrative permissions in accordance with these provisions."
+      ],
+      "ds35": [
+        "Where a public security organ or national security organ needs to obtain data for the sake of national security or for investigating crimes in accordance with the law, strict approval formalities shall be completed in accordance with the relevant provisions of the state and data be obtained in accordance with the law, and the relevant organizations and individuals shall cooperate."
+      ],
+      "ds36": [
+        "The competent authorities of the People's Republic of China shall handle requests for data made by foreign judicial or law enforcement authorities, in accordance with the relevant laws and international treaties or agreements concluded or acceded to by the People's Republic of China, or in accordance with the principles of equality and reciprocity. Without the approval of the competent authorities of the People's Republic of China, organizations or individuals in the People's Republic of China shall not provide data stored within the territory of the People's Republic of China to any overseas judicial or law enforcement body."
+      ],
+      "ds37": [
+        "The state shall make great efforts to promote the development of e-government, make government database more scientific, accurate, and time-efficient, and improve the ability of using data to serve economic and social development."
+      ],
+      "ds38": [
+        "Where state organs need to collect or use data to perform their statutory duties, they shall collect or use data within the scope as needed for performance of their statutory duties and under the conditions and procedures provided by laws and administrative regulations. They shall, in accordance with the law, preserve the confidentiality of the data accessed in the course of performing their duties, such as personal privacy, personal information, trade secrets, and confidential business information, and shall not divulge such data or illegally provide them to others."
+      ],
+      "ds39": [
+        "State organs shall, in accordance with the provisions of laws and administrative regulations, establish sound data security management systems, fulfill data security protection responsibilities, and ensure the security of government data."
+      ],
+      "ds40": [
+        "Where a state organ entrusts others to construct or maintain e-government systems, or to store or process government data, the state organ shall go through strict approval procedures, and shall supervise the entrusted party in the performance of data security protection obligations. The entrusted party shall perform its data security protection obligations in accordance with the provisions of laws, regulations, and contracts signed, and shall not retain, use, divulge, or provide others with government data without authorization."
+      ],
+      "ds41": [
+        "State organs shall, under the principles of fairness, equality and convenience for the people, disclose government data in a timely and accurate manner in accordance with the provisions, except those which shall not be disclosed in accordance with the law."
+      ],
+      "ds42": [
+        "The state shall formulate the catalog of open government data, build an open, uniform, standardized, interconnected, safe and controllable government data platform, and promote the release and utilization of government data."
+      ],
+      "ds43": [
+        "The provisions of this Chapter shall apply to the data processing carried out by the organizations with the functions of administering public affairs as authorized by laws and regulations for the purpose of performing their statutory duties."
+      ],
+      "ds44": [
+        "Where competent departments discover the existence of major security risks in data processing when they perform their regulatory duties as regards data security, they may, in accordance with the prescribed limits of authority and procedures, conduct regulatory talks with the relevant organizations and/or individuals, and require the relevant organizations and/or individuals to adopt measures to make rectifications and eliminate potential hazards."
+      ],
+      "ds45": [
+        "Where an organization or individual that processes data fails to perform the data security protection obligations provided in Articles 27, 29 and 30 of this Law, the organization or individual shall be ordered to make rectifications and be given a warning, and may be concurrently fined not less than RMB 50,000 yuan but not more than RMB 500,000 yuan by the competent department, and the directly liable persons in charge and other directly liable persons may be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan. Where the organization or individual refuses to make rectifications or has caused serious consequences such as a massive data breach, the organization or individual shall be fined not less than RMB 500,000 yuan but not more than RMB 2 million yuan, and may be ordered to suspend the relevant business or suspend operations for rectification, or have relevant business permits or the business license revoked, and the directly liable persons in charge and other directly liable persons shall be fined not less than RMB 50,000 yuan but not more than RMB 200,000 yuan.",
+        "Where the organization or individual violates the national core data management rules and endangers national sovereignty, security, or development interests of the state, the competent department shall impose upon the organization or individual a fine of not less than RMB 2 million yuan but not more than RMB 10 million yuan, and may, based on the circumstances, order a suspension of relevant business or a suspension of operations for rectification, or revoke relevant business permits or the business license. Where a crime is constituted, criminal responsibilities shall be investigated in accordance with the law."
+      ],
+      "ds46": [
+        "Whoever, in violation of the provisions of Article 31 of this Law, provides important data abroad, shall be ordered to make rectifications and be given a warning by the competent department, and may be concurrently fined not less than RMB 100,000 yuan but not more than RMB 1 million yuan, and the directly liable persons in charge and other directly liable persons may be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan. Where the circumstances are serious, the violator shall be fined not less than RMB 1 million but not more than RMB 10 million yuan, and may also be ordered to suspend the relevant business or suspend operations for rectification, or have relevant business permits or the business license revoked, and the directly liable persons in charge and other directly liable persons shall be fined not less than RMB 100,000 yuan but not more than RMB 1 million yuan."
+      ],
+      "ds47": [
+        "Where a data transaction intermediary fails to perform the obligations prescribed in Article 33 of this Law, it shall be ordered by the competent department to make rectifications, its illegal gains, if any, shall be confiscated, and it shall also be fined not less than the amount of but not more than ten times the amount of the illegal gains; if there are no illegal gains or the illegal gains are less than RMB 100,000 yuan, it shall be fined not less than RMB 100,000 yuan but not more than RMB 1 million yuan. It may be concurrently ordered to suspend the relevant business or suspend operations for rectification, or have relevant business permits or the business license revoked. The directly liable persons in charge and other directly liable persons shall be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan."
+      ],
+      "ds48": [
+        "Whoever in violation of Article 35 of this Law, refuses to cooperate when a public organ or national security organ needs to access the data, shall be ordered by the competent department to make rectifications and be given a warning, and shall be concurrently fined not less than RMB 50,000 yuan but nor more than RMB 500,000 yuan, and the directly liable persons in charge and other directly liable persons may be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan.",
+        "Whoever, in violation of Article 36 of this Law, provides data to an overseas judicial or law enforcement body without the approval of the competent authorities, shall be given a warning by the competent department, and may be concurrently fined not less than RMB 100,000 yuan but not more than RMB 1 million yuan, and the directly liable persons in charge and other directly liable persons may be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan. If serious consequences are caused, the violator shall be fined not less than RMB 1 million yuan but not more than RMB 5 million yuan, and may be ordered to suspend the relevant business or suspend operations for rectification, or have relevant business permits or the business license revoked. The directly liable persons in charge and other directly liable persons shall be fined not less than RMB 50,000 yuan but not more than RMB 500,000 yuan."
+      ],
+      "ds49": [
+        "Where a state organ fails to perform data security obligations as provided for in this Law, the directly liable persons in charge and other directly liable persons shall be given a sanction in accordance with the law."
+      ],
+      "ds50": [
+        "Any state functionary performing data security related regulation regulation neglects his duty, abuses power, or engages in malpractice for personal gain, shall be given a sanction in accordance with the law."
+      ],
+      "ds51": [
+        "Whoever obtains data through theft or by any other illegal means, or eliminates or restricts competition in data processing, or harms the lawful rights and interests of individuals or organizations, shall be punished in accordance with the provisions of relevant laws and administrative regulations."
+      ],
+      "ds52": [
+        "Whoever, in violation of this Law, causes damages to others shall bear civil liability in accordance with the law.",
+        "Where a violation of the provisions of this Law constitutes a violation of public security administration, a public security administrative penalty shall be given in accordance with the law. Where a crime is constituted, criminal responsibility shall be investigated in accordance with the law."
+      ],
+      "ds53": [
+        "The provisions of the Law of the People's Republic of China on Guarding State Secrets and other relevant laws and administrative regulations shall apply to data processing that involves state secrets.",
+        "The provisions of relevant laws and administrative regulations shall also be observed when data are processed in statistical or archival work and in data processing involving personal information."
+      ],
+      "ds54": [
+        "Measures for the military data security and protection shall be separately formulated by the Central Military Commission in accordance with this Law."
+      ],
+      "ds55": [
+        "This Law shall come into force as of September 1, 2021."
+      ],
+      "pi1": [
+        "This Law is enacted in accordance with the Constitution for the purposes of protecting the rights and interests on personal information, regulating personal information processing activities, and promoting reasonable use of personal information."
+      ],
+      "pi2": [
+        "The personal information of natural persons shall be protected by law. No organization or individual may infringe upon natural persons' rights and interests on their personal information."
+      ],
+      "pi3": [
+        "This Law shall apply to the processing of personal information of natural persons within the territory of the People's Republic of China.",
+        "This Law shall also apply to the processing outside the territory of the People's Republic of China of the personal information of natural persons within the territory of the People's Republic of China, under any of the following circumstances:",
+        "(1) for the purpose of providing products or services for natural persons inside the People's Republic of China;",
+        "(2) analyzing or evaluating the behaviors of natural persons within the territory of the People's Republic of China; and",
+        "(3) any other circumstance as provided by any law or administrative regulation."
+      ],
+      "pi4": [
+        "\"Personal information\" refers to various information related to an identified or identifiable natural person recorded electronically or by other means, but does not include anonymized information.",
+        "Personal information processing includes personal information collection, storage, use, processing, transmission, provision, disclosure and deletion, among others."
+      ],
+      "pi5": [
+        "Personal information shall be processed according to law when it is necessary, with justified reason, and in good faith, and the processing may not involve misguidance, fraud, coercion, and the like."
+      ],
+      "pi6": [
+        "Personal information processing shall be based on explicit and reasonable purposes and directly related to those purposes, and shall exert the minimum impacts on the rights and interests of individuals.",
+        "The collection of personal information shall be limited to the minimum scope required by the purpose of processing, and personal information may not be collected excessively."
+      ],
+      "pi7": [
+        "The principles of openness and transparency shall be observed in the processing of personal information, the rules for processing personal information shall be disclosed, and the purposes, means, and scope of processing shall be explicitly indicated."
+      ],
+      "pi8": [
+        "The quality of personal information shall be guaranteed in personal information processing, to avoid adverse impacts on the rights and interests of individuals caused by inaccurate and incomplete personal information."
+      ],
+      "pi9": [
+        "Personal information processors shall be responsible for their personal information processing activities and take necessary measures to ensure the security of the personal information they process."
+      ],
+      "pi10": [
+        "No organization or individual shall illegally collect, use, process, or transmit the personal information of other persons, or illegally trade, provide or disclose the personal information of other persons, or engage in personal information processing activities that endanger national security or harm public interests."
+      ],
+      "pi11": [
+        "The state shall establish and improve the personal information protection system to prevent and punish infringements upon the rights and interests on personal information, strengthen publicity and education on personal information protection, and promote a favorable environment for the government, enterprises, relevant industry organizations, and the public to jointly participate in personal information protection."
+      ],
+      "pi12": [
+        "The state will actively engage in the development of international rules on personal information protection, promote the international exchanges and cooperation in personal information protection, and encourage the mutual recognition of personal information protection rules and standards, among others, with other countries, regions, and international organizations."
+      ],
+      "pi13": [
+        "A personal information processor can process personal information of an individual only if one of the following circumstances exists:",
+        "(1) the individual's consent has been obtained;",
+        "(2) the processing is necessary for the conclusion or performance of a contract in which the individual is a party, or necessary for human resources management in accordance with the labor rules and regulations established in accordance with the law and the collective contracts signed in accordance with the law;",
+        "(3) the processing is necessary for the performance of statutory duties or obligations;",
+        "(4) the processing is necessary for the response to public health emergencies, or for the protection of life, health, and property safety of natural persons in emergencies;",
+        "(5) the personal information is reasonably processed for news reporting, media supervision, and other activities conducted in the public interest;",
+        "(6) the personal information disclosed by the individual himself or other legally disclosed personal information of the individual is reasonably processed in accordance with this Law; and",
+        "(7) other circumstances as provided by laws or administrative regulations.",
+        "Individual consent shall be obtained for processing personal information if any other relevant provisions of this Law so provide, except under the circumstances specified in Subparagraphs (2) to (7) of the preceding paragraph."
+      ],
+      "pi14": [
+        "Where personal information processing is based on individual consent, the individual consent shall be voluntary, explicit, and fully informed. Where any other law or administrative regulation provides that an individual's separate consent or written consent must be obtained for processing personal information, such provisions shall apply.",
+        "In the case of any change of the purposes or means of personal information processing, or the category of processed personal information, a new consent shall be obtained from the individual."
+      ],
+      "pi15": [
+        "Where personal information processing is based on individual consent, an individual shall have the right to withdraw his consent. Personal information processors shall provide convenient ways for individuals to withdraw their consents.",
+        "The withdrawal of consent shall not affect the validity of the processing activities conducted based on consent before it is withdrawn."
+      ],
+      "pi16": [
+        "A personal information processor shall not refuse to provide products or services for an individual on the grounds that the individual withholds his consent for the processing of his personal information or has withdrawn his consent for the processing of personal information, except where the processing of personal information is necessary for the provision of products or services."
+      ],
+      "pi17": [
+        "A personal information processor shall, before processing personal information, truthfully, accurately and fully inform an individual of the following matters in a easy-to-notice manner and in clear and easy-to-understand language:",
+        "(1) the name and contact information of the personal information processor;",
+        "(2) the purposes and means of personal information processing, and the categories and storage periods of the personal information to be processed;",
+        "(3) the methods and procedures for the individual to exercise his rights as provided in this Law; and",
+        "(4) other matters that the individual should be notified of as provided by laws and administrative regulations.",
+        "Where any matter as set forth in the preceding paragraph changes, the individual shall be informed of the change.",
+        "Where the personal information processor informs an individual of the matters specified in the first paragraph by formulating personal information processing rules, the processing rules shall be made public and be easy to consult and save."
+      ],
+      "pi18": [
+        "When processing personal information, personal information processors are permitted not to inform individuals of the matters specified in the first paragraph of the preceding article where laws or administrative regulations require confidentiality or provide no requirement for such notification.",
+        "Where it is impossible to notify individuals in a timely manner in a bid to protect natural persons' life, health and property safety in case of emergency, the personal information processors shall notify them without delay after the emergency is removed."
+      ],
+      "pi19": [
+        "Except as otherwise provided by laws and administrative regulations, the storage period of personal information shall be the minimum time necessary to achieve the purpose of processing."
+      ],
+      "pi20": [
+        "Where two or more personal information processors jointly determine the purposes and means of processing certain personal information, they shall reach an agreement on their respective rights and obligations in processing the personal information. However, this agreement shall not affect an individual's request to any one of them to exercise his rights as provided in this Law.",
+        "Where, in jointly processing certain personal information, a processor infringes the rights and interests on personal information and causes damages, other personal information processors shall bear joint and several liability in accordance with law."
+      ],
+      "pi21": [
+        "A personal information processor entrusting the processing of certain personal information to a party shall reach an agreement with the entrusted party on the purposes, period and means of processing, the categories of personal information to be processed and the protection measures, as well as the rights and obligations of both parties, among others, and shall supervise the personal information processing activities of the entrusted party.",
+        "The entrusted party shall process personal information in accordance with the agreement and may not process personal information beyond the purposes, means and other conditions as agreed upon. Where the entrustment contract has not taken effect, or is invalid, or is revoked or terminated, the entrusted party shall return the personal information in question to the personal information processor or delete it and shall not retain the personal information.",
+        "Without the consent of the personal information processor, the entrusted party may not sub-contract the processing of personal information to any other party."
+      ],
+      "pi22": [
+        "Where a personal information processor needs to transfer personal information due to a merger, division, dissolution, or bankruptcy or for other reasons, the processor shall inform the individuals of the name and contact information of the recipient of the transferred personal information. The recipient shall continue to perform the obligations of the said personal information processor. Any change of the original purposes or means of processing by the recipient shall be subject to individual consent in accordance with this Law."
+      ],
+      "pi23": [
+        "To provide personal information for any other processor, a personal information processor shall inform the individuals of the recipient's name and contact information, the purposes and means of processing and the categories of personal information to be processed, and shall obtain the individuals' separate consent. The recipient shall process personal information within the scope of the purposes, means, and categories of personal information mentioned above. Any change of the purposes or means of processing by the recipient shall be subject to individual consent in accordance with this Law."
+      ],
+      "pi24": [
+        "Personal information processors using personal information for automated decision making shall ensure the transparency of the decision making and the fairness and impartiality of the results, and may not apply unreasonable differential treatment to individuals in terms of transaction prices and other transaction conditions.",
+        "Information push and commercial marketing to individuals based on automated decision making shall be simultaneously accompanied by options not specific to their personal characteristics or with convenient means for individuals to refuse.",
+        "Where a decision that may have a significant impact on an individual's rights and interests is made through automated decision making, the individual shall have the right to request clarification from the personal information processor and the right to refuse the processor for making the decision only through automated decision making."
+      ],
+      "pi25": [
+        "Personal information processors shall not disclose the personal information they process, except where separate consents has been obtained from the individuals."
+      ],
+      "pi26": [
+        "Image collection and personal identification equipment in public places shall be installed only when it is necessary for the purpose of maintaining public security, and shall be installed in compliance with the relevant provisions of the state and with prominent reminders. The personal images and identification information collected can only be used for the purpose of maintaining public security and, unless the individuals' separate consents are obtained, shall not be used for any other purpose."
+      ],
+      "pi27": [
+        "A personal information processor may reasonably process the personal information disclosed by an individual himself or other legally disclosed personal information, except where the individual expressly refuses. Where the processing of disclosed personal information may have a significant impact on an individual's rights and interests, the personal information processors shall first obtain the individual's consent in accordance with the provisions of this Law."
+      ],
+      "pi28": [
+        "\"Sensitive personal information\" is personal information that once leaked or illegally used, may easily lead to the infringement of the personal dignity of a natural person or may endanger his personal safety or property, including information such as biometrics, religious belief, specific identity, medical health status, financial accounts, and the person's whereabouts, as well as the personal information of a minor under the age of 14 years.",
+        "Personal information processors can process sensitive personal information only when there is a specific purpose and when it is of necessity, under the circumstance where strict protective measures are taken."
+      ],
+      "pi29": [
+        "For the processing of sensitive personal information, individual's separate consent shall be obtained. Where other laws or administrative regulations provide that written consent shall be obtained for the processing of sensitive personal information, such provisions shall prevail."
+      ],
+      "pi30": [
+        "In addition to the matters specified in the first paragraph of Article 17 of this Law, a processor processing sensitive personal information shall notify an individual of the necessity of processing his sensitive personal information and the impact it has on his rights and interests, except where such notification is not required in accordance with the provisions of this Law."
+      ],
+      "pi31": [
+        "To process the personal information of minors under the age of 14, personal information processors shall obtain the consent of the parents or other guardians of the minors.",
+        "Personal information processors processing the personal information of minors under the age of 14 shall develop special rules for processing such personal information."
+      ],
+      "pi32": [
+        "Where other laws or administrative regulations provide that relevant administrative permit shall be obtained for the processing of sensitive personal information or impose other restrictions, such provisions shall prevail."
+      ],
+      "pi33": [
+        "This Law shall apply to the processing of personal information by state organs; where there are special provisions in this Section, the provisions of this Section shall prevail."
+      ],
+      "pi34": [
+        "When state organs process personal information in order to perform their statutory duties, they shall act in accordance with the authority and procedures prescribed by laws and administrative regulations, and shall not exceed the scope and limits necessary to perform their statutory duties."
+      ],
+      "pi35": [
+        "When state organs process personal information in order to perform their statutory duties, they shall fulfill the obligation of notification in accordance with the provisions of this Law, except under the circumstances specified in the first paragraph of Article 18 of this Law or where notification will hinder the state organs from performing their statutory duties."
+      ],
+      "pi36": [
+        "Personal information processed by state organs shall be stored within the territory of the People's Republic of China. A security assessment shall be conducted where it is truly necessary to provide such information for any party outside of the territory of the People's Republic of China. In the security assessment the relevant departments shall provide support and assistance if so requested."
+      ],
+      "pi37": [
+        "Where organizations authorized by laws or regulations with the function of administering public affairs process personal information in order to fulfill their statutory duties, the provisions herein on the processing of personal information by state organs shall apply."
+      ],
+      "pi38": [
+        "A personal information processor that truly needs to provide personal information for a party outside the territory of the People's Republic of China for business sake or other reasons, shall meet one of the following requirements:",
+        "(1) passing the security assessment organized by the national cyberspace department in accordance with Article 40 of this Law;",
+        "(2) obtaining personal information protection certification from the relevant specialized institution according to the provisions issued by the national cyberspace department;",
+        "(3) concluding a contract stipulating both parties' rights and obligations with the overseas recipient in accordance with the standard contract formulated by the national cyberspace department; and",
+        "(4) meeting other conditions set forth by laws and administrative regulations and by the national cyberspace department.",
+        "Where an international treaty or agreement that the People's Republic of China has concluded or acceded to stipulates conditions for providing personal information for a party outside the territory of the People's Republic of China, such stipulations may be followed.",
+        "The personal information processor shall take necessary measures to ensure that the personal information processing activities of the overseas recipient meet the personal information protection standards set forth in this Law."
+      ],
+      "pi39": [
+        "Where a personal information processor provides personal information for any party outside the territory of the People's Republic of China, the processor shall inform the individuals of the overseas recipient's name and contact information, the purposes and means of processing, the categories of personal information to be processed, as well as the methods and procedures for the individuals to exercise their rights as provided in this Law over the overseas recipient, etc., and shall obtain individual's separate consent."
+      ],
+      "pi40": [
+        "Critical information infrastructure operators and the personal information processors that process personal information up to the amount prescribed by the national cyberspace department shall store domestically the personal information collected and generated within the territory of the People's Republic of China. Where it is truly necessary to provide the information for a party outside the territory of the People's Republic of China, the matter shall be subjected to security assessment organized by the national cyberspace department. Where laws, administrative regulations, or the provisions issued by the national cyberspace department provide that security assessment is not necessary, such provisions shall prevail."
+      ],
+      "pi41": [
+        "The competent authorities of the People's Republic of China shall handle foreign judicial or law enforcement authorities' requests for personal information stored within China in accordance with relevant laws and the international treaties and agreements concluded or acceded to by the People's Republic of China, or under the principle of equality and reciprocity. Without the approval of the competent authorities of the People's Republic of China, no organization or individual shall provide data stored in the territory of the People's Republic of China for any foreign judicial or law enforcement authority."
+      ],
+      "pi42": [
+        "Where overseas organizations or individuals engage in personal information processing activities, which infringe upon the rights and interests of citizens of the People's Republic of China on personal information or endanger the national security or public interests of the People's Republic of China, the national cyberspace department may include them in a list of restricted or prohibited recipients of personal information, publicize the list, and take measures such as restricting or prohibiting the provision of personal information for such organizations and individuals."
+      ],
+      "pi43": [
+        "Where any country or region adopts any prohibitive, restrictive or other similar discriminatory measures against the People's Republic of China in terms of personal information protection, the People's Republic of China may take countermeasures against the aforesaid country or region based on actual situations."
+      ],
+      "pi44": [
+        "Individuals shall have the right to be informed, the right to make decisions on the processing of their personal information, and the right to restrict or refuse the processing of their personal information by others, except as otherwise provided by laws or administrative regulations."
+      ],
+      "pi45": [
+        "Individuals shall have the right to consult and duplicate their personal information from personal information processors, except under circumstances as set out in the first paragraph of Article 18 and Article 35 of this Law.",
+        "Where an individual requests the consultation or duplication of his personal information, the requested personal information processor shall provide such information in a timely manner.",
+        "Where an individual requests the transfer of his personal information to a designated personal information processor, which meets the requirements of national cyberspace department for transferring personal information , the requested personal information processor shall provide means for the transfer."
+      ],
+      "pi46": [
+        "Where an individual discovers that his personal information is incorrect or incomplete, he shall have the right to request the personal information processors to rectify or supplement relevant information.",
+        "Where an individual requests the rectification or supplementation of his personal information, the personal information processors shall verify the information in question, and make rectification or supplementation in a timely manner."
+      ],
+      "pi47": [
+        "In any of the following circumstances, a personal information processor shall take the initiative to erase personal information, and an individual has the right to request the deletion of his personal information if the personal information processor fails to erase the information:",
+        "(1) the purposes of processing have been achieved or cannot be achieved, or such information is no longer necessary for achieving the purposes of processing;",
+        "(2) the personal information processor ceases to provide products or services, or the storage period has expired;",
+        "(3) the individual withdraws his consent;",
+        "(4) the personal information processor processes personal information in violation of laws, administrative regulations, or agreements; or",
+        "(5) other circumstances as provided by laws and administrative regulations.",
+        "Where the storage period provided by any law or administrative regulation has not expired, or it is difficult to erase personal information technically, the personal information processor shall cease the processing of personal information other than storing and taking necessary security protection measures for such information."
+      ],
+      "pi48": [
+        "An individuals has the right to request a personal information processor to interpret the personal information processing rules developed by the latter."
+      ],
+      "pi49": [
+        "The close relatives of a deceased natural person may, for their own legal and legitimate interests, exercise the rights to handle the personal information of the deceased, such as consultation, duplication, rectification, and deletion, as provided in this Chapter, except as otherwise arranged by the deceased before death."
+      ],
+      "pi50": [
+        "A personal information processor shall establish the mechanism for receiving and handling individuals' requests for exercising their rights. Where an individual's request is rejected, the reasons therefor shall be given.",
+        "Where an individual's request to exercise his rights is rejected by a personal information processor, the individual may file a lawsuit with the people's court in accordance with the law."
+      ],
+      "pi51": [
+        "Personal information processors shall take the following measures to ensure that their personal information processing activities are in compliance with laws and administrative regulations based on the purpose and means of processing, the categories of personal information to be processed, the impact on personal rights and interests, and the potential security risks, among others, and shall prevent unauthorized access to, as well as breach, tampering or loss of any personal information:",
+        "(1) formulating internal management system and operational procedures;",
+        "(2) implementing classified management of personal information;",
+        "(3) adopting corresponding security technical measures such as encryption and de-identification;",
+        "(4) reasonably determining the operational authority of personal information processing, and regularly conducting safety education and training for practitioners;",
+        "(5) formulating contingent plans for personal information security emergencies and organizing the implementation of such plans; and",
+        "(6) other measures as provided by laws and administrative regulations."
+      ],
+      "pi52": [
+        "A personal information processor that processes personal information up to the amount prescribed by the national cyberspace department shall designate a person in charge of personal information protection, who shall supervise the personal information processing activities of the processor as well as the protective measures taken thereby, among others.",
+        "The personal information processor shall disclose the contact information of the person in charge of personal information protection, and submit the said person's name, contact information, and other information to the departments with personal information protection duties."
+      ],
+      "pi53": [
+        "Personal information processors outside the territory of the People's Republic of China as specified in the second paragraph of Article 3 of this Law shall set up specialized agencies or designate representatives within the territory of the People's Republic of China to be responsible for handling personal information protection related matters, and shall submit the names, contact information, and other information of the agencies and representatives to the departments with personal information protection duties."
+      ],
+      "pi54": [
+        "Personal information processors shall regularly conduct compliance audits of their personal information processing activities with laws and administrative regulations."
+      ],
+      "pi55": [
+        "In any of the following circumstances, a personal information processor shall assess in advance the impact on personal information protection and keep a record of the course of the processing:",
+        "(1) processing sensitive personal information;",
+        "(2) using personal information to conduct automated decision making;",
+        "(3) entrusting personal information processing to another party, providing personal information for another party, or publicizing personal information;",
+        "(4) providing personal information for any party outside the territory of the People's Republic of China; or",
+        "(5) conducting other personal information processing activities which may have significant impacts on individuals."
+      ],
+      "pi56": [
+        "The assessment of impact on personal information protection shall include the following contents:",
+        "(1) whether the purposes and means of personal information processing, are legitimate, justified and necessary;",
+        "(2) the impact on individuals' rights and interests, and security risks; and",
+        "(3) whether the protection measures taken are legitimate, effective, and compatible with the degree of risks.",
+        "The report of the impact assessment on personal information protection and the processing record shall be retained for at least three years."
+      ],
+      "pi57": [
+        "Where the breach, tampering, or loss of personal information occurs or may occur, a personal information processor shall immediately take remedial measures and notify the departments with personal information protection duties and the relevant individuals. The notice shall include the following items:",
+        "(1) the categories of personal information that has been or may be breached, tampered with or lost, and the reasons and possible harm of the breach, tampering and loss;",
+        "(2) the remedial measures adopted by the personal information processor and the measures the individuals may take to mitigate the harm; and",
+        "(3) the contact information of the personal information processor.",
+        "Where the measures taken by the personal information processor can effectively avoid the harm caused by breach, tampering, or loss of personal information, the personal information processor is not required to notify individuals; where the departments with personal information protection duties consider that harm may be caused, they have the authority to request the personal information processor to notify individuals."
+      ],
+      "pi58": [
+        "A personal information processor that provides important internet platform services involving a huge number of users and complicated business types shall perform the following obligations:",
+        "(1) establishing and improving the personal information protection compliance system in accordance with the provisions of the state and establishing an independent organization mainly composed of external members to supervise the protection of personal information;",
+        "(2) following the principles of openness, fairness, and justice, formulating platform rules, and clarifying the norms and obligations that product or service providers within the platform should meet when processing personal information;",
+        "(3) stopping providing services for product or service providers within the platforms that process personal information in serious violation of laws and administrative regulations; and",
+        "(4) regularly publishing social responsibility reports on personal information protection for public supervision."
+      ],
+      "pi59": [
+        "The party entrusted with the processing of personal information shall, in accordance with this Law and relevant laws and administrative regulations, take the necessary measures to ensure the security of the personal information entrusted for processing, and assist the entrusting personal information processor in fulfilling the obligations provided by this Law."
+      ],
+      "pi60": [
+        "The national cyberspace department shall be responsible for the overall planning and coordination of personal information protection and related supervision and administration. The relevant departments of the State Council shall, in accordance with this Law and other relevant laws and administrative regulations, be responsible for personal information protection and related supervision and administration within the scope of their respective duties.",
+        "The duties of personal information protection and related supervision and administration of the relevant departments of the local people's governments at or above the county level shall be determined in accordance with the relevant provisions of the state.",
+        "The departments provided in the preceding two paragraphs are collectively referred to as the departments with personal information protection duties."
+      ],
+      "pi61": [
+        "Departments with personal information protection duties shall perform the following personal information protection duties:",
+        "(1) conducting publicity and education on personal information protection, and guiding and supervising personal information processors in their protection of personal information;",
+        "(2) receiving and handling complaints and reports related to personal information protection;",
+        "(3) organizing evaluations on applications, etc. in terms of personal information protection and publish the results of such evaluations;",
+        "(4) investigating and handling illegal personal information processing activities; and",
+        "(5) other duties as provided by laws and administrative regulations."
+      ],
+      "pi62": [
+        "The national cyberspace department shall coordinate relevant departments to promote personal information protection through the following efforts in accordance with this Law:",
+        "(1) formulating specific rules and standards for personal information protection;",
+        "(2) developing special personal information protection rules and standards for small personal information processors, the processing of sensitive personal information, and new technologies and applications such as face recognition and artificial intelligence;",
+        "(3) supporting the research and development, and promoting the application of secure and convenient electronic identity authentication technology, and advancing the public services for network identity authentication;",
+        "(4) promoting the development of a personal information protection service system with the participation of various social sectors, and supporting relevant institutions in providing personal information protection assessment and certification services; and",
+        "(5) improving the complaint and reporting mechanism related to personal information protection ."
+      ],
+      "pi63": [
+        "A department with personal information protection duties when fulfilling related duties may take the following measures:",
+        "(1) questioning relevant parties, and investigating circumstances related to personal information processing activities;",
+        "(2) consulting and duplicating the parties' contracts, records, account books and other relevant materials related to personal information processing activities;",
+        "(3) conducting on-site inspections, and investigating suspected illegal personal information processing activities; and",
+        "(4) inspecting equipment and articles related to personal information processing activities; and sealing up or seizing equipment and articles related to illegal personal information processing activities as proved by evidence after submitting written reports to and obtaining approval from the principal person in charge of the departments with personal information protection duties.",
+        "When departments with personal information protection duties carry out their duties in accordance with the law, the parties concerned shall cooperate and provide assistance, and shall not reject or obstruct them."
+      ],
+      "pi64": [
+        "Where a department with personal information protection duties finds, when performing its duties, relatively high risks in personal information processing activities or the occurrence of personal information security incidents, the department may hold an interview with the legal representative or the principal person in charge of the personal information processor according to the provided authority and procedures, or request the processor to entrust a professional institution to conduct compliance audits of the personal information processing activities. The personal information processor shall adopt measures to make rectification and eliminate potential risks as required.",
+        "Where a department with personal information protection duties, in performing its duties, finds an illegal personal information processing activity that may involve a crime, the department shall transfer the case to the public security organ in a timely manner in accordance with the law."
+      ],
+      "pi65": [
+        "Any organization or individual has the right to complain and report to a department with personal information protection duties about illegal personal information processing. The department that receives such a complaint or report shall handle it in a timely manner in accordance with the law, and notify the complainant or informant of the results.",
+        "Departments with personal information protection duties shall publish their contact information for receiving complaints and reports."
+      ],
+      "pi66": [
+        "Where personal information is processed in violation of the provisions of this Law or without fulfilling the personal information protection obligations provided in this Law, the departments with personal information protection duties shall order the violator to make corrections, give a warning, confiscate the illegal gains, and order the suspension or termination of provision of services by the applications that illegally process personal information; where the violator refuses to make corrections, a fine of not more than RMB one million yuan shall be imposed thereupon; and the directly liable persons in charge and other directly liable persons shall each be fined not less than RMB 10,000 yuan nor more than RMB 100,000 yuan.",
+        "In case of an illegal act as prescribed in the preceding paragraph and the circumstances are serious, the departments with personal information protection duties at or above the provincial level shall order the violator to make corrections, confiscate the illegal gains, impose a fine of not more than RMB 50 million yuan or not more than five percent of the previous year's turnover; may also order the suspension of relevant businesses, or order the suspension of all the business operations for an overhaul, and notify the competent authorities to revoke relevant business permits or license; shall impose a fine of not less than RMB 100,000 yuan but not more than RMB 1 million yuan upon each of the directly liable persons in charge and other directly liable persons, and may decide to prohibit the abovementioned persons from serving as directors, supervisors, senior managers, or the persons in charge of relevant companies within a specific period of time."
+      ],
+      "pi67": [
+        "Any violation of the provisions of this Law shall be entered in the relevant credit record and be published in accordance with the provisions of the relevant laws and administrative regulations."
+      ],
+      "pi68": [
+        "Where any state organ fails to fulfill the personal information protection obligations as provided in this Law, the organ at the higher level or the departments with personal information protection duties shall order it to make corrections, and discipline the directly liable person in charge and other directly liable persons in accordance with the law.",
+        "Where a staff member of a department with personal information protection duties neglects duties, abuses power, or practices favoritism, which does not constitute a crime, the staff member shall be subject to sanction in accordance with the law."
+      ],
+      "pi69": [
+        "Where a personal information processor infringes the rights or interests on personal information due to any personal information processing activity and cannot prove that the processor is not at fault, the processor shall assume the liability for damages and other tort liability.",
+        "The liability for damages prescribed in the preceding paragraph shall be determined based on the losses of individuals incurred thereby and the benefits acquired by the infringing personal information processor; and where it is difficult to determine the aforementioned losses or the benefits, the amount of damages shall be determined based on the actual circumstances."
+      ],
+      "pi70": [
+        "Where a personal information processor processes personal information in violation of the provisions of this Law and infringes the rights and interests of many individuals, the people's procuratorate, the consumer organizations specified by law, and the organization designated by the national cyberspace department may file a lawsuit with the people's court in accordance with the law."
+      ],
+      "pi71": [
+        "Any violation of this Law which constitutes a violation of public security administration shall be subject to public security administration penalty in accordance with the law. If the violation constitutes a crime, the violator shall be held criminally liable in accordance with the law."
+      ],
+      "pi72": [
+        "This Law is not applicable where a natural person processes personal information for personal or household affairs.",
+        "Where other laws provide personal information processing in statistical or archives management activities organized and conducted by the people's governments at all levels and their relevant departments, the provisions of such laws shall prevail."
+      ],
+      "pi73": [
+        "For purposes of this Law, the following terms shall have the following meanings:",
+        "(1) \"A personal information processor\" refers to an organization or individual that autonomously determines the purposes and means of personal information processing.",
+        "(2) \"automated decision making\" refers to the activities of automatically analyzing and evaluating personal behaviors, hobbies, or economic, health, and credit status, among others, through computer programs, and making decisions.",
+        "(3) \"de-identification\" refers to processing personal information to make it impossible to identify specific natural persons in the absence of the support of additional information.",
+        "(4) \"anonymization\" refers to the process of processing personal information to make it impossible to identify specific natural persons and impossible to restore."
+      ],
+      "pi74": [
+        "This Law shall come into force as of November 1st , 2021."
+      ]
+    },
+    "2025": {
+      "ds1": [
+        "This Law is enacted for the purpose of regulating data processing, ensuring data security, promoting development and utilization of data, protecting the lawful rights and interests of individuals and organizations, and safeguarding the sovereignty, security, and development interests of the state."
+      ],
+      "ds2": [
+        "This Law shall apply to data processing activities and security supervision and regulation of such activities within the territory of the People's Republic of China.",
+        "Where data processing outside the territory of People's Republic of China harms the national security, public interests, or the lawful rights and interests of individuals or organizations of the People's Republic of China, legal liability shall be investigated in accordance with the law."
+      ],
+      "ds3": [
+        "For the purpose of this Law, the term \"data\" refers to any record of information in electronic or any other form.",
+        "\"Data processing\" includes the collection, storage, use, processing, transmission, provision, and disclosure of data, among others.",
+        "\"Data security\" refers to ensuring that data is effectively protected and lawfully used through adopting necessary measures, and to possessing the capacity to guarantee the continuous security of data."
+      ],
+      "ds4": [
+        "In preserving data security, the holistic approach to national security shall be adopted, sound data security governance systems shall be established, and data security and protection capabilities shall be improved."
+      ],
+      "ds5": [
+        "The central leading authority for national security shall be responsible for the decision-making, deliberation and coordination of the national data security work; researching, formulating, and guiding the implementation of the national data security strategy and related major guidelines and policies; coordinating major matters and important work in respect of national data security; and establishing a coordination mechanism for national data security."
+      ],
+      "ds6": [
+        "All localities and departments shall bear responsibility for the management of the data collected or generated in their work as well as for the data security thereof.",
+        "The competent departments of industry, telecommunications, transport, finance, natural resources, health, education, technology and other relevant competent departments shall assume the responsibilities of supervising and regulating data security in their respective trades and sectors.",
+        "Public security organs and national security organs, etc. shall assume the responsibilities of supervising and regulating data security within the scopes of their respective duties in accordance with the provisions of this Law and other relevant laws and administrative regulations.",
+        "The national cyberspace affairs department shall be in charge of the overall planning and coordination of network data security and the related supervision and regulation in accordance with the provisions of this Law and other relevant laws and administrative regulations."
+      ],
+      "ds7": [
+        "The state shall protect the data-related rights and interests of individuals and organizations, encourage the lawful, reasonable, and effective use of data, ensure free flow of data in an orderly manner and in accordance with the law, and promote the development of a digital economy with data as the key factor."
+      ],
+      "ds8": [
+        "Whoever processes data shall observe laws and regulations, respect social morality and ethics, observe business and professional ethics, uphold honesty and trustworthiness, fulfill data security protection obligations, and undertake social responsibilities; and shall not endanger national security and public interests, nor harm the lawful rights and interests of individuals and organizations."
+      ],
+      "ds9": [
+        "The state supports the dissemination and popularization of knowledge of data security to raise public awareness in this regard and ability to protect data security, and promotes the joint participation by relevant departments, industry organizations, research institutions, enterprises, and individuals in data security protection, so as to create a good environment for members of the whole society to jointly protect data, ensure data security and promote development of relevant industries."
+      ],
+      "ds10": [
+        "Relevant industry associations shall, in accordance with their articles of association, formulate the code of conduct and standards to ensure data security according to the law, strengthen self-regulation in their respective industries, guide members to strengthen data security protection, improve their protection level and promote the healthy development of the industries."
+      ],
+      "ds11": [
+        "The state shall actively carry out international exchanges and cooperation in fields such as data security governance and data development and utilization, participate in the formulation of relevant international rules and standards for data security, and promote the safe and free flow of data across borders."
+      ],
+      "ds12": [
+        "Any individual or organization shall have the right to file complaints about or report violations of this Law to the competent departments. The departments receiving such complaints or reports shall deal with them in a timely manner in accordance with the law.",
+        "The competent departments shall keep confidential the relevant information of those making such complaints or reports, and protect their lawful rights and interests."
+      ],
+      "ds13": [
+        "The state shall make an overall plan to coordinate development and security, to promote data security through data development and utilization and through industrial development on one hand, and on the other hand, to ensure that data security facilitates data development and utilization as well as industrial development."
+      ],
+      "ds14": [
+        "The state shall implement the big data strategy, advance the construction of data infrastructure, and encourage and support the innovative application of data in all industries and fields.",
+        "People's governments at or above the provincial level shall incorporate the development of digital economy into their national economic and social development plans, and formulate development plans for the digital economy as needed."
+      ],
+      "ds15": [
+        "The state supports development and utilization of data to render public services smarter. In providing smarter public services, the needs of the elderly and the disabled shall be taken into full account to avoid posing obstacles to their daily lives."
+      ],
+      "ds16": [
+        "The state supports research on development and utilization of data and on data security related technologies, encourages popularization and commercial innovation of technologies in the foregoing fields, and fosters and develops products and industrial systems for development and utilization of data and for data security."
+      ],
+      "ds17": [
+        "The state shall advance the forming of the standards for data development and the standards for data utilization technologies and data security. The department in charge of standardization under the State Council and other relevant departments under the State Council shall, within the scopes of their respective duties and functions, organize the establishment of, and make revisions in due time to the standards for technologies and products for data development and data utilization and the standards for data security. The state shall support enterprises, social groups, and education or research institutions, etc. in their participation in the establishment of such standards."
+      ],
+      "ds18": [
+        "The state encourages the development of services such as data security testing, evaluation, and accreditation, and supports agencies specialized in data security testing, evaluation, accreditation, etc. to provide services according to the law.",
+        "The state supports collaboration among relevant departments, industry associations, enterprises, education and research institutions, relevant specialized agencies, etc. in the fields such as data security related risk assessment, prevention, and disposal ."
+      ],
+      "ds19": [
+        "The state shall establish sound systems for data trading management, standardize data trading activities, and foster a data trading market."
+      ],
+      "ds20": [
+        "The state supports education and research institutions, enterprises, and other entities in carrying out education and training on technologies for data development and utilization and on data security, cultivates professionals in data development and utilization technologies and in data security by a variety of means, and promotes talent exchanges."
+      ],
+      "ds21": [
+        "The state shall establish a categorized and classified system and carry out data protection based on the importance of the data in economic and social development, as well as the extent of harm to national security, public interests, or the lawful rights and interests of individuals or organizations that will be caused once the data are altered, destroyed, leaked, or illegally obtained or used. The coordination mechanism for national data security shall coordinate the relevant departments to formulate a catalog of important data and strengthen protection of important data.",
+        "Data concerning national security, lifelines of the national economy, important aspects of people's lives, major public interests, ect., are core data of the state, for which a stricter management system shall be implemented.",
+        "All localities and departments shall, in accordance with the categorized and classified data protection system, prepare specific catalogs of important data for their respective regions, departments, and relevant industries and sectors, and give priority to the data listed in the catalogs in terms of data protection."
+      ],
+      "ds22": [
+        "The state shall establish a centralized, unified, highly effective, and authoritative mechanism for assessing, reporting, information sharing, monitoring, and early alert of data security risks. The coordinating mechanism for national data security shall make an overall plan on and coordinate relevant departments in strengthening the work about acquiring, analyzing, researching and evaluating information of data security risks and the work about early alert of such risks."
+      ],
+      "ds23": [
+        "The state shall establish a data security emergency response mechanism. Where a data security incident occurs, the relevant competent departments shall initiate emergency response in accordance with the plan and the law, take corresponding measures to prevent further harm and eliminate security hazards, and send out warnings to the public by publishing information relevant thereto in a timely manner."
+      ],
+      "ds24": [
+        "The state shall establish a review system for data security, conducting national security reviews of data processing that affects or may affect national security.",
+        "Security review decisions made in accordance with the law are final decisions."
+      ],
+      "ds25": [
+        "The state shall apply export control in accordance with the law on data that are controlled items and concern national security and interests and the performance of international obligations."
+      ],
+      "ds26": [
+        "Where any country or region adopts discriminatory prohibitions, restrictions, or other similar measures against the People's Republic of China in respect of investment, trade or any other field related to data and data development and utilization technologies, the People's Republic of China may take countermeasures against that country or region in light of the actual circumstances."
+      ],
+      "ds27": [
+        "In data processing, the laws and regulations shall be complied with, a sound data security management system throughout the whole process shall be established, data security education and training shall be organized and conducted, and corresponding technical measures and other necessary measures shall be adopted to ensure data security. In data processing by making use of the internet or any other information networks, the abovementioned data security obligations shall be fulfilled on the basis of the classified protection system for cyber security.",
+        "Processors of important data shall be clear about their persons responsible for data security and the data security management bodies, and fulfill the responsibilities for data security."
+      ],
+      "ds28": [
+        "Data processing as well as research and development of new data technologies shall be conducive to furthering economic and social development, and improving the well-being of people, and shall conform to social morals and ethics."
+      ],
+      "ds29": [
+        "Closer risk monitoring shall be applied in data processing. Where data security defects, bugs, or other risks are discovered, remedial measures shall be taken immediately. Where a data security incident occurs, measures shall be taken immediately to address it, and users shall be notified and reports made to relevant competent departments in a timely manner in accordance with relevant provisions."
+      ],
+      "ds30": [
+        "Processors of important data shall, in accordance with the relevant provisions, conduct risk assessments of their data processing on a regular basis and submit risk assessment reports to relevant competent departments.",
+        "Risk assessment reports shall include the types and amounts of important data processed, information on data processing, data security risks and the response measures for them."
+      ],
+      "ds31": [
+        "The provisions of the Cyber Security Law of the People's Republic of China shall apply to the outbound security management of the important data collected or produced by critical information infrastructure operators during their operation within the territory of the People's Republic of China, and the measures for the outbound security management of the important data collected or produced by others data processors during their operation within the territory of the People's Republic of China shall be formulated by the national cyberspace authority in conjunction with the relevant departments under the State Council."
+      ],
+      "ds32": [
+        "An organization or individual shall collect data by lawful and proper means, and shall not acquire data by theft or in other illegal manners.",
+        "Where laws or administrative regulations have provisions on the purposes or scopes of data collection and use, data shall be collected and used for the purposes and within the scopes provided for by those laws and administrative regulations."
+      ],
+      "ds33": [
+        "When providing services, data transaction intermediaries shall require data providers to specify the sources of the data, verify the identities of both parties to the transactions, and retain the verification and transaction records."
+      ],
+      "ds34": [
+        "Where laws or administrative regulations require that administrative permissions be acquired for providing services related to data processing, service providers shall obtain such administrative permissions in accordance with these provisions."
+      ],
+      "ds35": [
+        "Where a public security organ or national security organ needs to obtain data for the sake of national security or for investigating crimes in accordance with the law, strict approval formalities shall be completed in accordance with the relevant provisions of the state and data be obtained in accordance with the law, and the relevant organizations and individuals shall cooperate."
+      ],
+      "ds36": [
+        "The competent authorities of the People's Republic of China shall handle requests for data made by foreign judicial or law enforcement authorities, in accordance with the relevant laws and international treaties or agreements concluded or acceded to by the People's Republic of China, or in accordance with the principles of equality and reciprocity. Without the approval of the competent authorities of the People's Republic of China, organizations or individuals in the People's Republic of China shall not provide data stored within the territory of the People's Republic of China to any overseas judicial or law enforcement body."
+      ],
+      "ds37": [
+        "The state shall make great efforts to promote the development of e-government, make government database more scientific, accurate, and time-efficient, and improve the ability of using data to serve economic and social development."
+      ],
+      "ds38": [
+        "Where state organs need to collect or use data to perform their statutory duties, they shall collect or use data within the scope as needed for performance of their statutory duties and under the conditions and procedures provided by laws and administrative regulations. They shall, in accordance with the law, preserve the confidentiality of the data accessed in the course of performing their duties, such as personal privacy, personal information, trade secrets, and confidential business information, and shall not divulge such data or illegally provide them to others."
+      ],
+      "ds39": [
+        "State organs shall, in accordance with the provisions of laws and administrative regulations, establish sound data security management systems, fulfill data security protection responsibilities, and ensure the security of government data."
+      ],
+      "ds40": [
+        "Where a state organ entrusts others to construct or maintain e-government systems, or to store or process government data, the state organ shall go through strict approval procedures, and shall supervise the entrusted party in the performance of data security protection obligations. The entrusted party shall perform its data security protection obligations in accordance with the provisions of laws, regulations, and contracts signed, and shall not retain, use, divulge, or provide others with government data without authorization."
+      ],
+      "ds41": [
+        "State organs shall, under the principles of fairness, equality and convenience for the people, disclose government data in a timely and accurate manner in accordance with the provisions, except those which shall not be disclosed in accordance with the law."
+      ],
+      "ds42": [
+        "The state shall formulate the catalog of open government data, build an open, uniform, standardized, interconnected, safe and controllable government data platform, and promote the release and utilization of government data."
+      ],
+      "ds43": [
+        "The provisions of this Chapter shall apply to the data processing carried out by the organizations with the functions of administering public affairs as authorized by laws and regulations for the purpose of performing their statutory duties."
+      ],
+      "ds44": [
+        "Where competent departments discover the existence of major security risks in data processing when they perform their regulatory duties as regards data security, they may, in accordance with the prescribed limits of authority and procedures, conduct regulatory talks with the relevant organizations and/or individuals, and require the relevant organizations and/or individuals to adopt measures to make rectifications and eliminate potential hazards."
+      ],
+      "ds45": [
+        "Where an organization or individual that processes data fails to perform the data security protection obligations provided in Articles 27, 29 and 30 of this Law, the organization or individual shall be ordered to make rectifications and be given a warning, and may be concurrently fined not less than RMB 50,000 yuan but not more than RMB 500,000 yuan by the competent department, and the directly liable persons in charge and other directly liable persons may be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan. Where the organization or individual refuses to make rectifications or has caused serious consequences such as a massive data breach, the organization or individual shall be fined not less than RMB 500,000 yuan but not more than RMB 2 million yuan, and may be ordered to suspend the relevant business or suspend operations for rectification, or have relevant business permits or the business license revoked, and the directly liable persons in charge and other directly liable persons shall be fined not less than RMB 50,000 yuan but not more than RMB 200,000 yuan.",
+        "Where the organization or individual violates the national core data management rules and endangers national sovereignty, security, or development interests of the state, the competent department shall impose upon the organization or individual a fine of not less than RMB 2 million yuan but not more than RMB 10 million yuan, and may, based on the circumstances, order a suspension of relevant business or a suspension of operations for rectification, or revoke relevant business permits or the business license. Where a crime is constituted, criminal responsibilities shall be investigated in accordance with the law."
+      ],
+      "ds46": [
+        "Whoever, in violation of the provisions of Article 31 of this Law, provides important data abroad, shall be ordered to make rectifications and be given a warning by the competent department, and may be concurrently fined not less than RMB 100,000 yuan but not more than RMB 1 million yuan, and the directly liable persons in charge and other directly liable persons may be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan. Where the circumstances are serious, the violator shall be fined not less than RMB 1 million but not more than RMB 10 million yuan, and may also be ordered to suspend the relevant business or suspend operations for rectification, or have relevant business permits or the business license revoked, and the directly liable persons in charge and other directly liable persons shall be fined not less than RMB 100,000 yuan but not more than RMB 1 million yuan."
+      ],
+      "ds47": [
+        "Where a data transaction intermediary fails to perform the obligations prescribed in Article 33 of this Law, it shall be ordered by the competent department to make rectifications, its illegal gains, if any, shall be confiscated, and it shall also be fined not less than the amount of but not more than ten times the amount of the illegal gains; if there are no illegal gains or the illegal gains are less than RMB 100,000 yuan, it shall be fined not less than RMB 100,000 yuan but not more than RMB 1 million yuan. It may be concurrently ordered to suspend the relevant business or suspend operations for rectification, or have relevant business permits or the business license revoked. The directly liable persons in charge and other directly liable persons shall be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan."
+      ],
+      "ds48": [
+        "Whoever in violation of Article 35 of this Law, refuses to cooperate when a public organ or national security organ needs to access the data, shall be ordered by the competent department to make rectifications and be given a warning, and shall be concurrently fined not less than RMB 50,000 yuan but nor more than RMB 500,000 yuan, and the directly liable persons in charge and other directly liable persons may be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan.",
+        "Whoever, in violation of Article 36 of this Law, provides data to an overseas judicial or law enforcement body without the approval of the competent authorities, shall be given a warning by the competent department, and may be concurrently fined not less than RMB 100,000 yuan but not more than RMB 1 million yuan, and the directly liable persons in charge and other directly liable persons may be fined not less than RMB 10,000 yuan but not more than RMB 100,000 yuan. If serious consequences are caused, the violator shall be fined not less than RMB 1 million yuan but not more than RMB 5 million yuan, and may be ordered to suspend the relevant business or suspend operations for rectification, or have relevant business permits or the business license revoked. The directly liable persons in charge and other directly liable persons shall be fined not less than RMB 50,000 yuan but not more than RMB 500,000 yuan."
+      ],
+      "ds49": [
+        "Where a state organ fails to perform data security obligations as provided for in this Law, the directly liable persons in charge and other directly liable persons shall be given a sanction in accordance with the law."
+      ],
+      "ds50": [
+        "Any state functionary performing data security related regulation regulation neglects his duty, abuses power, or engages in malpractice for personal gain, shall be given a sanction in accordance with the law."
+      ],
+      "ds51": [
+        "Whoever obtains data through theft or by any other illegal means, or eliminates or restricts competition in data processing, or harms the lawful rights and interests of individuals or organizations, shall be punished in accordance with the provisions of relevant laws and administrative regulations."
+      ],
+      "ds52": [
+        "Whoever, in violation of this Law, causes damages to others shall bear civil liability in accordance with the law.",
+        "Where a violation of the provisions of this Law constitutes a violation of public security administration, a public security administrative penalty shall be given in accordance with the law. Where a crime is constituted, criminal responsibility shall be investigated in accordance with the law."
+      ],
+      "ds53": [
+        "The provisions of the Law of the People's Republic of China on Guarding State Secrets and other relevant laws and administrative regulations shall apply to data processing that involves state secrets.",
+        "The provisions of relevant laws and administrative regulations shall also be observed when data are processed in statistical or archival work and in data processing involving personal information."
+      ],
+      "ds54": [
+        "Measures for the military data security and protection shall be separately formulated by the Central Military Commission in accordance with this Law."
+      ],
+      "ds55": [
+        "This Law shall come into force as of September 1, 2021."
+      ],
+      "pi1": [
+        "This Law is enacted in accordance with the Constitution for the purposes of protecting the rights and interests on personal information, regulating personal information processing activities, and promoting reasonable use of personal information."
+      ],
+      "pi2": [
+        "The personal information of natural persons shall be protected by law. No organization or individual may infringe upon natural persons' rights and interests on their personal information."
+      ],
+      "pi3": [
+        "This Law shall apply to the processing of personal information of natural persons within the territory of the People's Republic of China.",
+        "This Law shall also apply to the processing outside the territory of the People's Republic of China of the personal information of natural persons within the territory of the People's Republic of China, under any of the following circumstances:",
+        "(1) for the purpose of providing products or services for natural persons inside the People's Republic of China;",
+        "(2) analyzing or evaluating the behaviors of natural persons within the territory of the People's Republic of China; and",
+        "(3) any other circumstance as provided by any law or administrative regulation."
+      ],
+      "pi4": [
+        "\"Personal information\" refers to various information related to an identified or identifiable natural person recorded electronically or by other means, but does not include anonymized information.",
+        "Personal information processing includes personal information collection, storage, use, processing, transmission, provision, disclosure and deletion, among others."
+      ],
+      "pi5": [
+        "Personal information shall be processed according to law when it is necessary, with justified reason, and in good faith, and the processing may not involve misguidance, fraud, coercion, and the like."
+      ],
+      "pi6": [
+        "Personal information processing shall be based on explicit and reasonable purposes and directly related to those purposes, and shall exert the minimum impacts on the rights and interests of individuals.",
+        "The collection of personal information shall be limited to the minimum scope required by the purpose of processing, and personal information may not be collected excessively."
+      ],
+      "pi7": [
+        "The principles of openness and transparency shall be observed in the processing of personal information, the rules for processing personal information shall be disclosed, and the purposes, means, and scope of processing shall be explicitly indicated."
+      ],
+      "pi8": [
+        "The quality of personal information shall be guaranteed in personal information processing, to avoid adverse impacts on the rights and interests of individuals caused by inaccurate and incomplete personal information."
+      ],
+      "pi9": [
+        "Personal information processors shall be responsible for their personal information processing activities and take necessary measures to ensure the security of the personal information they process."
+      ],
+      "pi10": [
+        "No organization or individual shall illegally collect, use, process, or transmit the personal information of other persons, or illegally trade, provide or disclose the personal information of other persons, or engage in personal information processing activities that endanger national security or harm public interests."
+      ],
+      "pi11": [
+        "The state shall establish and improve the personal information protection system to prevent and punish infringements upon the rights and interests on personal information, strengthen publicity and education on personal information protection, and promote a favorable environment for the government, enterprises, relevant industry organizations, and the public to jointly participate in personal information protection."
+      ],
+      "pi12": [
+        "The state will actively engage in the development of international rules on personal information protection, promote the international exchanges and cooperation in personal information protection, and encourage the mutual recognition of personal information protection rules and standards, among others, with other countries, regions, and international organizations."
+      ],
+      "pi13": [
+        "A personal information processor can process personal information of an individual only if one of the following circumstances exists:",
+        "(1) the individual's consent has been obtained;",
+        "(2) the processing is necessary for the conclusion or performance of a contract in which the individual is a party, or necessary for human resources management in accordance with the labor rules and regulations established in accordance with the law and the collective contracts signed in accordance with the law;",
+        "(3) the processing is necessary for the performance of statutory duties or obligations;",
+        "(4) the processing is necessary for the response to public health emergencies, or for the protection of life, health, and property safety of natural persons in emergencies;",
+        "(5) the personal information is reasonably processed for news reporting, media supervision, and other activities conducted in the public interest;",
+        "(6) the personal information disclosed by the individual himself or other legally disclosed personal information of the individual is reasonably processed in accordance with this Law; and",
+        "(7) other circumstances as provided by laws or administrative regulations.",
+        "Individual consent shall be obtained for processing personal information if any other relevant provisions of this Law so provide, except under the circumstances specified in Subparagraphs (2) to (7) of the preceding paragraph."
+      ],
+      "pi14": [
+        "Where personal information processing is based on individual consent, the individual consent shall be voluntary, explicit, and fully informed. Where any other law or administrative regulation provides that an individual's separate consent or written consent must be obtained for processing personal information, such provisions shall apply.",
+        "In the case of any change of the purposes or means of personal information processing, or the category of processed personal information, a new consent shall be obtained from the individual."
+      ],
+      "pi15": [
+        "Where personal information processing is based on individual consent, an individual shall have the right to withdraw his consent. Personal information processors shall provide convenient ways for individuals to withdraw their consents.",
+        "The withdrawal of consent shall not affect the validity of the processing activities conducted based on consent before it is withdrawn."
+      ],
+      "pi16": [
+        "A personal information processor shall not refuse to provide products or services for an individual on the grounds that the individual withholds his consent for the processing of his personal information or has withdrawn his consent for the processing of personal information, except where the processing of personal information is necessary for the provision of products or services."
+      ],
+      "pi17": [
+        "A personal information processor shall, before processing personal information, truthfully, accurately and fully inform an individual of the following matters in a easy-to-notice manner and in clear and easy-to-understand language:",
+        "(1) the name and contact information of the personal information processor;",
+        "(2) the purposes and means of personal information processing, and the categories and storage periods of the personal information to be processed;",
+        "(3) the methods and procedures for the individual to exercise his rights as provided in this Law; and",
+        "(4) other matters that the individual should be notified of as provided by laws and administrative regulations.",
+        "Where any matter as set forth in the preceding paragraph changes, the individual shall be informed of the change.",
+        "Where the personal information processor informs an individual of the matters specified in the first paragraph by formulating personal information processing rules, the processing rules shall be made public and be easy to consult and save."
+      ],
+      "pi18": [
+        "When processing personal information, personal information processors are permitted not to inform individuals of the matters specified in the first paragraph of the preceding article where laws or administrative regulations require confidentiality or provide no requirement for such notification.",
+        "Where it is impossible to notify individuals in a timely manner in a bid to protect natural persons' life, health and property safety in case of emergency, the personal information processors shall notify them without delay after the emergency is removed."
+      ],
+      "pi19": [
+        "Except as otherwise provided by laws and administrative regulations, the storage period of personal information shall be the minimum time necessary to achieve the purpose of processing."
+      ],
+      "pi20": [
+        "Where two or more personal information processors jointly determine the purposes and means of processing certain personal information, they shall reach an agreement on their respective rights and obligations in processing the personal information. However, this agreement shall not affect an individual's request to any one of them to exercise his rights as provided in this Law.",
+        "Where, in jointly processing certain personal information, a processor infringes the rights and interests on personal information and causes damages, other personal information processors shall bear joint and several liability in accordance with law."
+      ],
+      "pi21": [
+        "A personal information processor entrusting the processing of certain personal information to a party shall reach an agreement with the entrusted party on the purposes, period and means of processing, the categories of personal information to be processed and the protection measures, as well as the rights and obligations of both parties, among others, and shall supervise the personal information processing activities of the entrusted party.",
+        "The entrusted party shall process personal information in accordance with the agreement and may not process personal information beyond the purposes, means and other conditions as agreed upon. Where the entrustment contract has not taken effect, or is invalid, or is revoked or terminated, the entrusted party shall return the personal information in question to the personal information processor or delete it and shall not retain the personal information.",
+        "Without the consent of the personal information processor, the entrusted party may not sub-contract the processing of personal information to any other party."
+      ],
+      "pi22": [
+        "Where a personal information processor needs to transfer personal information due to a merger, division, dissolution, or bankruptcy or for other reasons, the processor shall inform the individuals of the name and contact information of the recipient of the transferred personal information. The recipient shall continue to perform the obligations of the said personal information processor. Any change of the original purposes or means of processing by the recipient shall be subject to individual consent in accordance with this Law."
+      ],
+      "pi23": [
+        "To provide personal information for any other processor, a personal information processor shall inform the individuals of the recipient's name and contact information, the purposes and means of processing and the categories of personal information to be processed, and shall obtain the individuals' separate consent. The recipient shall process personal information within the scope of the purposes, means, and categories of personal information mentioned above. Any change of the purposes or means of processing by the recipient shall be subject to individual consent in accordance with this Law."
+      ],
+      "pi24": [
+        "Personal information processors using personal information for automated decision making shall ensure the transparency of the decision making and the fairness and impartiality of the results, and may not apply unreasonable differential treatment to individuals in terms of transaction prices and other transaction conditions.",
+        "Information push and commercial marketing to individuals based on automated decision making shall be simultaneously accompanied by options not specific to their personal characteristics or with convenient means for individuals to refuse.",
+        "Where a decision that may have a significant impact on an individual's rights and interests is made through automated decision making, the individual shall have the right to request clarification from the personal information processor and the right to refuse the processor for making the decision only through automated decision making."
+      ],
+      "pi25": [
+        "Personal information processors shall not disclose the personal information they process, except where separate consents has been obtained from the individuals."
+      ],
+      "pi26": [
+        "Image collection and personal identification equipment in public places shall be installed only when it is necessary for the purpose of maintaining public security, and shall be installed in compliance with the relevant provisions of the state and with prominent reminders. The personal images and identification information collected can only be used for the purpose of maintaining public security and, unless the individuals' separate consents are obtained, shall not be used for any other purpose."
+      ],
+      "pi27": [
+        "A personal information processor may reasonably process the personal information disclosed by an individual himself or other legally disclosed personal information, except where the individual expressly refuses. Where the processing of disclosed personal information may have a significant impact on an individual's rights and interests, the personal information processors shall first obtain the individual's consent in accordance with the provisions of this Law."
+      ],
+      "pi28": [
+        "\"Sensitive personal information\" is personal information that once leaked or illegally used, may easily lead to the infringement of the personal dignity of a natural person or may endanger his personal safety or property, including information such as biometrics, religious belief, specific identity, medical health status, financial accounts, and the person's whereabouts, as well as the personal information of a minor under the age of 14 years.",
+        "Personal information processors can process sensitive personal information only when there is a specific purpose and when it is of necessity, under the circumstance where strict protective measures are taken."
+      ],
+      "pi29": [
+        "For the processing of sensitive personal information, individual's separate consent shall be obtained. Where other laws or administrative regulations provide that written consent shall be obtained for the processing of sensitive personal information, such provisions shall prevail."
+      ],
+      "pi30": [
+        "In addition to the matters specified in the first paragraph of Article 17 of this Law, a processor processing sensitive personal information shall notify an individual of the necessity of processing his sensitive personal information and the impact it has on his rights and interests, except where such notification is not required in accordance with the provisions of this Law."
+      ],
+      "pi31": [
+        "To process the personal information of minors under the age of 14, personal information processors shall obtain the consent of the parents or other guardians of the minors.",
+        "Personal information processors processing the personal information of minors under the age of 14 shall develop special rules for processing such personal information."
+      ],
+      "pi32": [
+        "Where other laws or administrative regulations provide that relevant administrative permit shall be obtained for the processing of sensitive personal information or impose other restrictions, such provisions shall prevail."
+      ],
+      "pi33": [
+        "This Law shall apply to the processing of personal information by state organs; where there are special provisions in this Section, the provisions of this Section shall prevail."
+      ],
+      "pi34": [
+        "When state organs process personal information in order to perform their statutory duties, they shall act in accordance with the authority and procedures prescribed by laws and administrative regulations, and shall not exceed the scope and limits necessary to perform their statutory duties."
+      ],
+      "pi35": [
+        "When state organs process personal information in order to perform their statutory duties, they shall fulfill the obligation of notification in accordance with the provisions of this Law, except under the circumstances specified in the first paragraph of Article 18 of this Law or where notification will hinder the state organs from performing their statutory duties."
+      ],
+      "pi36": [
+        "Personal information processed by state organs shall be stored within the territory of the People's Republic of China. A security assessment shall be conducted where it is truly necessary to provide such information for any party outside of the territory of the People's Republic of China. In the security assessment the relevant departments shall provide support and assistance if so requested."
+      ],
+      "pi37": [
+        "Where organizations authorized by laws or regulations with the function of administering public affairs process personal information in order to fulfill their statutory duties, the provisions herein on the processing of personal information by state organs shall apply."
+      ],
+      "pi38": [
+        "A personal information processor that truly needs to provide personal information for a party outside the territory of the People's Republic of China for business sake or other reasons, shall meet one of the following requirements:",
+        "(1) passing the security assessment organized by the national cyberspace department in accordance with Article 40 of this Law;",
+        "(2) obtaining personal information protection certification from the relevant specialized institution according to the provisions issued by the national cyberspace department;",
+        "(3) concluding a contract stipulating both parties' rights and obligations with the overseas recipient in accordance with the standard contract formulated by the national cyberspace department; and",
+        "(4) meeting other conditions set forth by laws and administrative regulations and by the national cyberspace department.",
+        "Where an international treaty or agreement that the People's Republic of China has concluded or acceded to stipulates conditions for providing personal information for a party outside the territory of the People's Republic of China, such stipulations may be followed.",
+        "The personal information processor shall take necessary measures to ensure that the personal information processing activities of the overseas recipient meet the personal information protection standards set forth in this Law."
+      ],
+      "pi39": [
+        "Where a personal information processor provides personal information for any party outside the territory of the People's Republic of China, the processor shall inform the individuals of the overseas recipient's name and contact information, the purposes and means of processing, the categories of personal information to be processed, as well as the methods and procedures for the individuals to exercise their rights as provided in this Law over the overseas recipient, etc., and shall obtain individual's separate consent."
+      ],
+      "pi40": [
+        "Critical information infrastructure operators and the personal information processors that process personal information up to the amount prescribed by the national cyberspace department shall store domestically the personal information collected and generated within the territory of the People's Republic of China. Where it is truly necessary to provide the information for a party outside the territory of the People's Republic of China, the matter shall be subjected to security assessment organized by the national cyberspace department. Where laws, administrative regulations, or the provisions issued by the national cyberspace department provide that security assessment is not necessary, such provisions shall prevail."
+      ],
+      "pi41": [
+        "The competent authorities of the People's Republic of China shall handle foreign judicial or law enforcement authorities' requests for personal information stored within China in accordance with relevant laws and the international treaties and agreements concluded or acceded to by the People's Republic of China, or under the principle of equality and reciprocity. Without the approval of the competent authorities of the People's Republic of China, no organization or individual shall provide data stored in the territory of the People's Republic of China for any foreign judicial or law enforcement authority."
+      ],
+      "pi42": [
+        "Where overseas organizations or individuals engage in personal information processing activities, which infringe upon the rights and interests of citizens of the People's Republic of China on personal information or endanger the national security or public interests of the People's Republic of China, the national cyberspace department may include them in a list of restricted or prohibited recipients of personal information, publicize the list, and take measures such as restricting or prohibiting the provision of personal information for such organizations and individuals."
+      ],
+      "pi43": [
+        "Where any country or region adopts any prohibitive, restrictive or other similar discriminatory measures against the People's Republic of China in terms of personal information protection, the People's Republic of China may take countermeasures against the aforesaid country or region based on actual situations."
+      ],
+      "pi44": [
+        "Individuals shall have the right to be informed, the right to make decisions on the processing of their personal information, and the right to restrict or refuse the processing of their personal information by others, except as otherwise provided by laws or administrative regulations."
+      ],
+      "pi45": [
+        "Individuals shall have the right to consult and duplicate their personal information from personal information processors, except under circumstances as set out in the first paragraph of Article 18 and Article 35 of this Law.",
+        "Where an individual requests the consultation or duplication of his personal information, the requested personal information processor shall provide such information in a timely manner.",
+        "Where an individual requests the transfer of his personal information to a designated personal information processor, which meets the requirements of national cyberspace department for transferring personal information , the requested personal information processor shall provide means for the transfer."
+      ],
+      "pi46": [
+        "Where an individual discovers that his personal information is incorrect or incomplete, he shall have the right to request the personal information processors to rectify or supplement relevant information.",
+        "Where an individual requests the rectification or supplementation of his personal information, the personal information processors shall verify the information in question, and make rectification or supplementation in a timely manner."
+      ],
+      "pi47": [
+        "In any of the following circumstances, a personal information processor shall take the initiative to erase personal information, and an individual has the right to request the deletion of his personal information if the personal information processor fails to erase the information:",
+        "(1) the purposes of processing have been achieved or cannot be achieved, or such information is no longer necessary for achieving the purposes of processing;",
+        "(2) the personal information processor ceases to provide products or services, or the storage period has expired;",
+        "(3) the individual withdraws his consent;",
+        "(4) the personal information processor processes personal information in violation of laws, administrative regulations, or agreements; or",
+        "(5) other circumstances as provided by laws and administrative regulations.",
+        "Where the storage period provided by any law or administrative regulation has not expired, or it is difficult to erase personal information technically, the personal information processor shall cease the processing of personal information other than storing and taking necessary security protection measures for such information."
+      ],
+      "pi48": [
+        "An individuals has the right to request a personal information processor to interpret the personal information processing rules developed by the latter."
+      ],
+      "pi49": [
+        "The close relatives of a deceased natural person may, for their own legal and legitimate interests, exercise the rights to handle the personal information of the deceased, such as consultation, duplication, rectification, and deletion, as provided in this Chapter, except as otherwise arranged by the deceased before death."
+      ],
+      "pi50": [
+        "A personal information processor shall establish the mechanism for receiving and handling individuals' requests for exercising their rights. Where an individual's request is rejected, the reasons therefor shall be given.",
+        "Where an individual's request to exercise his rights is rejected by a personal information processor, the individual may file a lawsuit with the people's court in accordance with the law."
+      ],
+      "pi51": [
+        "Personal information processors shall take the following measures to ensure that their personal information processing activities are in compliance with laws and administrative regulations based on the purpose and means of processing, the categories of personal information to be processed, the impact on personal rights and interests, and the potential security risks, among others, and shall prevent unauthorized access to, as well as breach, tampering or loss of any personal information:",
+        "(1) formulating internal management system and operational procedures;",
+        "(2) implementing classified management of personal information;",
+        "(3) adopting corresponding security technical measures such as encryption and de-identification;",
+        "(4) reasonably determining the operational authority of personal information processing, and regularly conducting safety education and training for practitioners;",
+        "(5) formulating contingent plans for personal information security emergencies and organizing the implementation of such plans; and",
+        "(6) other measures as provided by laws and administrative regulations."
+      ],
+      "pi52": [
+        "A personal information processor that processes personal information up to the amount prescribed by the national cyberspace department shall designate a person in charge of personal information protection, who shall supervise the personal information processing activities of the processor as well as the protective measures taken thereby, among others.",
+        "The personal information processor shall disclose the contact information of the person in charge of personal information protection, and submit the said person's name, contact information, and other information to the departments with personal information protection duties."
+      ],
+      "pi53": [
+        "Personal information processors outside the territory of the People's Republic of China as specified in the second paragraph of Article 3 of this Law shall set up specialized agencies or designate representatives within the territory of the People's Republic of China to be responsible for handling personal information protection related matters, and shall submit the names, contact information, and other information of the agencies and representatives to the departments with personal information protection duties."
+      ],
+      "pi54": [
+        "Personal information processors shall regularly conduct compliance audits of their personal information processing activities with laws and administrative regulations."
+      ],
+      "pi55": [
+        "In any of the following circumstances, a personal information processor shall assess in advance the impact on personal information protection and keep a record of the course of the processing:",
+        "(1) processing sensitive personal information;",
+        "(2) using personal information to conduct automated decision making;",
+        "(3) entrusting personal information processing to another party, providing personal information for another party, or publicizing personal information;",
+        "(4) providing personal information for any party outside the territory of the People's Republic of China; or",
+        "(5) conducting other personal information processing activities which may have significant impacts on individuals."
+      ],
+      "pi56": [
+        "The assessment of impact on personal information protection shall include the following contents:",
+        "(1) whether the purposes and means of personal information processing, are legitimate, justified and necessary;",
+        "(2) the impact on individuals' rights and interests, and security risks; and",
+        "(3) whether the protection measures taken are legitimate, effective, and compatible with the degree of risks.",
+        "The report of the impact assessment on personal information protection and the processing record shall be retained for at least three years."
+      ],
+      "pi57": [
+        "Where the breach, tampering, or loss of personal information occurs or may occur, a personal information processor shall immediately take remedial measures and notify the departments with personal information protection duties and the relevant individuals. The notice shall include the following items:",
+        "(1) the categories of personal information that has been or may be breached, tampered with or lost, and the reasons and possible harm of the breach, tampering and loss;",
+        "(2) the remedial measures adopted by the personal information processor and the measures the individuals may take to mitigate the harm; and",
+        "(3) the contact information of the personal information processor.",
+        "Where the measures taken by the personal information processor can effectively avoid the harm caused by breach, tampering, or loss of personal information, the personal information processor is not required to notify individuals; where the departments with personal information protection duties consider that harm may be caused, they have the authority to request the personal information processor to notify individuals."
+      ],
+      "pi58": [
+        "A personal information processor that provides important internet platform services involving a huge number of users and complicated business types shall perform the following obligations:",
+        "(1) establishing and improving the personal information protection compliance system in accordance with the provisions of the state and establishing an independent organization mainly composed of external members to supervise the protection of personal information;",
+        "(2) following the principles of openness, fairness, and justice, formulating platform rules, and clarifying the norms and obligations that product or service providers within the platform should meet when processing personal information;",
+        "(3) stopping providing services for product or service providers within the platforms that process personal information in serious violation of laws and administrative regulations; and",
+        "(4) regularly publishing social responsibility reports on personal information protection for public supervision."
+      ],
+      "pi59": [
+        "The party entrusted with the processing of personal information shall, in accordance with this Law and relevant laws and administrative regulations, take the necessary measures to ensure the security of the personal information entrusted for processing, and assist the entrusting personal information processor in fulfilling the obligations provided by this Law."
+      ],
+      "pi60": [
+        "The national cyberspace department shall be responsible for the overall planning and coordination of personal information protection and related supervision and administration. The relevant departments of the State Council shall, in accordance with this Law and other relevant laws and administrative regulations, be responsible for personal information protection and related supervision and administration within the scope of their respective duties.",
+        "The duties of personal information protection and related supervision and administration of the relevant departments of the local people's governments at or above the county level shall be determined in accordance with the relevant provisions of the state.",
+        "The departments provided in the preceding two paragraphs are collectively referred to as the departments with personal information protection duties."
+      ],
+      "pi61": [
+        "Departments with personal information protection duties shall perform the following personal information protection duties:",
+        "(1) conducting publicity and education on personal information protection, and guiding and supervising personal information processors in their protection of personal information;",
+        "(2) receiving and handling complaints and reports related to personal information protection;",
+        "(3) organizing evaluations on applications, etc. in terms of personal information protection and publish the results of such evaluations;",
+        "(4) investigating and handling illegal personal information processing activities; and",
+        "(5) other duties as provided by laws and administrative regulations."
+      ],
+      "pi62": [
+        "The national cyberspace department shall coordinate relevant departments to promote personal information protection through the following efforts in accordance with this Law:",
+        "(1) formulating specific rules and standards for personal information protection;",
+        "(2) developing special personal information protection rules and standards for small personal information processors, the processing of sensitive personal information, and new technologies and applications such as face recognition and artificial intelligence;",
+        "(3) supporting the research and development, and promoting the application of secure and convenient electronic identity authentication technology, and advancing the public services for network identity authentication;",
+        "(4) promoting the development of a personal information protection service system with the participation of various social sectors, and supporting relevant institutions in providing personal information protection assessment and certification services; and",
+        "(5) improving the complaint and reporting mechanism related to personal information protection ."
+      ],
+      "pi63": [
+        "A department with personal information protection duties when fulfilling related duties may take the following measures:",
+        "(1) questioning relevant parties, and investigating circumstances related to personal information processing activities;",
+        "(2) consulting and duplicating the parties' contracts, records, account books and other relevant materials related to personal information processing activities;",
+        "(3) conducting on-site inspections, and investigating suspected illegal personal information processing activities; and",
+        "(4) inspecting equipment and articles related to personal information processing activities; and sealing up or seizing equipment and articles related to illegal personal information processing activities as proved by evidence after submitting written reports to and obtaining approval from the principal person in charge of the departments with personal information protection duties.",
+        "When departments with personal information protection duties carry out their duties in accordance with the law, the parties concerned shall cooperate and provide assistance, and shall not reject or obstruct them."
+      ],
+      "pi64": [
+        "Where a department with personal information protection duties finds, when performing its duties, relatively high risks in personal information processing activities or the occurrence of personal information security incidents, the department may hold an interview with the legal representative or the principal person in charge of the personal information processor according to the provided authority and procedures, or request the processor to entrust a professional institution to conduct compliance audits of the personal information processing activities. The personal information processor shall adopt measures to make rectification and eliminate potential risks as required.",
+        "Where a department with personal information protection duties, in performing its duties, finds an illegal personal information processing activity that may involve a crime, the department shall transfer the case to the public security organ in a timely manner in accordance with the law."
+      ],
+      "pi65": [
+        "Any organization or individual has the right to complain and report to a department with personal information protection duties about illegal personal information processing. The department that receives such a complaint or report shall handle it in a timely manner in accordance with the law, and notify the complainant or informant of the results.",
+        "Departments with personal information protection duties shall publish their contact information for receiving complaints and reports."
+      ],
+      "pi66": [
+        "Where personal information is processed in violation of the provisions of this Law or without fulfilling the personal information protection obligations provided in this Law, the departments with personal information protection duties shall order the violator to make corrections, give a warning, confiscate the illegal gains, and order the suspension or termination of provision of services by the applications that illegally process personal information; where the violator refuses to make corrections, a fine of not more than RMB one million yuan shall be imposed thereupon; and the directly liable persons in charge and other directly liable persons shall each be fined not less than RMB 10,000 yuan nor more than RMB 100,000 yuan.",
+        "In case of an illegal act as prescribed in the preceding paragraph and the circumstances are serious, the departments with personal information protection duties at or above the provincial level shall order the violator to make corrections, confiscate the illegal gains, impose a fine of not more than RMB 50 million yuan or not more than five percent of the previous year's turnover; may also order the suspension of relevant businesses, or order the suspension of all the business operations for an overhaul, and notify the competent authorities to revoke relevant business permits or license; shall impose a fine of not less than RMB 100,000 yuan but not more than RMB 1 million yuan upon each of the directly liable persons in charge and other directly liable persons, and may decide to prohibit the abovementioned persons from serving as directors, supervisors, senior managers, or the persons in charge of relevant companies within a specific period of time."
+      ],
+      "pi67": [
+        "Any violation of the provisions of this Law shall be entered in the relevant credit record and be published in accordance with the provisions of the relevant laws and administrative regulations."
+      ],
+      "pi68": [
+        "Where any state organ fails to fulfill the personal information protection obligations as provided in this Law, the organ at the higher level or the departments with personal information protection duties shall order it to make corrections, and discipline the directly liable person in charge and other directly liable persons in accordance with the law.",
+        "Where a staff member of a department with personal information protection duties neglects duties, abuses power, or practices favoritism, which does not constitute a crime, the staff member shall be subject to sanction in accordance with the law."
+      ],
+      "pi69": [
+        "Where a personal information processor infringes the rights or interests on personal information due to any personal information processing activity and cannot prove that the processor is not at fault, the processor shall assume the liability for damages and other tort liability.",
+        "The liability for damages prescribed in the preceding paragraph shall be determined based on the losses of individuals incurred thereby and the benefits acquired by the infringing personal information processor; and where it is difficult to determine the aforementioned losses or the benefits, the amount of damages shall be determined based on the actual circumstances."
+      ],
+      "pi70": [
+        "Where a personal information processor processes personal information in violation of the provisions of this Law and infringes the rights and interests of many individuals, the people's procuratorate, the consumer organizations specified by law, and the organization designated by the national cyberspace department may file a lawsuit with the people's court in accordance with the law."
+      ],
+      "pi71": [
+        "Any violation of this Law which constitutes a violation of public security administration shall be subject to public security administration penalty in accordance with the law. If the violation constitutes a crime, the violator shall be held criminally liable in accordance with the law."
+      ],
+      "pi72": [
+        "This Law is not applicable where a natural person processes personal information for personal or household affairs.",
+        "Where other laws provide personal information processing in statistical or archives management activities organized and conducted by the people's governments at all levels and their relevant departments, the provisions of such laws shall prevail."
+      ],
+      "pi73": [
+        "For purposes of this Law, the following terms shall have the following meanings:",
+        "(1) \"A personal information processor\" refers to an organization or individual that autonomously determines the purposes and means of personal information processing.",
+        "(2) \"automated decision making\" refers to the activities of automatically analyzing and evaluating personal behaviors, hobbies, or economic, health, and credit status, among others, through computer programs, and making decisions.",
+        "(3) \"de-identification\" refers to processing personal information to make it impossible to identify specific natural persons in the absence of the support of additional information.",
+        "(4) \"anonymization\" refers to the process of processing personal information to make it impossible to identify specific natural persons and impossible to restore."
+      ],
+      "pi74": [
+        "This Law shall come into force as of November 1st , 2021."
+      ]
+    }
+  },
+  "amendments": {},
+  "validation": {
+    "allIncludedArticleNumbersMatchChinese": true,
+    "articlesPerSnapshot": 129
+  },
+  "notIncluded": [
+    {
+      "law": "网络安全法",
+      "years": [
+        2016,
+        2021,
+        2025
+      ],
+      "reason": "截至2026-10-18，未找到可核实的官方英文全文；未以新闻报道或非官方译文替代。"
+    }
+  ]
+}

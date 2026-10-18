@@ -1,0 +1,41 @@
+[
+  {
+    "name": "Data Security Law of the People's Republic of China",
+    "nodeId": "data-security",
+    "prefix": "ds",
+    "files": [
+      {
+        "file": "data-en-1.html",
+        "url": "http://en.npc.gov.cn.cdurl.cn/2021-06/10/c_689311.htm",
+        "sha256": "cab7dbab297e33cb7c4dc3e7f659fd9534b3096a23f92e3cfc4494dae06c649c"
+      },
+      {
+        "file": "data-en-2.html",
+        "url": "http://en.npc.gov.cn.cdurl.cn/2021-06/10/c_689311_2.htm",
+        "sha256": "4332c15fbd343d15127f02ecb45b04a4f7c679b0bdc2a6aa43bec05d512fb789"
+      }
+    ]
+  },
+  {
+    "name": "Personal Information Protection Law of the People's Republic of China",
+    "nodeId": "personal-information",
+    "prefix": "pi",
+    "files": [
+      {
+        "file": "personal-en-1.html",
+        "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559.htm",
+        "sha256": "f4536ca78eb647a204632a2e5236169255ab1cf4a27a8b2483e5b6673c55ac32"
+      },
+      {
+        "file": "personal-en-2.html",
+        "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559_2.htm",
+        "sha256": "acab86767e369f2d6ccf60242ce37f116986c76ba96bd7af739243a7fe0f09c5"
+      },
+      {
+        "file": "personal-en-3.html",
+        "url": "http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559_3.htm",
+        "sha256": "65f488fdee1355bc1d89fac4aaa513b807e744abce34a9483061d1676c8c636e"
+      }
+    ]
+  }
+]

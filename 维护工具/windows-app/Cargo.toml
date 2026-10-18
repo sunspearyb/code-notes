@@ -1,0 +1,24 @@
+[package]
+name = "fadian-notes"
+version = "1.0.0"
+edition = "2021"
+description = "法典笔记 Windows 应用：内嵌纯净版页面的 WebView2 外壳"
+publish = false
+
+[dependencies]
+dirs = "6"
+open = "5"
+png = "0.17"
+serde_json = "1"
+tao = "0.37"
+wry = "0.57"
+
+[build-dependencies]
+embed-resource = "3"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

@@ -1,0 +1,39 @@
+# 推送到 main 后，把网页版发布到 GitHub Pages。
+# 需要在仓库 Settings → Pages 中把 Source 设为 “GitHub Actions”。
+name: 发布网页版
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # 宪法在网站根目录，其他法典在各自的子目录（如 /civil-code/），每个都可以单独添加到主屏幕。
+      - name: 生成网页版
+        run: |
+          python3 demo/build.py
+          tag="$(date +%Y%m%d)-${GITHUB_SHA::7}"
+          python3 维护工具/制作各终端版本.py --only web --source . --tag "$tag" --web-dir _site
+          for pack in $(python3 -c "import sys; sys.path.insert(0, 'demo'); from edition import pack_names; print(' '.join(pack_names()[1:]))"); do
+            python3 维护工具/制作各终端版本.py --only web --source . --codex "$pack" --tag "$tag" --web-dir _site
+          done
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,1393 @@
+{
+  "about": "民法典数据包；条旨另列审阅稿，正式条旨留空。",
+  "id": "cn-civil-code",
+  "name": "中华人民共和国民法典",
+  "short": "民法典",
+  "whole": "整部民法典",
+  "amendment": "修正",
+  "portOffset": 1,
+  "webFolder": "civil-code",
+  "citation": {
+    "latest": "《中华人民共和国民法典》",
+    "original": "《中华人民共和国民法典》（{year} 年）",
+    "amended": "《中华人民共和国民法典》（{year} 年修正）",
+    "aliases": [
+      "中华人民共和国民法典",
+      "民法典"
+    ],
+    "note": "引用时注明法律全称、条款；引用以往文本时注明版本年份。"
+  },
+  "files": {
+    "history": "versions.json",
+    "subtitles": "subtitles.json",
+    "guide": "guide.json",
+    "english": "english.json"
+  },
+  "levels": {
+    "part": {
+      "name": "编",
+      "numbered": true
+    },
+    "subpart": {
+      "name": "分编",
+      "numbered": true
+    },
+    "chapter": {
+      "name": "章",
+      "numbered": true,
+      "numberWithin": "part"
+    },
+    "section": {
+      "name": "节",
+      "numbered": true
+    },
+    "plain": {
+      "name": "",
+      "numbered": false
+    }
+  },
+  "structure": [
+    {
+      "id": "a-node-1",
+      "level": "part",
+      "name": "总　　则",
+      "title": "第一编　总　　则",
+      "from": "a1",
+      "number": 1,
+      "children": [
+        {
+          "id": "a-node-2",
+          "level": "chapter",
+          "name": "基本规定",
+          "title": "第一章　基本规定",
+          "from": "a1",
+          "number": 1,
+          "to": "a12"
+        },
+        {
+          "id": "a-node-3",
+          "level": "chapter",
+          "name": "自然人",
+          "title": "第二章　自然人",
+          "from": "a13",
+          "number": 2,
+          "children": [
+            {
+              "id": "a-node-4",
+              "level": "section",
+              "name": "民事权利能力和民事行为能力",
+              "title": "第一节　民事权利能力和民事行为能力",
+              "from": "a13",
+              "number": 1,
+              "to": "a25"
+            },
+            {
+              "id": "a-node-5",
+              "level": "section",
+              "name": "监　　护",
+              "title": "第二节　监　　护",
+              "from": "a26",
+              "number": 2,
+              "to": "a39"
+            },
+            {
+              "id": "a-node-6",
+              "level": "section",
+              "name": "宣告失踪和宣告死亡",
+              "title": "第三节　宣告失踪和宣告死亡",
+              "from": "a40",
+              "number": 3,
+              "to": "a53"
+            },
+            {
+              "id": "a-node-7",
+              "level": "section",
+              "name": "个体工商户和农村承包经营户",
+              "title": "第四节　个体工商户和农村承包经营户",
+              "from": "a54",
+              "number": 4,
+              "to": "a56"
+            }
+          ],
+          "to": "a56"
+        },
+        {
+          "id": "a-node-8",
+          "level": "chapter",
+          "name": "法　　人",
+          "title": "第三章　法　　人",
+          "from": "a57",
+          "number": 3,
+          "children": [
+            {
+              "id": "a-node-9",
+              "level": "section",
+              "name": "一般规定",
+              "title": "第一节　一般规定",
+              "from": "a57",
+              "number": 1,
+              "to": "a75"
+            },
+            {
+              "id": "a-node-10",
+              "level": "section",
+              "name": "营利法人",
+              "title": "第二节　营利法人",
+              "from": "a76",
+              "number": 2,
+              "to": "a86"
+            },
+            {
+              "id": "a-node-11",
+              "level": "section",
+              "name": "非营利法人",
+              "title": "第三节　非营利法人",
+              "from": "a87",
+              "number": 3,
+              "to": "a95"
+            },
+            {
+              "id": "a-node-12",
+              "level": "section",
+              "name": "特别法人",
+              "title": "第四节　特别法人",
+              "from": "a96",
+              "number": 4,
+              "to": "a101"
+            }
+          ],
+          "to": "a101"
+        },
+        {
+          "id": "a-node-13",
+          "level": "chapter",
+          "name": "非法人组织",
+          "title": "第四章　非法人组织",
+          "from": "a102",
+          "number": 4,
+          "to": "a108"
+        },
+        {
+          "id": "a-node-14",
+          "level": "chapter",
+          "name": "民事权利",
+          "title": "第五章　民事权利",
+          "from": "a109",
+          "number": 5,
+          "to": "a132"
+        },
+        {
+          "id": "a-node-15",
+          "level": "chapter",
+          "name": "民事法律行为",
+          "title": "第六章　民事法律行为",
+          "from": "a133",
+          "number": 6,
+          "children": [
+            {
+              "id": "a-node-16",
+              "level": "section",
+              "name": "一般规定",
+              "title": "第一节　一般规定",
+              "from": "a133",
+              "number": 1,
+              "to": "a136"
+            },
+            {
+              "id": "a-node-17",
+              "level": "section",
+              "name": "意思表示",
+              "title": "第二节　意思表示",
+              "from": "a137",
+              "number": 2,
+              "to": "a142"
+            },
+            {
+              "id": "a-node-18",
+              "level": "section",
+              "name": "民事法律行为的效力",
+              "title": "第三节　民事法律行为的效力",
+              "from": "a143",
+              "number": 3,
+              "to": "a157"
+            },
+            {
+              "id": "a-node-19",
+              "level": "section",
+              "name": "民事法律行为的附条件和附期限",
+              "title": "第四节　民事法律行为的附条件和附期限",
+              "from": "a158",
+              "number": 4,
+              "to": "a160"
+            }
+          ],
+          "to": "a160"
+        },
+        {
+          "id": "a-node-20",
+          "level": "chapter",
+          "name": "代　　理",
+          "title": "第七章　代　　理",
+          "from": "a161",
+          "number": 7,
+          "children": [
+            {
+              "id": "a-node-21",
+              "level": "section",
+              "name": "一般规定",
+              "title": "第一节　一般规定",
+              "from": "a161",
+              "number": 1,
+              "to": "a164"
+            },
+            {
+              "id": "a-node-22",
+              "level": "section",
+              "name": "委托代理",
+              "title": "第二节　委托代理",
+              "from": "a165",
+              "number": 2,
+              "to": "a172"
+            },
+            {
+              "id": "a-node-23",
+              "level": "section",
+              "name": "代理终止",
+              "title": "第三节　代理终止",
+              "from": "a173",
+              "number": 3,
+              "to": "a175"
+            }
+          ],
+          "to": "a175"
+        },
+        {
+          "id": "a-node-24",
+          "level": "chapter",
+          "name": "民事责任",
+          "title": "第八章　民事责任",
+          "from": "a176",
+          "number": 8,
+          "to": "a187"
+        },
+        {
+          "id": "a-node-25",
+          "level": "chapter",
+          "name": "诉讼时效",
+          "title": "第九章　诉讼时效",
+          "from": "a188",
+          "number": 9,
+          "to": "a199"
+        },
+        {
+          "id": "a-node-26",
+          "level": "chapter",
+          "name": "期间计算",
+          "title": "第十章　期间计算",
+          "from": "a200",
+          "number": 10,
+          "to": "a204"
+        }
+      ],
+      "to": "a204"
+    },
+    {
+      "id": "a-node-27",
+      "level": "part",
+      "name": "物　　权",
+      "title": "第二编　物　　权",
+      "from": "a205",
+      "number": 2,
+      "children": [
+        {
+          "id": "a-node-28",
+          "level": "subpart",
+          "name": "通　　则",
+          "title": "第一分编　通　　则",
+          "from": "a205",
+          "number": 1,
+          "children": [
+            {
+              "id": "a-node-29",
+              "level": "chapter",
+              "name": "一般规定",
+              "title": "第一章　一般规定",
+              "from": "a205",
+              "number": 1,
+              "to": "a208"
+            },
+            {
+              "id": "a-node-30",
+              "level": "chapter",
+              "name": "物权的设立、变更、转让和消灭",
+              "title": "第二章　物权的设立、变更、转让和消灭",
+              "from": "a209",
+              "number": 2,
+              "children": [
+                {
+                  "id": "a-node-31",
+                  "level": "section",
+                  "name": "不动产登记",
+                  "title": "第一节　不动产登记",
+                  "from": "a209",
+                  "number": 1,
+                  "to": "a223"
+                },
+                {
+                  "id": "a-node-32",
+                  "level": "section",
+                  "name": "动产交付",
+                  "title": "第二节　动产交付",
+                  "from": "a224",
+                  "number": 2,
+                  "to": "a228"
+                },
+                {
+                  "id": "a-node-33",
+                  "level": "section",
+                  "name": "其他规定",
+                  "title": "第三节　其他规定",
+                  "from": "a229",
+                  "number": 3,
+                  "to": "a232"
+                }
+              ],
+              "to": "a232"
+            },
+            {
+              "id": "a-node-34",
+              "level": "chapter",
+              "name": "物权的保护",
+              "title": "第三章　物权的保护",
+              "from": "a233",
+              "number": 3,
+              "to": "a239"
+            }
+          ],
+          "to": "a239"
+        },
+        {
+          "id": "a-node-35",
+          "level": "subpart",
+          "name": "所有权",
+          "title": "第二分编　所有权",
+          "from": "a240",
+          "number": 2,
+          "children": [
+            {
+              "id": "a-node-36",
+              "level": "chapter",
+              "name": "一般规定",
+              "title": "第四章　一般规定",
+              "from": "a240",
+              "number": 4,
+              "to": "a245"
+            },
+            {
+              "id": "a-node-37",
+              "level": "chapter",
+              "name": "国家所有权和集体所有权、私人所有权",
+              "title": "第五章　国家所有权和集体所有权、私人所有权",
+              "from": "a246",
+              "number": 5,
+              "to": "a270"
+            },
+            {
+              "id": "a-node-38",
+              "level": "chapter",
+              "name": "业主的建筑物区分所有权",
+              "title": "第六章　业主的建筑物区分所有权",
+              "from": "a271",
+              "number": 6,
+              "to": "a287"
+            },
+            {
+              "id": "a-node-39",
+              "level": "chapter",
+              "name": "相邻关系",
+              "title": "第七章　相邻关系",
+              "from": "a288",
+              "number": 7,
+              "to": "a296"
+            },
+            {
+              "id": "a-node-40",
+              "level": "chapter",
+              "name": "共　　有",
+              "title": "第八章　共　　有",
+              "from": "a297",
+              "number": 8,
+              "to": "a310"
+            },
+            {
+              "id": "a-node-41",
+              "level": "chapter",
+              "name": "所有权取得的特别规定",
+              "title": "第九章　所有权取得的特别规定",
+              "from": "a311",
+              "number": 9,
+              "to": "a322"
+            }
+          ],
+          "to": "a322"
+        },
+        {
+          "id": "a-node-42",
+          "level": "subpart",
+          "name": "用益物权",
+          "title": "第三分编　用益物权",
+          "from": "a323",
+          "number": 3,
+          "children": [
+            {
+              "id": "a-node-43",
+              "level": "chapter",
+              "name": "一般规定",
+              "title": "第十章　一般规定",
+              "from": "a323",
+              "number": 10,
+              "to": "a329"
+            },
+            {
+              "id": "a-node-44",
+              "level": "chapter",
+              "name": "土地承包经营权",
+              "title": "第十一章　土地承包经营权",
+              "from": "a330",
+              "number": 11,
+              "to": "a343"
+            },
+            {
+              "id": "a-node-45",
+              "level": "chapter",
+              "name": "建设用地使用权",
+              "title": "第十二章　建设用地使用权",
+              "from": "a344",
+              "number": 12,
+              "to": "a361"
+            },
+            {
+              "id": "a-node-46",
+              "level": "chapter",
+              "name": "宅基地使用权",
+              "title": "第十三章　宅基地使用权",
+              "from": "a362",
+              "number": 13,
+              "to": "a365"
+            },
+            {
+              "id": "a-node-47",
+              "level": "chapter",
+              "name": "居住权",
+              "title": "第十四章　居住权",
+              "from": "a366",
+              "number": 14,
+              "to": "a371"
+            },
+            {
+              "id": "a-node-48",
+              "level": "chapter",
+              "name": "地役权",
+              "title": "第十五章　地役权",
+              "from": "a372",
+              "number": 15,
+              "to": "a385"
+            }
+          ],
+          "to": "a385"
+        },
+        {
+          "id": "a-node-49",
+          "level": "subpart",
+          "name": "担保物权",
+          "title": "第四分编　担保物权",
+          "from": "a386",
+          "number": 4,
+          "children": [
+            {
+              "id": "a-node-50",
+              "level": "chapter",
+              "name": "一般规定",
+              "title": "第十六章　一般规定",
+              "from": "a386",
+              "number": 16,
+              "to": "a393"
+            },
+            {
+              "id": "a-node-51",
+              "level": "chapter",
+              "name": "抵押权",
+              "title": "第十七章　抵押权",
+              "from": "a394",
+              "number": 17,
+              "children": [
+                {
+                  "id": "a-node-52",
+                  "level": "section",
+                  "name": "一般抵押权",
+                  "title": "第一节　一般抵押权",
+                  "from": "a394",
+                  "number": 1,
+                  "to": "a419"
+                },
+                {
+                  "id": "a-node-53",
+                  "level": "section",
+                  "name": "最高额抵押权",
+                  "title": "第二节　最高额抵押权",
+                  "from": "a420",
+                  "number": 2,
+                  "to": "a424"
+                }
+              ],
+              "to": "a424"
+            },
+            {
+              "id": "a-node-54",
+              "level": "chapter",
+              "name": "质　　权",
+              "title": "第十八章　质　　权",
+              "from": "a425",
+              "number": 18,
+              "children": [
+                {
+                  "id": "a-node-55",
+                  "level": "section",
+                  "name": "动产质权",
+                  "title": "第一节　动产质权",
+                  "from": "a425",
+                  "number": 1,
+                  "to": "a439"
+                },
+                {
+                  "id": "a-node-56",
+                  "level": "section",
+                  "name": "权利质权",
+                  "title": "第二节　权利质权",
+                  "from": "a440",
+                  "number": 2,
+                  "to": "a446"
+                }
+              ],
+              "to": "a446"
+            },
+            {
+              "id": "a-node-57",
+              "level": "chapter",
+              "name": "留置权",
+              "title": "第十九章　留置权",
+              "from": "a447",
+              "number": 19,
+              "to": "a457"
+            }
+          ],
+          "to": "a457"
+        },
+        {
+          "id": "a-node-58",
+          "level": "subpart",
+          "name": "占　　有",
+          "title": "第五分编　占　　有",
+          "from": "a458",
+          "number": 5,
+          "children": [
+            {
+              "id": "a-node-59",
+              "level": "chapter",
+              "name": "占　　有",
+              "title": "第二十章　占　　有",
+              "from": "a458",
+              "number": 20,
+              "to": "a462"
+            }
+          ],
+          "to": "a462"
+        }
+      ],
+      "to": "a462"
+    },
+    {
+      "id": "a-node-60",
+      "level": "part",
+      "name": "合　　同",
+      "title": "第三编　合　　同",
+      "from": "a463",
+      "number": 3,
+      "children": [
+        {
+          "id": "a-node-61",
+          "level": "subpart",
+          "name": "通　　则",
+          "title": "第一分编　通　　则",
+          "from": "a463",
+          "number": 1,
+          "children": [
+            {
+              "id": "a-node-62",
+              "level": "chapter",
+              "name": "一般规定",
+              "title": "第一章　一般规定",
+              "from": "a463",
+              "number": 1,
+              "to": "a468"
+            },
+            {
+              "id": "a-node-63",
+              "level": "chapter",
+              "name": "合同的订立",
+              "title": "第二章　合同的订立",
+              "from": "a469",
+              "number": 2,
+              "to": "a501"
+            },
+            {
+              "id": "a-node-64",
+              "level": "chapter",
+              "name": "合同的效力",
+              "title": "第三章　合同的效力",
+              "from": "a502",
+              "number": 3,
+              "to": "a508"
+            },
+            {
+              "id": "a-node-65",
+              "level": "chapter",
+              "name": "合同的履行",
+              "title": "第四章　合同的履行",
+              "from": "a509",
+              "number": 4,
+              "to": "a534"
+            },
+            {
+              "id": "a-node-66",
+              "level": "chapter",
+              "name": "合同的保全",
+              "title": "第五章　合同的保全",
+              "from": "a535",
+              "number": 5,
+              "to": "a542"
+            },
+            {
+              "id": "a-node-67",
+              "level": "chapter",
+              "name": "合同的变更和转让",
+              "title": "第六章　合同的变更和转让",
+              "from": "a543",
+              "number": 6,
+              "to": "a556"
+            },
+            {
+              "id": "a-node-68",
+              "level": "chapter",
+              "name": "合同的权利义务终止",
+              "title": "第七章　合同的权利义务终止",
+              "from": "a557",
+              "number": 7,
+              "to": "a576"
+            },
+            {
+              "id": "a-node-69",
+              "level": "chapter",
+              "name": "违约责任",
+              "title": "第八章　违约责任",
+              "from": "a577",
+              "number": 8,
+              "to": "a594"
+            }
+          ],
+          "to": "a594"
+        },
+        {
+          "id": "a-node-70",
+          "level": "subpart",
+          "name": "典型合同",
+          "title": "第二分编　典型合同",
+          "from": "a595",
+          "number": 2,
+          "children": [
+            {
+              "id": "a-node-71",
+              "level": "chapter",
+              "name": "买卖合同",
+              "title": "第九章　买卖合同",
+              "from": "a595",
+              "number": 9,
+              "to": "a647"
+            },
+            {
+              "id": "a-node-72",
+              "level": "chapter",
+              "name": "供用电、水、气、热力合同",
+              "title": "第十章　供用电、水、气、热力合同",
+              "from": "a648",
+              "number": 10,
+              "to": "a656"
+            },
+            {
+              "id": "a-node-73",
+              "level": "chapter",
+              "name": "赠与合同",
+              "title": "第十一章　赠与合同",
+              "from": "a657",
+              "number": 11,
+              "to": "a666"
+            },
+            {
+              "id": "a-node-74",
+              "level": "chapter",
+              "name": "借款合同",
+              "title": "第十二章　借款合同",
+              "from": "a667",
+              "number": 12,
+              "to": "a680"
+            },
+            {
+              "id": "a-node-75",
+              "level": "chapter",
+              "name": "保证合同",
+              "title": "第十三章　保证合同",
+              "from": "a681",
+              "number": 13,
+              "children": [
+                {
+                  "id": "a-node-76",
+                  "level": "section",
+                  "name": "一般规定",
+                  "title": "第一节　一般规定",
+                  "from": "a681",
+                  "number": 1,
+                  "to": "a690"
+                },
+                {
+                  "id": "a-node-77",
+                  "level": "section",
+                  "name": "保证责任",
+                  "title": "第二节　保证责任",
+                  "from": "a691",
+                  "number": 2,
+                  "to": "a702"
+                }
+              ],
+              "to": "a702"
+            },
+            {
+              "id": "a-node-78",
+              "level": "chapter",
+              "name": "租赁合同",
+              "title": "第十四章　租赁合同",
+              "from": "a703",
+              "number": 14,
+              "to": "a734"
+            },
+            {
+              "id": "a-node-79",
+              "level": "chapter",
+              "name": "融资租赁合同",
+              "title": "第十五章　融资租赁合同",
+              "from": "a735",
+              "number": 15,
+              "to": "a760"
+            },
+            {
+              "id": "a-node-80",
+              "level": "chapter",
+              "name": "保理合同",
+              "title": "第十六章　保理合同",
+              "from": "a761",
+              "number": 16,
+              "to": "a769"
+            },
+            {
+              "id": "a-node-81",
+              "level": "chapter",
+              "name": "承揽合同",
+              "title": "第十七章　承揽合同",
+              "from": "a770",
+              "number": 17,
+              "to": "a787"
+            },
+            {
+              "id": "a-node-82",
+              "level": "chapter",
+              "name": "建设工程合同",
+              "title": "第十八章　建设工程合同",
+              "from": "a788",
+              "number": 18,
+              "to": "a808"
+            },
+            {
+              "id": "a-node-83",
+              "level": "chapter",
+              "name": "运输合同",
+              "title": "第十九章　运输合同",
+              "from": "a809",
+              "number": 19,
+              "children": [
+                {
+                  "id": "a-node-84",
+                  "level": "section",
+                  "name": "一般规定",
+                  "title": "第一节　一般规定",
+                  "from": "a809",
+                  "number": 1,
+                  "to": "a813"
+                },
+                {
+                  "id": "a-node-85",
+                  "level": "section",
+                  "name": "客运合同",
+                  "title": "第二节　客运合同",
+                  "from": "a814",
+                  "number": 2,
+                  "to": "a824"
+                },
+                {
+                  "id": "a-node-86",
+                  "level": "section",
+                  "name": "货运合同",
+                  "title": "第三节　货运合同",
+                  "from": "a825",
+                  "number": 3,
+                  "to": "a837"
+                },
+                {
+                  "id": "a-node-87",
+                  "level": "section",
+                  "name": "多式联运合同",
+                  "title": "第四节　多式联运合同",
+                  "from": "a838",
+                  "number": 4,
+                  "to": "a842"
+                }
+              ],
+              "to": "a842"
+            },
+            {
+              "id": "a-node-88",
+              "level": "chapter",
+              "name": "技术合同",
+              "title": "第二十章　技术合同",
+              "from": "a843",
+              "number": 20,
+              "children": [
+                {
+                  "id": "a-node-89",
+                  "level": "section",
+                  "name": "一般规定",
+                  "title": "第一节　一般规定",
+                  "from": "a843",
+                  "number": 1,
+                  "to": "a850"
+                },
+                {
+                  "id": "a-node-90",
+                  "level": "section",
+                  "name": "技术开发合同",
+                  "title": "第二节　技术开发合同",
+                  "from": "a851",
+                  "number": 2,
+                  "to": "a861"
+                },
+                {
+                  "id": "a-node-91",
+                  "level": "section",
+                  "name": "技术转让合同和技术许可合同",
+                  "title": "第三节　技术转让合同和技术许可合同",
+                  "from": "a862",
+                  "number": 3,
+                  "to": "a877"
+                },
+                {
+                  "id": "a-node-92",
+                  "level": "section",
+                  "name": "技术咨询合同和技术服务合同",
+                  "title": "第四节　技术咨询合同和技术服务合同",
+                  "from": "a878",
+                  "number": 4,
+                  "to": "a887"
+                }
+              ],
+              "to": "a887"
+            },
+            {
+              "id": "a-node-93",
+              "level": "chapter",
+              "name": "保管合同",
+              "title": "第二十一章　保管合同",
+              "from": "a888",
+              "number": 21,
+              "to": "a903"
+            },
+            {
+              "id": "a-node-94",
+              "level": "chapter",
+              "name": "仓储合同",
+              "title": "第二十二章　仓储合同",
+              "from": "a904",
+              "number": 22,
+              "to": "a918"
+            },
+            {
+              "id": "a-node-95",
+              "level": "chapter",
+              "name": "委托合同",
+              "title": "第二十三章　委托合同",
+              "from": "a919",
+              "number": 23,
+              "to": "a936"
+            },
+            {
+              "id": "a-node-96",
+              "level": "chapter",
+              "name": "物业服务合同",
+              "title": "第二十四章　物业服务合同",
+              "from": "a937",
+              "number": 24,
+              "to": "a950"
+            },
+            {
+              "id": "a-node-97",
+              "level": "chapter",
+              "name": "行纪合同",
+              "title": "第二十五章　行纪合同",
+              "from": "a951",
+              "number": 25,
+              "to": "a960"
+            },
+            {
+              "id": "a-node-98",
+              "level": "chapter",
+              "name": "中介合同",
+              "title": "第二十六章　中介合同",
+              "from": "a961",
+              "number": 26,
+              "to": "a966"
+            },
+            {
+              "id": "a-node-99",
+              "level": "chapter",
+              "name": "合伙合同",
+              "title": "第二十七章　合伙合同",
+              "from": "a967",
+              "number": 27,
+              "to": "a978"
+            }
+          ],
+          "to": "a978"
+        },
+        {
+          "id": "a-node-100",
+          "level": "subpart",
+          "name": "准合同",
+          "title": "第三分编　准合同",
+          "from": "a979",
+          "number": 3,
+          "children": [
+            {
+              "id": "a-node-101",
+              "level": "chapter",
+              "name": "无因管理",
+              "title": "第二十八章　无因管理",
+              "from": "a979",
+              "number": 28,
+              "to": "a984"
+            },
+            {
+              "id": "a-node-102",
+              "level": "chapter",
+              "name": "不当得利",
+              "title": "第二十九章　不当得利",
+              "from": "a985",
+              "number": 29,
+              "to": "a988"
+            }
+          ],
+          "to": "a988"
+        }
+      ],
+      "to": "a988"
+    },
+    {
+      "id": "a-node-103",
+      "level": "part",
+      "name": "人格权",
+      "title": "第四编　人格权",
+      "from": "a989",
+      "number": 4,
+      "children": [
+        {
+          "id": "a-node-104",
+          "level": "chapter",
+          "name": "一般规定",
+          "title": "第一章　一般规定",
+          "from": "a989",
+          "number": 1,
+          "to": "a1001"
+        },
+        {
+          "id": "a-node-105",
+          "level": "chapter",
+          "name": "生命权、身体权和健康权",
+          "title": "第二章　生命权、身体权和健康权",
+          "from": "a1002",
+          "number": 2,
+          "to": "a1011"
+        },
+        {
+          "id": "a-node-106",
+          "level": "chapter",
+          "name": "姓名权和名称权",
+          "title": "第三章　姓名权和名称权",
+          "from": "a1012",
+          "number": 3,
+          "to": "a1017"
+        },
+        {
+          "id": "a-node-107",
+          "level": "chapter",
+          "name": "肖像权",
+          "title": "第四章　肖像权",
+          "from": "a1018",
+          "number": 4,
+          "to": "a1023"
+        },
+        {
+          "id": "a-node-108",
+          "level": "chapter",
+          "name": "名誉权和荣誉权",
+          "title": "第五章　名誉权和荣誉权",
+          "from": "a1024",
+          "number": 5,
+          "to": "a1031"
+        },
+        {
+          "id": "a-node-109",
+          "level": "chapter",
+          "name": "隐私权和个人信息保护",
+          "title": "第六章　隐私权和个人信息保护",
+          "from": "a1032",
+          "number": 6,
+          "to": "a1039"
+        }
+      ],
+      "to": "a1039"
+    },
+    {
+      "id": "a-node-110",
+      "level": "part",
+      "name": "婚姻家庭",
+      "title": "第五编　婚姻家庭",
+      "from": "a1040",
+      "number": 5,
+      "children": [
+        {
+          "id": "a-node-111",
+          "level": "chapter",
+          "name": "一般规定",
+          "title": "第一章　一般规定",
+          "from": "a1040",
+          "number": 1,
+          "to": "a1045"
+        },
+        {
+          "id": "a-node-112",
+          "level": "chapter",
+          "name": "结　　婚",
+          "title": "第二章　结　　婚",
+          "from": "a1046",
+          "number": 2,
+          "to": "a1054"
+        },
+        {
+          "id": "a-node-113",
+          "level": "chapter",
+          "name": "家庭关系",
+          "title": "第三章　家庭关系",
+          "from": "a1055",
+          "number": 3,
+          "children": [
+            {
+              "id": "a-node-114",
+              "level": "section",
+              "name": "夫妻关系",
+              "title": "第一节　夫妻关系",
+              "from": "a1055",
+              "number": 1,
+              "to": "a1066"
+            },
+            {
+              "id": "a-node-115",
+              "level": "section",
+              "name": "父母子女关系和其他近亲属关系",
+              "title": "第二节　父母子女关系和其他近亲属关系",
+              "from": "a1067",
+              "number": 2,
+              "to": "a1075"
+            }
+          ],
+          "to": "a1075"
+        },
+        {
+          "id": "a-node-116",
+          "level": "chapter",
+          "name": "离　　婚",
+          "title": "第四章　离　　婚",
+          "from": "a1076",
+          "number": 4,
+          "to": "a1092"
+        },
+        {
+          "id": "a-node-117",
+          "level": "chapter",
+          "name": "收　　养",
+          "title": "第五章　收　　养",
+          "from": "a1093",
+          "number": 5,
+          "children": [
+            {
+              "id": "a-node-118",
+              "level": "section",
+              "name": "收养关系的成立",
+              "title": "第一节　收养关系的成立",
+              "from": "a1093",
+              "number": 1,
+              "to": "a1110"
+            },
+            {
+              "id": "a-node-119",
+              "level": "section",
+              "name": "收养的效力",
+              "title": "第二节　收养的效力",
+              "from": "a1111",
+              "number": 2,
+              "to": "a1113"
+            },
+            {
+              "id": "a-node-120",
+              "level": "section",
+              "name": "收养关系的解除",
+              "title": "第三节　收养关系的解除",
+              "from": "a1114",
+              "number": 3,
+              "to": "a1118"
+            }
+          ],
+          "to": "a1118"
+        }
+      ],
+      "to": "a1118"
+    },
+    {
+      "id": "a-node-121",
+      "level": "part",
+      "name": "继　　承",
+      "title": "第六编　继　　承",
+      "from": "a1119",
+      "number": 6,
+      "children": [
+        {
+          "id": "a-node-122",
+          "level": "chapter",
+          "name": "一般规定",
+          "title": "第一章　一般规定",
+          "from": "a1119",
+          "number": 1,
+          "to": "a1125"
+        },
+        {
+          "id": "a-node-123",
+          "level": "chapter",
+          "name": "法定继承",
+          "title": "第二章　法定继承",
+          "from": "a1126",
+          "number": 2,
+          "to": "a1132"
+        },
+        {
+          "id": "a-node-124",
+          "level": "chapter",
+          "name": "遗嘱继承和遗赠",
+          "title": "第三章　遗嘱继承和遗赠",
+          "from": "a1133",
+          "number": 3,
+          "to": "a1144"
+        },
+        {
+          "id": "a-node-125",
+          "level": "chapter",
+          "name": "遗产的处理",
+          "title": "第四章　遗产的处理",
+          "from": "a1145",
+          "number": 4,
+          "to": "a1163"
+        }
+      ],
+      "to": "a1163"
+    },
+    {
+      "id": "a-node-126",
+      "level": "part",
+      "name": "侵权责任",
+      "title": "第七编　侵权责任",
+      "from": "a1164",
+      "number": 7,
+      "children": [
+        {
+          "id": "a-node-127",
+          "level": "chapter",
+          "name": "一般规定",
+          "title": "第一章　一般规定",
+          "from": "a1164",
+          "number": 1,
+          "to": "a1178"
+        },
+        {
+          "id": "a-node-128",
+          "level": "chapter",
+          "name": "损害赔偿",
+          "title": "第二章　损害赔偿",
+          "from": "a1179",
+          "number": 2,
+          "to": "a1187"
+        },
+        {
+          "id": "a-node-129",
+          "level": "chapter",
+          "name": "责任主体的特殊规定",
+          "title": "第三章　责任主体的特殊规定",
+          "from": "a1188",
+          "number": 3,
+          "to": "a1201"
+        },
+        {
+          "id": "a-node-130",
+          "level": "chapter",
+          "name": "产品责任",
+          "title": "第四章　产品责任",
+          "from": "a1202",
+          "number": 4,
+          "to": "a1207"
+        },
+        {
+          "id": "a-node-131",
+          "level": "chapter",
+          "name": "机动车交通事故责任",
+          "title": "第五章　机动车交通事故责任",
+          "from": "a1208",
+          "number": 5,
+          "to": "a1217"
+        },
+        {
+          "id": "a-node-132",
+          "level": "chapter",
+          "name": "医疗损害责任",
+          "title": "第六章　医疗损害责任",
+          "from": "a1218",
+          "number": 6,
+          "to": "a1228"
+        },
+        {
+          "id": "a-node-133",
+          "level": "chapter",
+          "name": "环境污染和生态破坏责任",
+          "title": "第七章　环境污染和生态破坏责任",
+          "from": "a1229",
+          "number": 7,
+          "to": "a1235"
+        },
+        {
+          "id": "a-node-134",
+          "level": "chapter",
+          "name": "高度危险责任",
+          "title": "第八章　高度危险责任",
+          "from": "a1236",
+          "number": 8,
+          "to": "a1244"
+        },
+        {
+          "id": "a-node-135",
+          "level": "chapter",
+          "name": "饲养动物损害责任",
+          "title": "第九章　饲养动物损害责任",
+          "from": "a1245",
+          "number": 9,
+          "to": "a1251"
+        },
+        {
+          "id": "a-node-136",
+          "level": "chapter",
+          "name": "建筑物和物件损害责任",
+          "title": "第十章　建筑物和物件损害责任",
+          "from": "a1252",
+          "number": 10,
+          "to": "a1258"
+        }
+      ],
+      "to": "a1258"
+    },
+    {
+      "id": "a-node-137",
+      "level": "plain",
+      "name": "附　　则",
+      "title": "附　　则",
+      "from": "a1259",
+      "to": "a1260"
+    }
+  ],
+  "welcome": {
+    "body": "从条文出发，记录字句中的问题，结合所在编章和有关规范阅读，再写下自己的理解及依据。各条小标题为依据条款拟定的条旨草稿，可在研读时修改。",
+    "start": "a1",
+    "startLabel": "从第一条读起"
+  },
+  "searchQuery": "民法典 司法解释 指导性案例 site:court.gov.cn",
+  "features": {
+    "english": true
+  },
+  "relationCategories": {
+    "interpretation": {
+      "name": "司法解释",
+      "materialType": "司法解释",
+      "fields": [
+        [
+          "document",
+          "文件名称"
+        ],
+        [
+          "number",
+          "文号"
+        ],
+        [
+          "provision",
+          "条款"
+        ],
+        [
+          "status",
+          "效力",
+          [
+            "有效",
+            "已修改",
+            "已废止"
+          ]
+        ]
+      ]
+    },
+    "case": {
+      "name": "指导性案例",
+      "materialType": "案例",
+      "fields": [
+        [
+          "number",
+          "案例编号"
+        ],
+        [
+          "issuer",
+          "发布机关"
+        ],
+        [
+          "holding",
+          "裁判要点"
+        ]
+      ]
+    }
+  }
+}
