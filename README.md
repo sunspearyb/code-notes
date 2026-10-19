@@ -33,25 +33,41 @@
 - **我的笔记**：按条文或时间排序，待核清单，方法回顾。
 - **导出同步**：导出 JSON 和 Markdown；把整个文件夹放进网盘即可在几台电脑之间同步。
 
-## 下载和安装
+## 版本选择与使用
 
-| 设备 | 推荐 | 其他选择 |
-| --- | --- | --- |
-| Windows、Mac 电脑 | **PC&Mac 通用版**：解压后放进网盘的同步文件夹 | Windows 版应用（只用一台电脑时） |
-| 安卓手机、平板 | **安卓版** APK | 网页版仅供预览 |
-| 苹果手机、iPad | **网页版预览**：用 Safari 打开，不添加信息 | — |
+优先推荐电脑网页版和手机网页版。两者都在自己的设备上保存笔记；习惯安装应用的用户可以选择 EXE 或 APK。
 
-各版本在 [Releases](../../releases) 中下载，三部法典的网页版链接见下方“在线预览”。安装方法见[各终端安装说明](各终端安装说明.md)。
+### 电脑网页版（推荐，Windows、Mac 通用）
 
-PC&Mac 通用版包含三部法典；当前 Release 的 Windows 应用、安卓 APK 和网页部署 ZIP 为宪法版本。各版本使用同一套网页程序，具体内容随法典数据包而异。只有 PC&Mac 通用版在用启动文件打开时连接本机服务，可以上传附件（PDF、Word）、使用智能辅助、定期备份到目录。
+[下载电脑网页版 ZIP（原 PC&Mac 通用版）](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-pc-mac-20261018-r3.zip)。包含宪法、民法典和网络法典；解压后用 Chrome 或 Edge 打开 `demo/法典笔记.html`、`demo/法典笔记-civil-code.html` 或 `demo/法典笔记-cyber-law.html`。可以离线阅读、记笔记和导出备份。在“导出同步”中授权选择自己的网盘同步文件夹，或用启动文件连接本机服务，可将笔记写入文件夹。完整功能和操作步骤见下文及[各终端安装说明](各终端安装说明.md)。
 
-## 在线预览
+### 手机网页版（推荐，安卓、苹果通用）
 
-以下网页版仅供预览，请不要添加任何信息。正式使用请下载相应版本。
+以下是可以正式记笔记的稳定入口，也可在电脑浏览器中打开：
 
-- [宪法笔记](https://sunspearyb.github.io/code-notes/)
-- [民法典笔记](https://sunspearyb.github.io/code-notes/civil-code/)
-- [网络法典笔记](https://sunspearyb.github.io/code-notes/cyber-law/)
+- [宪法 · 正式手机版](https://sunspearyb.github.io/code-notes/)
+- [民法典 · 正式手机版](https://sunspearyb.github.io/code-notes/civil-code/)
+- [网络法典 · 正式手机版](https://sunspearyb.github.io/code-notes/cyber-law/)
+
+苹果手机、iPad：用 Safari 打开对应入口，在分享菜单中选择“添加到主屏幕”。安卓：用 Chrome 打开，选择“添加到主屏幕”或“安装应用”。三部法典分别添加，以后固定从对应图标进入。首次联网完整加载、离线缓存成功后，可以离线使用；安装后请先用一条测试笔记检查关闭重开、断网打开以及备份恢复，再开始正式记录。不要使用无痕模式。
+
+笔记保存在本机浏览器中，不会上传到 GitHub，不会自动同步到其他手机或电脑。每周至少分别导出三部法典的 JSON，存到自己的云盘；换设备时，在对应法典中导入并合并。手机端目前采用手动导出、导入，不支持自动读写云盘文件夹。清理网站数据或移除应用前先备份。JSON 不含上传的附件原文件；附件需另行备份。Markdown 供阅读，恢复请用 JSON。
+
+### 应用版（可选）
+
+当前以下应用包均为宪法版本，民法典和网络法典请用上面两种网页版：
+
+- [Windows 安装版 EXE](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-windows-setup-20261018-r3.exe)
+- [Windows 免安装版 EXE](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-windows-portable-20261018-r3.exe)
+- [安卓应用 APK](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-android-20261018-r3.apk)
+
+### 只读预览
+
+只想查看条文时，可打开[只读预览目录](https://sunspearyb.github.io/code-notes/preview/)：[宪法](https://sunspearyb.github.io/code-notes/preview/constitution/)、[民法典](https://sunspearyb.github.io/code-notes/preview/civil-code/)、[网络法典](https://sunspearyb.github.io/code-notes/preview/cyber-law/)。预览页面仅供阅读，不加载笔记程序，不提供输入、上传、导入或保存功能，与正式手机版分开。
+
+### 自行部署
+
+[网页部署包 ZIP（宪法）](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-web-20261018-r3.zip)供网站维护者上传到自己的 HTTPS 网站，包含网页、图标、应用清单和离线缓存脚本。普通用户不需要下载此包，它不是手机安装包。部署三部法典可参照仓库的 Pages 工作流，从源码分别生成。
 
 ## PC&Mac 通用版
 

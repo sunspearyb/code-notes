@@ -31,6 +31,13 @@ jobs:
           node demo/test-learning.cjs
           node demo/test-reflection.cjs
           node demo/test-codex.cjs
+      - name: 网页离线与只读预览
+        run: |
+          for pack in constitution civil-code cyber-law; do
+            python3 维护工具/制作各终端版本.py --only web --source . --codex "$pack" --tag test --web-dir /tmp/fadian-web-test
+          done
+          python3 维护工具/制作只读预览.py --source . --site /tmp/fadian-web-test
+          node 维护工具/test-web.cjs . /tmp/fadian-web-test
       - name: 本机服务
         working-directory: demo
         run: python3 -m unittest test_service test_agent test_help

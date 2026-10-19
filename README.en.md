@@ -33,25 +33,41 @@ The software is built on six principles, which matter as much as the methods of 
 | **Decentralised** | No server and no account; notes travel between devices through cloud storage or files |
 | **Local** | Notes stay on your own device and can be exported at any time as JSON and Markdown (see [数据格式](demo/数据格式.md)) |
 
-### Download and install
+### Choose an edition
 
-| Device | Recommended | Also available |
-| --- | --- | --- |
-| Windows or Mac computer | **PC & Mac edition**: unzip into a cloud-sync folder | Windows app (single computer) |
-| Android phone or tablet | **Android edition** (APK) | Web preview only |
-| iPhone or iPad | **Web preview**: open in Safari; do not add information | — |
+We recommend the desktop web edition and the mobile web edition. Both keep notes on your own device. EXE and APK apps are optional.
 
-Download from [Releases](../../releases); links to all three web previews appear below. Installation details (in Chinese) are in [各终端安装说明](各终端安装说明.md).
+#### Desktop web edition (recommended: Windows and Mac)
 
-The PC & Mac package contains all three collections. The Windows apps, Android APK and web deployment ZIP in the current Release contain the Constitution. The editions share the same web application; content varies by data pack. Only the PC & Mac edition, when opened with its launcher, starts a local service for attachments (PDF, Word), the built-in assistant and scheduled backups to the folder.
+[Download the desktop web ZIP (formerly PC & Mac edition)](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-pc-mac-20261018-r3.zip). It includes all three collections. Unzip it and open `demo/法典笔记.html`, `demo/法典笔记-civil-code.html` or `demo/法典笔记-cyber-law.html` in Chrome or Edge. Read and write notes offline, export JSON backups, and optionally select your own cloud-synced folder under Export and sync. The launchers provide a local service for attachments and additional tools. See [installation instructions](各终端安装说明.md).
 
-### Online preview
+#### Mobile web edition (recommended: Android, iPhone and iPad)
 
-These web editions are for preview only. Please do not add any information. Download the appropriate edition for regular use.
+These are the stable, fully functional entrances, also accessible on desktop:
 
 - [Constitution](https://sunspearyb.github.io/code-notes/)
 - [Civil Code](https://sunspearyb.github.io/code-notes/civil-code/)
 - [Cyber Law](https://sunspearyb.github.io/code-notes/cyber-law/)
+
+Open each collection in Safari on iPhone/iPad and choose Add to Home Screen from the Share menu. On Android, use Chrome and choose Add to Home Screen or Install app. Add each collection separately and consistently use its icon. After the initial online load and successful caching, the app can work offline. Before taking important notes, use a test note to check reopening, offline access and backup restoration on your device. Avoid private browsing.
+
+Notes stay in local browser storage; they are not uploaded to GitHub or automatically synced across devices. Export each collection as JSON at least weekly, save it to your own cloud drive, and import it into the corresponding collection on another device. Mobile cloud backup currently requires manual export/import; automatic cloud-folder access is not supported. Back up before clearing website data or removing the app. JSON does not include attachment files; back those up separately. Markdown is for reading; use JSON for restoration.
+
+#### Optional apps
+
+These packages currently contain the Constitution only. Use either web edition for all three collections:
+
+- [Windows installer EXE](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-windows-setup-20261018-r3.exe)
+- [Windows portable EXE](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-windows-portable-20261018-r3.exe)
+- [Android APK](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-android-20261018-r3.apk)
+
+#### Read-only preview
+
+[Preview index](https://sunspearyb.github.io/code-notes/preview/): [Constitution](https://sunspearyb.github.io/code-notes/preview/constitution/), [Civil Code](https://sunspearyb.github.io/code-notes/preview/civil-code/), [Cyber Law](https://sunspearyb.github.io/code-notes/preview/cyber-law/). These separate reading pages do not load the notebook application and have no input, upload, import or save controls.
+
+#### Self-hosting
+
+[Web deployment ZIP (Constitution)](https://github.com/sunspearyb/code-notes/releases/download/v20261018-r3/fadian-notes-web-20261018-r3.zip) is for website maintainers deploying to their own HTTPS site. It includes HTML, icons, an app manifest and an offline service worker. It is not a mobile installer and ordinary users do not need it. To deploy all three collections, follow the repository's Pages workflow to build each data pack.
 
 ### Around the Constitution
 

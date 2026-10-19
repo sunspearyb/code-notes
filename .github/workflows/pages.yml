@@ -32,6 +32,7 @@ jobs:
           for pack in $(python3 -c "import sys; sys.path.insert(0, 'demo'); from edition import pack_names; print(' '.join(pack_names()[1:]))"); do
             python3 维护工具/制作各终端版本.py --only web --source . --codex "$pack" --tag "$tag" --web-dir _site
           done
+          python3 维护工具/制作只读预览.py --source . --site _site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
