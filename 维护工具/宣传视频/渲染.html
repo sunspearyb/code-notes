@@ -1,0 +1,2382 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>法典笔记 · 宣传片 A</title>
+<!-- One frame is drawn for any time t (seconds) asked for: window.renderFrame(t). 抓帧.mjs drives t frame by
+     frame and 渲染.py joins the pictures with ffmpeg. Nothing animates by itself, so every run gives the
+     same film, and a single scene can be re-rendered on its own. -->
+<style>
+  html,body{margin:0;background:#0E1512;overflow:hidden}
+  canvas{display:block}
+</style></head>
+<body>
+<canvas id="stage" width="1920" height="1080"></canvas>
+<script>
+'use strict';
+// Ink-dark ground lifted towards jade and night blue; vermilion and amber carry the accents, and each
+// method of interpretation has its own colour (used in film B and on the method chips).
+// Portrait films (竖屏) draw on 1080×1920; every scene reads W and H, and checks PORTRAIT where the
+// layout has to change.
+let PORTRAIT=!!window.PORTRAIT,W=PORTRAIT?1080:1920,H=PORTRAIT?1920:1080;
+const PAPER='#F7F3E8',INK='#0F2A2B',SEAL='#F05A3C',GOLD='#F2B544',DIM='rgba(247,243,232,.66)';
+const JADE='#4FD1B0',SKY='#7DB7F5',CORAL='#FF8A65',VIOLET='#B79CFF';
+const METHOD={'文义解释':SKY,'体系解释':JADE,'历史解释':GOLD,'目的解释':CORAL,'比较法解释':VIOLET,'法权分析':SEAL};
+const SERIF='"Songti SC","STSong","Fadian Serif",serif',SANS='"PingFang SC","Hiragino Sans GB",sans-serif';
+// VY: in portrait, a scene laid out for a 1080-high band is moved to the middle of the screen.
+let VY=PORTRAIT?(H-1080)/2:0;
+const canvas=document.getElementById('stage'),g=canvas.getContext('2d');
+
+// ---------- data, filled in by 渲染.py ----------
+const LAWS=window.LAWS||[],STRICT=window.STRICT||[],TEXT=window.TEXT||{},TOTAL=window.TOTAL||60;
+
+// ---------- motion ----------
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+// Everything starts and stops; nothing overshoots.
+const ease=t=>t<=0?0:t>=1?1:1-Math.pow(1-t,3);
+const step=(t,start,span)=>ease(clamp((t-start)/span));
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+// ---------- drawing ----------
+function text(s,x,y,{size=48,font=SERIF,color=PAPER,align='left',alpha=1,weight=400,spacing=0}={}){
+  if(alpha<=0||!s)return;
+  g.save();g.globalAlpha*=clamp(alpha);g.fillStyle=color;g.textAlign=align;g.textBaseline='alphabetic';
+  if(spacing&&'letterSpacing' in g)g.letterSpacing=spacing+'px';
+  g.font=`${weight} ${size}px ${font}`;
+  // Letter spacing adds space after the last glyph too; give half of it back so centred type stays centred.
+  g.fillText(s,align==='center'&&spacing?x+spacing/2:x,y);g.restore();
+}
+function line(x1,y1,x2,y2,color=GOLD,width=1,alpha=1){
+  if(alpha<=0)return;
+  g.save();g.globalAlpha*=clamp(alpha);g.strokeStyle=color;g.lineWidth=width;g.lineCap='round';
+  g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.restore();
+}
+function grow(x,y,w,p,color=GOLD,height=1){if(p<=0)return;g.save();g.fillStyle=color;g.fillRect(x,y,w*clamp(p),height);g.restore();}
+function rounded(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+const NO_START='，。、；：？！”’）》」』…';
+function measure(s,size,font=SERIF){g.save();g.font=`400 ${size}px ${font}`;const w=g.measureText(s).width;g.restore();return w;}
+
+// Text set to a width. Returns the lines and the y just below them.
+function flow(s,x,y,maxWidth,{size=44,font=SERIF,color=PAPER,lineHeight=1.8,align='left',alpha=1}={}){
+  const lh=size*lineHeight,out=[];
+  g.save();g.font=`400 ${size}px ${font}`;
+  let line='';
+  for(const ch of s){
+    if(ch==='\n'){out.push(line);line='';continue;}
+    if(g.measureText(line+ch).width>maxWidth&&line&&!NO_START.includes(ch)){out.push(line);line=ch;}else line+=ch;
+  }
+  if(line)out.push(line);g.restore();
+  out.forEach((l,i)=>text(l,align==='center'?x:x,y+i*lh,{size,font,color,align,alpha}));
+  return {lines:out,bottom:y+(out.length-1)*lh,next:y+out.length*lh};
+}
+// A red (or gold) rule under one phrase inside a block of flowing text.
+// A key word or phrase is marked by colour and a soft glow, never by a rule under it.
+function splitLine(str,size,font,keep=[]){
+  const chars=[...str],max=W-150;if(measure(str,size,font)<=max)return [str];
+  const n=Math.ceil(measure(str,size,font)/max),out=[];let rest=str;
+  for(let k=n;k>1;k--){
+    const target=[...rest].length/k,c=[...rest];let best=-1,score=1e9;
+    for(let i=1;i<c.length-1;i++){
+      const head=c.slice(0,i).join('');if(measure(head,size,font)>max)break;
+      if(keep.some(w=>{const j=rest.indexOf(w);return j>=0&&j<head.length&&j+w.length>head.length;}))continue;
+      if('，。、；：！？'.includes(c[i]))continue;
+      const punct='，。、；：！？'.includes(c[i-1])?0:4;const sc=Math.abs(i-target)+punct;if(sc<score){score=sc;best=i;}
+    }
+    if(best<0)best=Math.floor(target);
+    out.push(c.slice(0,best).join(''));rest=c.slice(best).join('');
+  }
+  out.push(rest);return out;
+}
+function glowText(str,x,y,{size=44,font=SERIF,color=SEAL,alpha=1,align='left',t=0}={}){
+  if(alpha<=0||!str)return;
+  g.save();g.globalAlpha=clamp(alpha);g.fillStyle=color;g.textAlign=align;g.font=`400 ${size}px ${font}`;
+  g.shadowColor=color;g.shadowBlur=size*.45*(.85+.15*Math.sin(t*1.6));g.fillText(str,x,y);
+  g.shadowBlur=0;g.fillText(str,x,y);g.restore();
+}
+function underlineWord(full,word,x,y,{maxWidth,size=44,font=SERIF,lineHeight=1.8,align='left',alpha=1,color=SEAL}={}){
+  if(alpha<=0)return;
+  const lh=size*lineHeight,lines=[];let line='';
+  g.save();g.font=`400 ${size}px ${font}`;
+  for(const ch of full){if(g.measureText(line+ch).width>maxWidth&&line&&!NO_START.includes(ch)){lines.push(line);line=ch;}else line+=ch;}
+  if(line)lines.push(line);g.restore();
+  const idx=full.indexOf(word);if(idx<0)return;
+  // The word may break across lines: colour each piece where it stands.
+  let consumed=0;
+  lines.forEach((L,i)=>{
+    const a=Math.max(idx,consumed),b=Math.min(idx+word.length,consumed+L.length);
+    if(a<b){const lineW=measure(L,size,font),startX=align==='center'?x-lineW/2:x;
+      glowText(full.slice(a,b),startX+measure(L.slice(0,a-consumed),size,font),y+i*lh,{size,font,color,alpha,t:window.__t||0});}
+    consumed+=L.length;
+  });
+}
+
+// ---------- paper ----------
+const grainCanvas=document.createElement('canvas');grainCanvas.width=grainCanvas.height=256;
+const grain=grainCanvas.getContext('2d');
+function drawGrain(frame){
+  const img=grain.createImageData(256,256),rnd=mulberry(frame*7919+13);
+  for(let i=0;i<img.data.length;i+=4){const v=205+Math.floor(rnd()*50);img.data[i]=img.data[i+1]=img.data[i+2]=v;img.data[i+3]=255;}
+  grain.putImageData(img,0,0);
+  g.save();g.globalAlpha=.022;g.globalCompositeOperation='overlay';
+  g.fillStyle=g.createPattern(grainCanvas,'repeat');g.fillRect(0,0,W,H);g.restore();
+}
+// The ground: a diagonal from deep jade to night blue, with two soft glows drifting very slowly.
+function background(t){
+  const lin=g.createLinearGradient(0,0,W,H);
+  lin.addColorStop(0,'#123F3A');lin.addColorStop(.55,'#0F2A2F');lin.addColorStop(1,'#141F3C');
+  g.fillStyle=lin;g.fillRect(0,0,W,H);
+  const glow=(x,y,r,color,a)=>{const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,color.replace('A',a));gr.addColorStop(1,color.replace('A',0));g.fillStyle=gr;g.fillRect(0,0,W,H);};
+  glow(W*(.22+.05*Math.sin(t*.11)),H*(.25+.06*Math.cos(t*.09)),760,'rgba(79,209,176,A)',.16);
+  glow(W*(.8+.04*Math.cos(t*.08)),H*(.78+.05*Math.sin(t*.1)),820,'rgba(125,183,245,A)',.13);
+  glow(W*(.62+.05*Math.sin(t*.07+1)),H*(.18),520,'rgba(242,181,68,A)',.06);
+}
+function vignette(){
+  const v=g.createRadialGradient(W/2,H/2,H*0.4,W/2,H/2,H*1.05);
+  v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.24)');
+  g.save();g.fillStyle=v;g.fillRect(0,0,W,H);g.restore();
+}
+
+// ---------- 0–6 s: a plate, a gold rule, the name of the code ----------
+function open(t){
+  const a=step(t,.2,1.6),w=step(t,.8,1.6),sub=step(t,2.4,1.4);
+  kinetic(TEXT.open?.[0]||'',470+VY,t,.2,{size:96,per:.1});
+  
+  text(TEXT.open?.[1],W/2,578+VY,{size:32,align:'center',alpha:sub,color:DIM,font:SANS,spacing:6});
+  // Film A is about 体系解释: the method is named once, in its colour, at the start.
+  const tag=TEXT.open?.[2];if(tag){const w=measure(tag,30,SANS)+42;chip(tag,W/2-w/2,680+VY,{alpha:step(t,3.4,1),size:30});}
+}
+
+// ---------- Film A, act 1: Article 13 at the centre, the system around it, ring by ring ----------
+// The rings and threads are in 场景.json (TEXT.web); the article itself comes from the data pack.
+const TONE={jade:JADE,sky:SKY,gold:GOLD,coral:CORAL,violet:VIOLET,seal:SEAL};
+function seedOf(id){let h=7;for(const ch of id)h=(h*31+ch.charCodeAt(0))%9973;return h/9973*Math.PI*2;}
+function webPoint(n,cx,cy,rings,t=0){
+  if(n.id==='c')return {x:cx,y:cy};
+  // Each node drifts slowly on its own orbit, so the system never stands still.
+  const r=rings[n.ring],sd=seedOf(n.id),a=(n.angle+1.6*Math.sin(t*.32+sd))*Math.PI/180,k=1+.014*Math.sin(t*.47+sd*1.7);
+  return {x:cx+Math.cos(a)*r.rx*k,y:cy+Math.sin(a)*r.ry*k,a};
+}
+function a13(t,t0){
+  const web=TEXT.web||{},rings=web.rings||[],nodes=web.nodes||[],threads=web.threads||[];
+  const cx=W/2,cy=PORTRAIT?H/2+60:585,paras=TEXT.a13?.slice(1)||[];
+  if(PORTRAIT){web.rings&&(web.__p||(web.__p={rings:web.rings.map((r,i)=>({...r,rx:[165,265,345][i]||r.ry,ry:[300,500,700][i]||r.rx,labelAngle:-90})),
+    nodes:web.nodes.map(n=>({...n,angle:90-n.angle}))}));}
+  const RG=PORTRAIT?web.__p.rings:rings,ND=PORTRAIT?web.__p.nodes:nodes;
+  // 1. The article, its three ideas in three colours, and the words that leave the matter to law.
+  const showText=step(t,t0,.9)*(1-step(t,t0+7.2,.9));
+  if(showText>0){
+    if(PORTRAIT){
+      text(TEXT.a13?.[0],W/2,420,{size:64,align:'center',alpha:showText,spacing:8});
+      let y=580;
+      paras.forEach((p,i)=>{const a=step(t,t0+.5+i*.35,.8)*showText,size=42;
+        const box=flow(p,W/2,y,W-140,{size,align:'center',alpha:a,lineHeight:1.7});
+        (web.phrases||[]).forEach(([word,tone],k)=>{if(!p.includes(word))return;const hl=step(t,t0+1.8+k*.9,.7)*showText;
+          underlineWord(p,word,W/2,y,{maxWidth:W-140,size,lineHeight:1.7,align:'center',alpha:hl,color:TONE[tone]||SEAL});});
+        y=box.next+40;});
+    }else{
+    text(TEXT.a13?.[0],W/2,250,{size:60,align:'center',alpha:showText,spacing:8});
+      const size=40,lh=86;
+      paras.forEach((p,i)=>{
+        const y=390+i*lh,x=W/2-measure(p,size)/2,a=step(t,t0+.5+i*.35,.8)*showText;
+        text(p,x,y,{size,alpha:a});
+        (web.phrases||[]).forEach(([word,tone],k)=>{
+          const at=p.indexOf(word);if(at<0)return;
+          const px=x+measure(p.slice(0,at),size),pw=measure(word,size),hl=step(t,t0+1.8+k*.9,.7)*showText;
+          if(hl<=0)return;
+          glowText(word,px,y,{size,color:TONE[tone]||SEAL,alpha:hl,t});
+          
+        });
+      });
+    }
+  }
+  // 2. The article becomes a point.
+  const core=step(t,t0+7.6,1);
+  // 3. Rings: each layer opens outwards, then its nodes arrive.
+  RG.forEach((r,i)=>{
+    const open=step(t,t0+8.4+i*2.6,1.4);if(open<=0)return;
+    g.save();g.strokeStyle=TONE[r.tone]||GOLD;g.globalAlpha=.32*open;g.lineWidth=1.2;g.setLineDash([3,7]);
+    g.beginPath();g.ellipse(cx,cy,r.rx*open,r.ry*open,0,0,Math.PI*2);g.stroke();g.restore();
+    const la=r.labelAngle*Math.PI/180;
+    // Portrait: the ring names form a legend under the title instead of sitting on the rings.
+    if(PORTRAIT)text(r.name,90,230+i*46,{size:26,font:SANS,color:TONE[r.tone]||GOLD,alpha:step(t,t0+9+i*2.6,1),spacing:2});
+    else text(r.name,cx+Math.cos(la)*r.rx,cy+Math.sin(la)*r.ry-14,{size:20,font:SANS,align:'center',color:TONE[r.tone]||GOLD,alpha:step(t,t0+9+i*2.6,1),spacing:2});
+  });
+  const byId=Object.fromEntries(ND.map(n=>[n.id,n]));byId.c={id:'c'};
+  const pos=id=>webPoint(byId[id],cx,cy,RG,t);
+  const appear=n=>n.id==='c'?core:step(t,t0+9+n.ring*2.6+(n.order||0)*.28,.8);
+  // Which thread is lit now; before the first and after the last, none and all.
+  const tStart=t0+17.6,tSpan=5.2,k=Math.floor((t-tStart)/tSpan);
+  const current=t<tStart?-1:k<threads.length?k:threads.length;
+  const lit=new Map();
+  threads.forEach((th,i)=>{if(current===threads.length||i===current)for(const [a,b] of th.edges){lit.set(a+'>'+b,th);lit.set(a,th);lit.set(b,th);}});
+  const dimmed=current>=0&&current<threads.length;
+  // Edges: every relation in any thread, faint until its thread is lit.
+  threads.forEach(th=>th.edges.forEach(([a,b])=>{
+    const A=pos(a),B=pos(b),p=Math.min(appear(byId[a]),appear(byId[b]));if(p<=0)return;
+    const on=lit.has(a+'>'+b),glow=on?step(t,current===threads.length?tStart+threads.length*tSpan:tStart+threads.indexOf(th)*tSpan,.7):0;
+    const mx=(A.x+B.x)/2,my=(A.y+B.y)/2,qx=a==='c'?mx:cx+(mx-cx)*1.18,qy=a==='c'?my:cy+(my-cy)*1.18;
+    g.save();g.lineCap='round';
+    g.strokeStyle=on?TONE[th.tone]:'rgba(247,243,232,.5)';g.globalAlpha=p*(on?.35+.6*glow:dimmed?.12:.22);g.lineWidth=on?1.4+1.6*glow:1;
+    g.beginPath();g.moveTo(A.x,A.y);
+    const steps=Math.max(2,Math.round(40*p));
+    for(let s=1;s<=steps;s++){const u=s/40;g.lineTo((1-u)**2*A.x+2*(1-u)*u*qx+u*u*B.x,(1-u)**2*A.y+2*(1-u)*u*qy+u*u*B.y);}
+    g.stroke();g.restore();
+    // Impulses run outward along every finished thread: brighter, and more of them, on a lit thread.
+    if(p>=1){
+      const n=on?3:1,sd=seedOf(a+b);
+      for(let k=0;k<n;k++){
+        const u=((t*(on?.32:.18)+sd/6.283+k/n)%1),ix=(1-u)**2*A.x+2*(1-u)*u*qx+u*u*B.x,iy=(1-u)**2*A.y+2*(1-u)*u*qy+u*u*B.y;
+        const glowA=(on?.95:dimmed?.15:.4)*Math.sin(Math.PI*u);
+        const gr=g.createRadialGradient(ix,iy,0,ix,iy,on?14:9);gr.addColorStop(0,on?TONE[th.tone]:'rgba(247,243,232,.9)');gr.addColorStop(1,'rgba(0,0,0,0)');
+        g.save();g.globalAlpha=glowA;g.fillStyle=gr;g.beginPath();g.arc(ix,iy,on?14:9,0,Math.PI*2);g.fill();g.restore();
+      }
+    }
+  }));
+  // Nodes and their labels.
+  ND.forEach(n=>{
+    const p=appear(n);if(p<=0)return;
+    const P=pos(n.id),th=lit.get(n.id),fade=dimmed&&!th?.42:1,tone=th?TONE[th.tone]:TONE[RG[n.ring].tone];
+    g.save();g.globalAlpha=p*fade;g.fillStyle=th?tone:'#0F2A2F';g.strokeStyle=tone;g.lineWidth=1.6;
+    g.beginPath();g.arc(P.x,P.y,th?7:5.5,0,Math.PI*2);g.fill();g.stroke();g.restore();
+    const c=Math.cos(P.a),sn=Math.sin(P.a),side=c>.3?'left':c<-.3?'right':'center';
+    let lx=P.x+(side==='left'?16:side==='right'?-16:0);
+    if(PORTRAIT){const w=Math.max(measure(n.name,23),n.note?measure(n.note,17,SANS):0);if(side==='left')lx=Math.min(lx,W-30-w);else if(side==='right')lx=Math.max(lx,30+w);else lx=Math.min(Math.max(lx,30+w/2),W-30-w/2);}
+    const ly=side==='center'?(sn<0?P.y-42:P.y+34):P.y-4;
+    text(n.name,lx,ly,{size:23,align:side,alpha:p*fade});
+    if(n.note)text(n.note,lx,ly+25,{size:17,font:SANS,align:side,color:DIM,alpha:p*fade});
+  });
+  // The centre breathes: a ripple leaves it every three seconds.
+  if(core>=1)for(let k=0;k<2;k++){const u=((t-t0)/3+k/2)%1,r=118+150*u;
+    g.save();g.globalAlpha=.35*(1-u);g.strokeStyle=SEAL;g.lineWidth=1.5;g.beginPath();g.ellipse(cx,cy,r*1.25,r*.85,0,0,Math.PI*2);g.stroke();g.restore();}
+  // The centre.
+  if(core>0){
+    g.save();g.globalAlpha=core;g.fillStyle='#2A2F2B';g.strokeStyle=SEAL;g.lineWidth=2;
+    g.beginPath();g.arc(cx,cy,118*(.6+.4*core),0,Math.PI*2);g.fill();g.fillStyle='rgba(240,90,60,.18)';g.fill();g.stroke();g.restore();
+    text(TEXT.a13?.[0],cx,cy-4,{size:42,align:'center',alpha:core,spacing:3});
+    text(web.centre,cx,cy+38,{size:21,font:SANS,align:'center',color:'#FFD2C4',alpha:core});
+  }
+  text(web.title,PORTRAIT?90:110,PORTRAIT?170:120,{size:40,alpha:step(t,t0+8,1),spacing:4});
+  
+  // Caption of the lit thread, or the closing line.
+  threads.forEach((th,i)=>{
+    const a=step(t,tStart+i*tSpan,.5)*(1-step(t,tStart+(i+1)*tSpan-.4,.4));
+    text(th.caption,W/2,H-46,{size:26,font:SANS,align:'center',color:TONE[th.tone],alpha:a});
+  });
+  text(web.closing,W/2,H-46,{size:28,align:'center',alpha:step(t,tStart+threads.length*tSpan,.8)});
+}
+
+// ---------- 22–32 s: a ring of 143 articles and 56 laws, a net of chords, one line across codes ----------
+function a56(t,t0){
+  const cx=PORTRAIT?W/2:W/2-60,cy=PORTRAIT?H/2-20:H/2+10,rIn=PORTRAIT?150:190,rOut=PORTRAIT?300:380;
+  const ring=step(t,t0,.9),names=step(t,t0+1.4,1.6),net=step(t,t0+3.4,3.2),cross=step(t,t0+6,2);
+  // Inner ring: one tick for each of the 143 articles; the twelve that say 由法律规定 are red.
+  for(let i=0;i<143;i++){
+    const on=clamp(ring*1.25-i/143);if(on<=0)continue;
+    const a=-Math.PI/2+i/143*Math.PI*2,strict=STRICT.includes('a'+(i+1)),len=strict?30:12;
+    line(cx+Math.cos(a)*rIn,cy+Math.sin(a)*rIn,cx+Math.cos(a)*(rIn+len),cy+Math.sin(a)*(rIn+len),strict?SEAL:GOLD,strict?3:1.4,on*(strict?.95:.8));
+  }
+  // Outer ring: 56 ticks, one for each of the 宪法相关法.
+  for(let i=0;i<LAWS.length;i++){
+    const on=clamp(ring*1.2-i/LAWS.length*1.1);if(on<=0)continue;
+    const a=-Math.PI/2+i/LAWS.length*Math.PI*2;
+    line(cx+Math.cos(a)*rOut,cy+Math.sin(a)*rOut,cx+Math.cos(a)*(rOut+22),cy+Math.sin(a)*(rOut+22),GOLD,2.2,on*.95);
+  }
+  // Six names only, set flat outside the ring at even angles: the rest are ticks, not words.
+  // Each name sits at its own tick: the position comes from the official list, not from the script.
+  const picked=['全国人民代表大会和地方各级人民代表大会选举法','民族区域自治法','国旗法','国家赔偿法','立法法','监察法','对外关系法']
+    .map(full=>[LAWS.indexOf(full),full.length>8?full.slice(-3):full]).filter(([i])=>i>=0);
+  picked.forEach(([i,name],k)=>{
+    const a=-Math.PI/2+i/LAWS.length*Math.PI*2,p=step(t,t0+1.6+k*.42,1);
+    if(p<=0)return;
+    const cos=Math.cos(a),flat=Math.abs(cos)<.45;
+    const x=cx+Math.cos(a)*(rOut+72),y=cy+Math.sin(a)*(rOut+72);
+    const align=flat?'center':cos>0?'left':'right';
+    // Above or below the centre the label sits straight above or below its own tick; beside the
+    // centre it needs a short lead line to say which tick it belongs to.
+    if(!flat)line(cx+Math.cos(a)*(rOut+26),cy+Math.sin(a)*(rOut+26),cx+Math.cos(a)*(rOut+64),cy+Math.sin(a)*(rOut+64),GOLD,1,p*.6);
+    text(name,x,flat?y+14:y+12,{size:PORTRAIT?28:32,font:SERIF,color:PAPER,align,alpha:p});
+  });
+  // Chords between articles (by article number): drawn by walking the curve, so they grow.
+  const art=n=>-Math.PI/2+(n-1)/143*Math.PI*2;
+  const chords=[[9,59],[59,97],[97,129],[13,33],[33,37],[37,40],[86,95],[111,124]];
+  chords.forEach(([a,b],i)=>{
+    const p=step(t,t0+3.6+i*.28,.9);if(p<=0)return;
+    const A=art(a),B=art(b);
+    const x1=cx+Math.cos(A)*rIn,y1=cy+Math.sin(A)*rIn,x2=cx+Math.cos(B)*rIn,y2=cy+Math.sin(B)*rIn;
+    const dx=(x1+x2)/2-cx,dy=(y1+y2)/2-cy,qx=cx+dx*1.5,qy=cy+dy*1.5;
+    g.save();g.strokeStyle=GOLD;g.lineWidth=1.3;g.globalAlpha=.5;g.setLineDash([6,8]);g.lineDashOffset=-t*14;
+    g.beginPath();g.moveTo(x1,y1);
+    const steps=Math.max(2,Math.round(40*p));
+    for(let s=1;s<=steps;s++){const u=s/40;const mx=(1-u)*(1-u)*x1+2*(1-u)*u*qx+u*u*x2,my=(1-u)*(1-u)*y1+2*(1-u)*u*qy+u*u*y2;g.lineTo(mx,my);}
+    g.stroke();g.restore();
+  });
+  // One line leaves the constitution and lands on an article of the Civil Code.
+  if(cross>0){
+    const a=art(13);
+    const x1=cx+Math.cos(a)*rIn,y1=cy+Math.sin(a)*rIn,x2=W-120,y2=PORTRAIT?H-330:H-150;
+    const qx=(x1+x2)/2,qy=Math.min(y1,y2)-140;
+    g.save();g.strokeStyle=SEAL;g.lineWidth=2.4;g.globalAlpha=cross;g.beginPath();g.moveTo(x1,y1);
+    for(let s=1;s<=40*cross;s++){const u=s/40;g.lineTo((1-u)**2*x1+2*(1-u)*u*qx+u*u*x2,(1-u)**2*y1+2*(1-u)*u*qy+u*u*y2);}
+    g.stroke();g.restore();
+    text(TEXT.net?.[2],x2,y2+46,{size:26,font:SANS,color:SEAL,align:'right',alpha:step(t,t0+6.8,1.2)});
+    text(TEXT.net?.[3],x1+20,y1-12,{size:22,font:SANS,color:DIM,alpha:step(t,t0+6,1)});
+  }
+  // Headline in the corner, out of the ring's way.
+  const head=step(t,t0+.6,1);
+  text(TEXT.net?.[0],PORTRAIT?90:110,PORTRAIT?300:140,{size:44,alpha:head,spacing:4});
+  
+  text(TEXT.net?.[1],PORTRAIT?90:110,PORTRAIT?H-200:H-96,{size:26,alpha:step(t,t0+2.6,1.4),color:DIM,font:SANS});
+}
+
+// ---------- 32–42 s: anatomy of one note — the words, the question, the method, the source ----------
+function book(t,t0){
+  const x=PORTRAIT?100:180,size=40,width=PORTRAIT?W-200:760,ty=PORTRAIT?360:250,py=PORTRAIT?490:380;
+  // Left: the article, with the words the reader stopped at.
+  text(TEXT.a33?.[0],x,ty,{size:56,alpha:step(t,t0,.9),spacing:6});
+  
+  const para=TEXT.a33?.[1]||'',alpha=step(t,t0+.6,1.1);
+  flow(para,x,py,width,{size,alpha,lineHeight:1.85});
+  const mark=step(t,t0+1.6,1);
+  underlineWord(para,'中华人民共和国国籍',x,py,{maxWidth:width,size,lineHeight:1.85,alpha:mark,width:3});
+  // Right: the note card, field by field.
+  const cx=PORTRAIT?100:1060,cy=PORTRAIT?720:210,cw=PORTRAIT?W-200:680,fields=TEXT.note||[];
+  const card=step(t,t0+2.2,1.2);
+  if(card>0){
+    g.save();g.globalAlpha=card;
+    g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=60;g.shadowOffsetY=24;
+    g.fillStyle='rgba(244,241,232,.055)';g.strokeStyle='rgba(244,241,232,.32)';g.lineWidth=1.2;
+    rounded(cx,cy+30*(1-card),cw,620,14);g.fill();g.stroke();g.restore();
+    // A hairline from the marked words to the card.
+    const lx=PORTRAIT?x+120:x+measure(para.slice(0,para.indexOf('中华人民共和国国籍')+9),size),ly=py+size*.3;
+    g.save();g.strokeStyle=SEAL;g.globalAlpha=.7*card;g.lineWidth=1.2;g.setLineDash([3,6]);
+    g.beginPath();if(PORTRAIT){g.moveTo(lx,py+size*2.6);g.lineTo(lx,cy);}else{g.moveTo(Math.min(lx,x+width),ly);g.bezierCurveTo(cx-120,ly,cx-120,cy+80,cx,cy+80);}g.stroke();g.restore();
+  }
+  fields.forEach(([label,value,tone],i)=>{
+    const p=step(t,t0+3+i*.75,.9);if(p<=0)return;
+    const fy=cy+90+i*132+16*(1-p);
+    text(label,cx+48,fy,{size:20,font:SANS,color:GOLD,alpha:p,spacing:4});
+    if(tone==='tag'){
+      value.split('·').map(v=>v.trim()).forEach((v,k)=>{
+        const w=measure(v,26,SANS)+36,bx=cx+48+k*(w+14);
+        g.save();g.globalAlpha=p;g.strokeStyle=METHOD[v]||'rgba(244,241,232,.45)';g.lineWidth=1.4;rounded(bx,fy+20,w,46,23);g.stroke();g.restore();
+        text(v,bx+18,fy+52,{size:26,font:SANS,alpha:p});
+      });
+    }else if(tone==='pending'){
+      g.save();g.globalAlpha=p;g.fillStyle='rgba(240,90,60,.22)';rounded(cx+48,fy+20,measure(value,26,SANS)+48,46,6);g.fill();g.restore();
+      text(value,cx+72,fy+52,{size:26,font:SANS,color:'#FFC2B4',alpha:p});
+    }else text(value,cx+48,fy+56,{size:30,alpha:p});
+  });
+}
+
+// ---------- Film A: 法权分析 of Article 13 — the right, the power to expropriate, the duty to compensate ----------
+// An illustration of how the method is used, not an analysis of the article; the frame says so.
+function faquan(t,t0){
+  const lx=480,rx=W-500,top=330,F=TEXT.faquan||{};
+  text(F.subjects?.[0],lx,top-70,{size:30,align:'center',alpha:step(t,t0,.9),color:DIM,font:SANS,spacing:2});
+  text(F.subjects?.[1],rx,top-70,{size:30,align:'center',alpha:step(t,t0,.9),color:DIM,font:SANS,spacing:2});
+  
+  const kinds={权利:SKY,权力:CORAL,义务:'rgba(247,243,232,.6)'};
+  const N=(F.nodes||[]).map(([q,who,kind,side,row])=>({q,who,kind,side,x:side==='l'?lx:rx,y:top+60+row*150}));
+  N.forEach((n,i)=>{
+    const p=step(t,t0+.8+i*.32,.7);if(p<=0)return;
+    g.save();g.globalAlpha=p;g.fillStyle='rgba(247,243,232,.05)';g.strokeStyle=kinds[n.kind];g.lineWidth=1.6;
+    rounded(n.x-170,n.y-46,340,92,8);g.fill();g.stroke();g.restore();
+    text(n.q,n.x-138,n.y+4,{size:34,alpha:p});
+    text(n.who,n.x-138,n.y+34,{size:18,font:SANS,color:DIM,alpha:p});
+    text(n.kind,n.x+138,n.y+10,{size:20,font:SANS,color:kinds[n.kind],align:'right',alpha:p});
+  });
+  (F.links||[]).forEach(([a,b,name],i)=>{
+    const p=step(t,t0+2.6+i*1.3,1.1);if(p<=0)return;
+    const A=N[a],B=N[b];
+    if(A.side!==B.side){
+      const x1=A.x+170,x2=B.x-170,mx=(x1+x2)/2;
+      g.save();g.strokeStyle=SEAL;g.lineWidth=2;g.globalAlpha=.9*p;g.beginPath();g.moveTo(x1,A.y);
+      for(let s=1;s<=40*p;s++){const u=s/40;g.lineTo((1-u)**3*x1+3*(1-u)**2*u*mx+3*(1-u)*u*u*mx+u**3*x2,(1-u)**3*A.y+3*(1-u)**2*u*A.y+3*(1-u)*u*u*B.y+u**3*B.y);}
+      g.stroke();g.restore();
+      text(name,mx-40,(A.y+B.y)/2-44,{size:24,align:'center',color:SEAL,font:SANS,alpha:step(t,t0+3.2+i*1.3,.8)});
+    }else{
+      const x=A.x+170,bulge=x+120;
+      g.save();g.strokeStyle=SEAL;g.lineWidth=2;g.globalAlpha=.9*p;g.beginPath();g.moveTo(x,A.y);
+      for(let s=1;s<=40*p;s++){const u=s/40;g.lineTo((1-u)**3*x+3*(1-u)**2*u*bulge+3*(1-u)*u*u*bulge+u**3*x,(1-u)**3*A.y+3*(1-u)**2*u*A.y+3*(1-u)*u*u*B.y+u**3*B.y);}
+      g.stroke();g.restore();
+      g.save();g.translate(bulge+8,(A.y+B.y)/2);g.rotate(Math.PI/2);
+      text(name,0,-14,{size:24,align:'center',color:SEAL,font:SANS,alpha:step(t,t0+3.2+i*1.3,.8)});g.restore();
+    }
+  });
+  text(F.question,W/2,H-150,{size:34,align:'center',alpha:step(t,t0+5.6,1.2)});
+  text(F.note,W/2,H-62,{size:18,align:'center',color:'rgba(247,243,232,.45)',font:SANS,alpha:step(t,t0+6.2,1.2)});
+  text(F.title,110,140,{size:40,alpha:step(t,t0,.8),color:DIM,spacing:4});
+}
+
+// ---------- 52–60 s: the plate again, with the idea ----------
+// ---------- Kinetic type: a sentence set character by character, then its key words light up ----------
+// keys: [[word, tone, mode]] — mode 'glow' (takes its colour and glows) or 'fade' (steps back, dimmed).
+// enter: 'rise' (each character rises into place) or 'weave' (characters come alternately from above
+// and below, as a thread goes over and under).
+function kinetic(str,y,t,start,{size=64,keys=[],enter='rise',per=.08,keyAt=null,font=SERIF,color=PAPER,x=W/2,align='center'}={}){
+  // Portrait: a line too wide for the screen breaks at punctuation (else at the middle), never inside a
+  // key word, and the pieces are set one under another around y.
+  if(PORTRAIT&&align==='center'&&!arguments[5]?.__part&&measure(str,size,font)>W-150){
+    const parts=splitLine(str,size,font,keys.map(k=>k[0])),lh=size*1.42,y0=y-(parts.length-1)*lh/2;
+    let at=start,end=start;
+    parts.forEach((part,i)=>{end=Math.max(end,kinetic(part,y0+i*lh,t,at,{size,keys:keys.filter(k=>part.includes(k[0])),enter,per,keyAt,font,color,x,align,__part:true}));at+=[...part].length*per;});
+    return end;
+  }
+  const chars=[...str];g.save();g.font=`400 ${size}px ${font}`;
+  const ws=chars.map(c=>g.measureText(c).width),total=ws.reduce((a,b)=>a+b,0);g.restore();
+  const ranges=keys.map(([word,tone,mode])=>{const at=str.indexOf(word);if(at<0)return null;const i=[...str.slice(0,at)].length;return {i,j:i+[...word].length,tone:TONE[tone]||tone,mode:mode||'glow'};}).filter(Boolean);
+  const k0=keyAt??start+chars.length*per+.6;
+  const lit=ranges.map((r,k)=>step(t,k0+k*.9,1.1));
+  let cx=align==='center'?x-total/2:x;
+  chars.forEach((ch,i)=>{
+    const p=step(t,start+i*per,.9);if(p<=0){cx+=ws[i];return;}
+    const dy=enter==='weave'?(i%2?-1:1)*22*(1-p):14*(1-p);
+    const r=ranges.findIndex(R=>i>=R.i&&i<R.j),R=ranges[r],kp=r>=0?lit[r]:0;
+    g.save();g.font=`400 ${size}px ${font}`;g.textBaseline='alphabetic';
+    if(p<1)g.filter=`blur(${(1-p)*9}px)`;
+    if(R&&R.mode==='fade'){g.globalAlpha=p*(1-.62*kp);g.fillStyle=color;}
+    else if(R&&kp>0){
+      // From paper to the key colour, character by character, with a slow breathing glow.
+      const ck=clamp(kp*1.6-(i-R.i)*.08);
+      g.globalAlpha=p;g.fillStyle=color;g.fillText(ch,cx,y+dy);
+      g.globalAlpha=p*ck;g.fillStyle=R.tone;g.shadowColor=R.tone;g.shadowBlur=size*.5*ck*(.82+.18*Math.sin(t*1.5+i*.4));
+    }else{g.globalAlpha=p;g.fillStyle=color;}
+    g.fillText(ch,cx,y+dy);g.restore();
+    cx+=ws[i];
+  });
+  return k0+ranges.length*.9;
+}
+function motto(t,t0,M){
+  let at=t0+.6;
+  (M.lines||[]).forEach((L,i)=>{at=kinetic(L.text,L.y+VY*(PORTRAIT?1:0)+(PORTRAIT?(i-((M.lines||[]).length-1)/2)*60:0),t,at,{size:L.size,keys:L.keys,enter:L.enter,color:L.color?TONE[L.color]:PAPER})+.4;});
+}
+function motto1(t,t0){motto(t,t0,TEXT.motto1||{});}
+function motto2(t,t0){motto(t,t0,TEXT.motto2||{});}
+
+function end(t,t0){
+  kinetic(TEXT.end?.[0]||'',420+VY,t,t0+.3,{size:110,per:.16});
+  
+  const done=kinetic(TEXT.end?.[1]||'',572+VY,t,t0+1.6,{size:46,keys:TEXT.endKeys||[]});
+  text(TEXT.end?.[2],W/2,704+VY,{size:26,align:'center',alpha:step(t,done,1.2),color:DIM,font:SANS,spacing:3});
+}
+
+
+// =====================================================================================================
+// Film B: 怎样读懂一条宪法 — 文义、历史、目的、比较法解释, how the methods are chosen, what the notebook offers.
+// Official text comes in window.BDATA (from the data pack); the wording around it in TEXT.
+// =====================================================================================================
+const BD=window.BDATA||{};
+function chip(name,x,y,{alpha=1,color=METHOD[name]||PAPER,dashed=false,size=30,filled=true,strike=0}={}){
+  if(alpha<=0)return 0;
+  const w=measure(name,size,SANS)+size*1.4,h=size*1.75;
+  g.save();g.globalAlpha=clamp(alpha);
+  if(filled&&!dashed){g.fillStyle=color;g.globalAlpha*=.16;rounded(x,y-h/2,w,h,h/2);g.fill();g.globalAlpha=clamp(alpha);}
+  g.strokeStyle=color;g.lineWidth=1.6;if(dashed)g.setLineDash([6,6]);rounded(x,y-h/2,w,h,h/2);g.stroke();g.restore();
+  text(name,x+w/2,y+size*.36,{size,font:SANS,align:'center',color:dashed?color:PAPER,alpha});
+  if(strike>0)line(x+12,y,x+12+(w-24)*clamp(strike),y,PAPER,2,alpha);
+  return w;
+}
+// Method name, the question it answers, and where it lives in the notebook.
+function header(t,t0,name,question,feature){
+  chip(name,110,130,{alpha:step(t,t0,.7),size:30});
+  text(question,110,232,{size:44,alpha:step(t,t0+.4,.9)});
+  if(feature){
+    const a=step(t,t0+1.2,.9);
+    g.save();g.globalAlpha=a;g.fillStyle=METHOD[name]||GOLD;g.beginPath();g.arc(118,H-78,6,0,Math.PI*2);g.fill();g.restore();
+    text('法典笔记 · '+feature,136,H-70,{size:24,font:SANS,color:DIM,alpha:a});
+  }
+}
+// x of a phrase inside one line of text set at x0 (left aligned), the n-th occurrence.
+function at(lineStr,word,x0,size,n=0){
+  let i=-1;for(let k=0;k<=n;k++)i=lineStr.indexOf(word,i+1);
+  return {x:x0+measure(lineStr.slice(0,i),size),w:measure(word,size)};
+}
+function arcLine(x1,y1,x2,y2,lift,p,color,width=1.6,alpha=1){
+  if(p<=0)return;
+  const mx=(x1+x2)/2,my=Math.max(y1,y2)+lift;
+  g.save();g.strokeStyle=color;g.lineWidth=width;g.globalAlpha=alpha;g.beginPath();g.moveTo(x1,y1);
+  for(let s=1;s<=40*clamp(p);s++){const u=s/40;g.lineTo((1-u)**2*x1+2*(1-u)*u*mx+u*u*x2,(1-u)**2*y1+2*(1-u)*u*my+u*u*y2);}
+  g.stroke();g.restore();
+}
+
+// 0–5 s: the questions, and the methods that answer them.
+function bOpen(t,t0){
+  if(PORTRAIT){
+    kinetic(TEXT.open?.[0]||'',330,t,t0+.2,{size:72,per:.12,x:W/2});
+    flow(TEXT.open?.[1]||'',W/2,520,W-160,{size:32,font:SANS,align:'center',color:DIM,alpha:step(t,t0+1,1.2),lineHeight:1.6});
+    const rows=[['文义解释','体系解释','历史解释'],['目的解释','比较法解释']],size=32;
+    rows.forEach((names,r)=>{const ws=names.map(n=>measure(n,size,SANS)+size*1.4),tot=ws.reduce((a,b)=>a+b)+26*(names.length-1);let x=W/2-tot/2;
+      names.forEach((n,i)=>{chip(n,x,700+r*90,{alpha:step(t,t0+1.8+(r*3+i)*.28,.7),size});x+=ws[i]+26;});});
+    return;
+  }
+  kinetic(TEXT.open?.[0]||'',430,t,t0+.2,{size:72,per:.12,x:W/2});
+  text(TEXT.open?.[1],W/2,510,{size:32,align:'center',alpha:step(t,t0+1,1.2),color:DIM,font:SANS});
+  const names=['文义解释','体系解释','历史解释','目的解释','比较法解释'],size=30;
+  const widths=names.map(n=>measure(n,size,SANS)+size*1.4),gap=26,total=widths.reduce((a,b)=>a+b)+gap*(names.length-1);
+  let x=W/2-total/2;
+  names.forEach((n,i)=>{chip(n,x,640,{alpha:step(t,t0+1.8+i*.28,.7),size});x+=widths[i]+gap;});
+}
+
+// 文义解释 on Article 37(2): who does what; then the question the words leave open — is 国家安全机关
+// a 公安机关? — and the answer the NPC Standing Committee gave in 1983.
+function bLiteral(t,t0){
+  const L=TEXT.literal||{};
+  header(t,t0,'文义解释',L.question,L.feature);
+  // The article, with 公安机关 lit.
+  const p37=BD.a37?.[1]||'',x0=170,size=36,width=W-2*x0;
+  const fadeTop=1-step(t,t0+14,.8);
+  flow(p37,x0,320,width,{size,alpha:step(t,t0+.6,.9)*fadeTop*.75,lineHeight:1.7});
+  underlineWord(p37,'公安机关',x0,320,{maxWidth:width,size,lineHeight:1.7,alpha:step(t,t0+1.4,.8)*fadeTop,color:SKY,width:3});
+  // Time line: the constitution, the new ministry, the decision.
+  const tx0=PORTRAIT?110:360,tx1=W-tx0,ty=450,ev=L.events||[];
+  const tl=step(t,t0+2.4,1);
+  grow(tx0,ty,tx1-tx0,tl,'rgba(125,183,245,.35)',2);
+  ev.forEach(([date,what,at],i)=>{
+    const x=tx0+(tx1-tx0)*at,a=step(t,t0+[2.8,5.2,12][i],.8);
+    g.save();g.globalAlpha=a;g.fillStyle=i===2?SKY:PAPER;g.beginPath();g.arc(x,ty,i===2?10:7,0,Math.PI*2);g.fill();g.restore();
+    text(date,x,ty-24,{size:24,font:SANS,align:'center',color:i===2?SKY:GOLD,alpha:a});
+    text(what,x,ty+40,{size:22,font:SANS,align:'center',alpha:a});
+  });
+  // The State Council and its two ministries.
+  const ox=W/2,oy=560,cy=690,lx=ox-260,rx=ox+260,bw=250,bh=70;
+  const org=step(t,t0+3.4,.9),nsa=step(t,t0+5.6,.9);
+  box(ox-140,oy-34,280,68,{alpha:org,stroke:'rgba(247,243,232,.5)'});
+  text(L.council,ox,oy+10,{size:28,align:'center',alpha:org});
+  line(ox,oy+34,ox,cy-80,'rgba(247,243,232,.4)',1.4,org);line(lx,cy-80,rx,cy-80,'rgba(247,243,232,.4)',1.4,org);
+  line(lx,cy-80,lx,cy-bh/2,'rgba(247,243,232,.4)',1.4,org);line(rx,cy-80,rx,cy-bh/2,'rgba(247,243,232,.4)',1.4,nsa);
+  box(lx-bw/2,cy-bh/2,bw,bh,{alpha:org,stroke:SKY,fill:'rgba(125,183,245,.12)'});
+  text(L.ministries?.[0],lx,cy+10,{size:30,align:'center',alpha:org});
+  box(rx-bw/2,cy-bh/2+14*(1-nsa),bw,bh,{alpha:nsa,stroke:PAPER});
+  text(L.ministries?.[1],rx,cy+10+14*(1-nsa),{size:30,align:'center',alpha:nsa});
+  text(L.level,ox,cy+10,{size:20,font:SANS,align:'center',color:DIM,alpha:step(t,t0+7,.8)});
+  // The meaning of “公安机关”: first around the Ministry of Public Security only, then stretched.
+  const ring=step(t,t0+4.2,.9),grow2=step(t,t0+12.6,1.6);
+  if(ring>0){
+    const ex=lx+(ox-lx)*grow2,rw=(bw/2+40)+(rx-lx)/2*grow2,rh=bh/2+38;
+    g.save();g.globalAlpha=ring;g.strokeStyle=SKY;g.lineWidth=2.4;g.setLineDash(grow2>=1?[]:[8,7]);g.fillStyle='rgba(125,183,245,'+(.06+.08*grow2)+')';
+    g.beginPath();g.ellipse(ex,cy,rw,rh,0,0,Math.PI*2);g.fill();g.stroke();g.restore();
+    text('“公安机关”',ex-rw+18,cy-rh-12,{size:24,font:SANS,color:SKY,alpha:ring});
+  }
+  // The question, then the answer.
+  const q=step(t,t0+7.6,.9)*(1-step(t,t0+12,.6));
+  if(q>0){text('?',rx+bw/2+40,cy+22,{size:72,color:GOLD,alpha:q});
+    text(L.ask,W/2,cy+140,{size:34,align:'center',alpha:q});}
+  const ans=step(t,t0+13.4,.9);
+  if(ans>0){const w=measure(L.method,30,SANS)+44;chip(L.method,PORTRAIT?ox-w/2:rx+bw/2+60,PORTRAIT?cy+100:cy,{alpha:ans,size:30,color:SKY});}
+  const c=step(t,t0+14.6,1),cy2=786,cw=W-2*x0;
+  if(c>0){
+    box(x0,cy2-10+20*(1-c),cw,182,{alpha:c,stroke:'rgba(125,183,245,.45)',fill:'rgba(125,183,245,.08)',r:12});
+    flow(L.decision,x0+36,cy2+30,cw-72,{size:22,font:SANS,color:SKY,alpha:c,lineHeight:1.5});
+    flow(L.quote,x0+36,cy2+100,cw-72,{size:28,alpha:step(t,t0+15.2,1),lineHeight:1.5});
+  }
+  text(L.closing,W/2,330,{size:34,align:'center',alpha:step(t,t0+16.2,1)});
+}
+
+// 历史解释 on Article 11: three amendments, each shown as what was added and what was taken out.
+function diffBlock(segments,x0,y0,width,{size=31,lh=1.75,alpha=1,show=1}={}){
+  // Characters are laid out one by one so that inserted and deleted words can be marked in place.
+  let x=x0,y=y0;
+  g.save();g.font=`400 ${size}px ${SERIF}`;
+  for(const seg of segments){
+    for(const ch of seg.text){
+      if(ch==='\n'){x=x0;y+=size*lh+10;continue;}
+      const w=g.measureText(ch).width;
+      if(x+w>x0+width&&!NO_START.includes(ch)){x=x0;y+=size*lh;}
+      if(seg.type==='insert'){g.globalAlpha=alpha*show;g.fillStyle='rgba(79,209,176,.22)';g.fillRect(x,y-size*.92,w+.5,size*1.22);
+        g.globalAlpha=alpha;g.fillStyle='#BDF5E6';g.fillText(ch,x,y);}
+      else if(seg.type==='delete'){g.globalAlpha=alpha*(1-.55*show);g.fillStyle=CORAL;g.fillText(ch,x,y);
+        g.globalAlpha=alpha*show;g.fillRect(x,y-size*.34,w+.5,2);}
+      else{g.globalAlpha=alpha;g.fillStyle=PAPER;g.fillText(ch,x,y);}
+      x+=w;
+    }
+  }
+  g.restore();
+}
+function bHistory(t,t0){
+  header(t,t0,'历史解释',TEXT.history?.[0],TEXT.history?.[1]);
+  const H11=BD.a11||{},years=BD.years||[],changes=years.filter(y=>H11[y]?.changed);
+  const stageAt=k=>t0+2.8+k*4.8;                     // stage 0: 1982 text, then one per amendment
+  const stage=Math.max(0,Math.min(changes.length,Math.floor((t-t0-2.8)/4.8)+1));
+  const year=stage?changes[stage-1]:years[0],x0=PORTRAIT?80:200,width=W-2*x0;
+  text(BD.title11,x0,330,{size:40,alpha:step(t,t0+.8,.8)});
+  const tag=stage?`${year} 年 · 宪法修正案${H11[year].amendment}`:`${year} 年原文`;
+  const a=step(t,t0+1,.8)*(stage?step(t,stageAt(stage-1)+.1,.4):1);
+  text(tag,W-x0,330,{size:28,font:SANS,align:'right',color:GOLD,alpha:a});
+  const segs=stage?H11[year].diff:[{type:'equal',text:H11[years[0]].text}];
+  diffBlock(segs,x0,430,width,{alpha:step(t,t0+1.2,.8)*(stage?Math.min(1,.25+step(t,stageAt(stage-1),.6)):1),show:stage?step(t,stageAt(stage-1)+.9,1.4):0});
+  if(stage)text(TEXT.history?.[2]?.[stage-1],W/2,PORTRAIT?1010:810,{size:34,align:'center',color:JADE,alpha:step(t,stageAt(stage-1)+2,.8)});
+  // The time line, with a mark at each amendment.
+  const tx0=PORTRAIT?110:520,tx1=W-tx0,ty=PORTRAIT?1110:900,n=years.length-1;
+  grow(tx0,ty,tx1-tx0,step(t,t0+.6,1),'rgba(242,181,68,.3)',2);
+  years.forEach((y,i)=>{
+    const x=tx0+(tx1-tx0)*i/n,ch=changes.indexOf(y),on=y===year,past=ch>=0&&ch<stage;
+    const al=step(t,t0+.6+i*.08,.5);
+    g.save();g.globalAlpha=al;g.fillStyle=on?PAPER:past?GOLD:'rgba(247,243,232,.3)';g.beginPath();g.arc(x,ty+1,on?11:ch>=0?8:5,0,Math.PI*2);g.fill();g.restore();
+    text(String(y),x,ty+46,{size:24,font:SANS,align:'center',color:on?PAPER:DIM,alpha:al});
+  });
+}
+
+// 目的解释: the means of communication have changed; does “通信” follow, for the same purpose?
+function bPurpose(t,t0){
+  const P=TEXT.purpose||{};
+  header(t,t0,'目的解释',P.question,P.feature);
+  const x0=170,width=W-2*x0,size=30,p40=BD.a40||'';
+  const top=1-step(t,t0+11.6,.8);
+  flow(p40,x0,320,width,{size,alpha:step(t,t0+.6,1)*top*.8,lineHeight:1.7});
+  underlineWord(p40,'通信自由和通信秘密',x0,320,{maxWidth:width,size,lineHeight:1.7,alpha:step(t,t0+1.4,.8)*top,color:CORAL});
+  // The protected interest, in the middle.
+  const sx=W/2,sy=560,sh=step(t,t0+1.8,.9);
+  if(sh>0){g.save();g.globalAlpha=sh;g.fillStyle='rgba(255,138,101,.14)';g.strokeStyle=CORAL;g.lineWidth=2;
+    g.beginPath();g.ellipse(sx,sy,190,62,0,0,Math.PI*2);g.fill();g.stroke();g.restore();
+    text(P.shield,sx,sy+12,{size:34,align:'center',alpha:sh});}
+  // Time: the means of communication, oldest first; 1982 marks when the article was written.
+  const tx0=PORTRAIT?80:200,tx1=W-tx0,ty=830,media=P.media||[],c82=P.year1982||.5;
+  const head=clamp((t-t0-2.6)/5.4);
+  grow(tx0,ty,tx1-tx0,step(t,t0+2.2,1),'rgba(255,138,101,.3)',2);
+  grow(tx0,ty,(tx1-tx0)*head,1,CORAL,3);
+  const mx=tx0+(tx1-tx0)*c82,ma=step(t,t0+2.2+5.4*c82,.6);
+  line(mx,ty-150,mx,ty+20,SEAL,2,ma);text(P.marker,mx,PORTRAIT?ty-165:ty+50,{size:22,font:SANS,align:'center',color:SEAL,alpha:ma});
+  const extend=step(t,t0+8.4,1.6);
+  media.forEach(([name,era,at],i)=>{
+    const x=tx0+(tx1-tx0)*at,a=clamp((head-at)*12),after=at>c82;if(a<=0)return;
+    g.save();g.globalAlpha=a;g.fillStyle=CORAL;g.beginPath();g.arc(x,ty,8,0,Math.PI*2);g.fill();g.restore();
+    text(name,x,ty+44,{size:28,font:SANS,align:'center',alpha:a});
+    text(era,x,ty+76,{size:19,font:SANS,align:'center',color:DIM,alpha:a});
+    // A thread up to the protected interest: solid for what the drafters knew, then the new
+    // means are drawn in as well — the purpose reaches them.
+    const ex=sx+(x-sx)*.42,ey=sy+62,k=after?extend:1;
+    if(after&&k<=0){text('?',x,ty-30,{size:30,font:SANS,align:'center',color:GOLD,alpha:a*(1-extend)});return;}
+    g.save();g.strokeStyle=CORAL;g.lineWidth=after?1.6+.6*k:2.2;g.globalAlpha=a*(after?.4+.5*k:.85);if(after&&k<1)g.setLineDash([6,6]);
+    g.beginPath();g.moveTo(x,ty-10);const qx=x,qy=(ty+ey)/2;
+    for(let s=1;s<=30*Math.min(1,a*k+(after?0:1)-(after?0:0));s++){const u=s/30;g.lineTo((1-u)**2*x+2*(1-u)*u*qx+u*u*ex,(1-u)**2*(ty-10)+2*(1-u)*u*qy+u*u*ey);}
+    g.stroke();g.restore();
+  });
+  text(P.closing,W/2,H-118,{size:34,align:'center',alpha:step(t,t0+10,.9)});
+  // The 2019 filing-review case, in the report's words, where the article stood.
+  const c=step(t,t0+12.2,1);
+  if(c>0){
+    box(x0,280,width,160,{alpha:c,stroke:'rgba(255,138,101,.45)',fill:'rgba(255,138,101,.08)',r:12});
+    text(P.caseTitle,x0+36,322,{size:22,font:SANS,color:CORAL,alpha:c});
+    flow(P.caseText,x0+36,370,width-72,{size:26,alpha:step(t,t0+12.8,1),lineHeight:1.55});
+  }
+}
+
+// 比较法解释 — Article 38 beside Article 1(1) of the German Basic Law, and where each stands.
+function bCompare(t,t0){
+  header(t,t0,'比较法解释',TEXT.compare?.[0],TEXT.compare?.[1]);
+  const P_=PORTRAIT,cols=[{x:P_?90:170,dy:0,src:TEXT.compare?.[2],body:BD.a38,extra:'',where:TEXT.compare?.[4],at:BD.a38at||0.26},
+              {x:P_?90:1010,dy:P_?440:0,src:TEXT.compare?.[3],body:TEXT.compare?.[5],extra:TEXT.compare?.[6],where:TEXT.compare?.[7],at:0}];
+  cols.forEach((c,i)=>{
+    const a=step(t,t0+.8+i*.6,1),w=P_?W-180:740;
+    text(c.src,c.x,340+c.dy,{size:26,font:SANS,color:VIOLET,alpha:a});
+    const box=flow(c.body||'',c.x,420+c.dy,w,{size:40,alpha:a,lineHeight:1.7});
+    if(c.extra)text(c.extra,c.x,box.next,{size:28,font:'Georgia,serif',color:DIM,alpha:a});
+    // Where the article stands in its constitution: a bar from the first article to the last.
+    const by=(P_?620:700)+c.dy,pb=step(t,t0+2.4+i*.4,1);
+    grow(c.x,by,w,pb,'rgba(183,156,255,.3)',2);
+    if(pb>0){const mx=c.x+w*c.at;g.save();g.globalAlpha=pb;g.fillStyle=VIOLET;g.fillRect(mx-2,by-18,5,38);g.restore();
+      text(c.where,c.x,by+56,{size:24,font:SANS,color:DIM,alpha:pb});}
+  });
+  if(P_)line(90,740,W-90,740,'rgba(183,156,255,.35)',1,step(t,t0+1,1));else line(W/2,330,W/2,780,'rgba(183,156,255,.35)',1,step(t,t0+1,1));
+  if(P_){flow(TEXT.compare?.[8]||'',W/2,1230,W-160,{size:36,align:'center',alpha:step(t,t0+4.4,1),lineHeight:1.5});flow(TEXT.compare?.[9]||'',W/2,1380,W-160,{size:28,font:SANS,align:'center',color:VIOLET,alpha:step(t,t0+5.6,1),lineHeight:1.5});}
+  else{text(TEXT.compare?.[8],W/2,880,{size:36,align:'center',alpha:step(t,t0+4.4,1)});
+  text(TEXT.compare?.[9],W/2,950,{size:26,align:'center',font:SANS,color:VIOLET,alpha:step(t,t0+5.6,1)});}
+}
+
+// 39–48 s: which methods — the four basic ones, the optional ones, one of your own, one removed.
+// 比较法视野 — 中国法视角下的世界，世界法视角下的中国.
+// The two laws are two living spheres. China's sphere beats like a heart; the world's sphere is full of
+// cells, each “human dignity” in its own language, which divide into the concepts derived from it.
+// A torch from one sphere lights the other; then the other way round; at the end all the cells meet
+// inside one globe. Positions are laid out once (seeded), and each cell drifts on its own small orbit,
+// so any frame can be drawn on its own.
+const MULTI='"PingFang SC","Hiragino Sans","Apple SD Gothic Neo","Geeza Pro",sans-serif';
+let WORLD=null;
+function relax(n,R,r,seed,fixed=[]){
+  const rnd=mulberry(seed),pts=fixed.map(p=>({...p,fixed:true}));
+  while(pts.length<n){const a=rnd()*Math.PI*2,d=Math.sqrt(rnd())*(R-r-8);pts.push({x:Math.cos(a)*d,y:Math.sin(a)*d});}
+  const gap=2*r+16;
+  for(let it=0;it<500;it++){
+    for(let a=0;a<pts.length;a++)for(let b=a+1;b<pts.length;b++){
+      const P=pts[a],Q=pts[b],dx=Q.x-P.x,dy=Q.y-P.y,d=Math.hypot(dx,dy)||.01;if(d>=gap)continue;
+      const push=(gap-d)/2,ux=dx/d,uy=dy/d;
+      if(!P.fixed){P.x-=ux*push;P.y-=uy*push;}if(!Q.fixed){Q.x+=ux*push;Q.y+=uy*push;}
+    }
+    for(const P of pts){const d=Math.hypot(P.x,P.y),m=R-r-8;if(d>m){P.x*=m/d;P.y*=m/d;}}
+  }
+  return pts;
+}
+function hexGrid(R,r){const out=[],sp=2*r+5;for(let row=-8;row<=8;row++)for(let col=-8;col<=8;col++){
+  const x=col*sp+(row%2?sp/2:0),y=row*sp*.866;if(Math.hypot(x,y)<=R-r-2)out.push({x,y});}return out;}
+function buildWorld(){
+  const V=TEXT.world||{},dig=V.dignity||[],der=V.derived||[],cn=V.china||[];
+  const R=320,r=46;
+  const wa=relax(dig.length+der.length,R,r,7);
+  const grid=hexGrid(R,r);
+  const cnPts=relax(cn.length,R,64,11);
+  const G=425,all=dig.length+der.length+cn.length,glb=relax(all,G,43,23);
+  // World cells: dignity first, then derived, each derived born of a dignity cell.
+  const world=[...dig.map((txt,k)=>({txt,kind:'dignity',home:wa[k],born:.6+k*.12,parent:-1})),
+               ...der.map((txt,k)=>({txt,kind:'derived',home:wa[dig.length+k],born:3.6+k*.52,parent:k%dig.length}))];
+  const china=cn.map((c,k)=>({lines:c.lines,law:c.law,home:cnPts[k],parent:c.parent,born:k?16.4+k*.5:15.4}));
+  WORLD={R,r,world,grid,china,glb,G};
+}
+function fitLines(lines,r,font,max=17,min=10){
+  for(let sz=max;sz>=min;sz--){g.save();g.font=`500 ${sz}px ${font}`;const ok=lines.every(l=>g.measureText(l).width<=2*r*.84)&&lines.length*sz*1.2<=2*r*.8;g.restore();if(ok)return sz;}
+  return min;
+}
+function cell(x,y,r,lines,color,{alpha=1,lit=1,font=MULTI,accent=-1,maxSize=17}={}){
+  if(alpha<=0)return;
+  g.save();g.globalAlpha=alpha;
+  const gr=g.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);
+  gr.addColorStop(0,color+'55');gr.addColorStop(1,color+'14');
+  g.fillStyle=gr;g.strokeStyle=color;g.lineWidth=1.4;g.globalAlpha=alpha*(.45+.55*lit);
+  g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill();g.stroke();g.restore();
+  const sz=fitLines(lines,r,font,maxSize),h=lines.length*sz*1.2;
+  lines.forEach((l,k)=>text(l,x,y-h/2+sz*(k+.9)*1.2-sz*.2,{size:sz,font,align:'center',weight:500,color:k===accent?color:PAPER,alpha:alpha*(.55+.45*lit)}));
+}
+function drift(p,k,t,amp=6){return {x:p.x+amp*Math.sin(t*.55+k*1.7),y:p.y+amp*Math.cos(t*.47+k*2.3)};}
+function torch(sx,sy,tx,ty,a,t){
+  if(a<=0)return null;
+  const sweep=.11*Math.sin(t*.7),ang=Math.atan2(ty-sy,tx-sx)+sweep,L=Math.hypot(tx-sx,ty-sy)+260;
+  g.save();g.globalCompositeOperation='lighter';
+  [[.26,.05],[.19,.07],[.12,.1]].forEach(([half,al])=>{
+    const gr=g.createRadialGradient(sx,sy,10,sx,sy,L);gr.addColorStop(0,`rgba(255,240,205,${al*3*a})`);gr.addColorStop(.55,`rgba(255,236,190,${al*a})`);gr.addColorStop(1,'rgba(255,236,190,0)');
+    g.fillStyle=gr;g.beginPath();g.moveTo(sx,sy);g.arc(sx,sy,L,ang-half,ang+half);g.closePath();g.fill();});
+  // Dust in the beam.
+  for(let k=0;k<46;k++){const rnd=mulberry(k*97+5),u=(rnd()+t*.08)%1,v=(rnd()-.5)*2,d=40+u*(L-120),w=d*Math.tan(.2)*v;
+    const x=sx+Math.cos(ang)*d-Math.sin(ang)*w,y=sy+Math.sin(ang)*d+Math.cos(ang)*w,tw=.4+.6*Math.sin(t*3+k);
+    g.fillStyle=`rgba(255,244,220,${.5*a*tw*(1-u)})`;g.beginPath();g.arc(x,y,1.6,0,Math.PI*2);g.fill();}
+  // The pool of light where it lands.
+  const d0=Math.hypot(tx-sx,ty-sy),px=sx+Math.cos(ang)*d0,py=sy+Math.sin(ang)*d0;
+  const pool=g.createRadialGradient(px,py,0,px,py,230);pool.addColorStop(0,`rgba(255,240,205,${.22*a})`);pool.addColorStop(1,'rgba(255,240,205,0)');
+  g.fillStyle=pool;g.beginPath();g.arc(px,py,230,0,Math.PI*2);g.fill();
+  g.restore();
+  // The torch itself: a short barrel with a bright lens, turned towards the other sphere.
+  g.save();g.globalAlpha=a;g.translate(sx,sy);g.rotate(ang);
+  g.fillStyle='#0E2326';g.strokeStyle=GOLD;g.lineWidth=1.6;rounded(-62,-13,50,26,6);g.fill();g.stroke();
+  g.beginPath();g.moveTo(-12,-13);g.lineTo(4,-20);g.lineTo(4,20);g.lineTo(-12,13);g.closePath();g.fill();g.stroke();
+  const lens=g.createRadialGradient(4,0,0,4,0,22);lens.addColorStop(0,'rgba(255,248,225,1)');lens.addColorStop(1,'rgba(255,248,225,0)');
+  g.fillStyle=lens;g.beginPath();g.arc(4,0,22,0,Math.PI*2);g.fill();g.restore();
+  return {x:px,y:py,R:230};
+}
+function lightAt(pool,x,y){return pool?clamp(1-Math.hypot(x-pool.x,y-pool.y)/pool.R):0;}
+function heart(t){const ph=(t%1.15)/1.15;return Math.exp(-((ph-.04)**2)/.0016)+.6*Math.exp(-((ph-.2)**2)/.0016);}
+function bWorld(t,t0){
+  if(!WORLD)buildWorld();
+  const V=TEXT.world||{},Wd=WORLD,R=Wd.R,cy=540,u=t-t0;
+  const merge=step(u,24,2.4),gr=step(u,24.6,1.6);
+  const lx=W/2-430+430*merge,rx=W/2+430-430*merge;
+  // Portrait: China's sphere above, the world's below; the light runs up and down between them.
+  const P_=PORTRAIT,ax=P_?W/2:lx,ay=P_?H/2-430+430*merge:cy,bx=P_?W/2:rx,by=P_?H/2+430-430*merge:cy;
+  text(V.title,W/2,P_?110:78,{size:44,align:'center',alpha:step(u,0,.9)*(1-step(u,24.4,.8)),spacing:4});
+  text(V.centre,W/2,P_?110:78,{size:44,align:'center',color:'#E4D9FF',alpha:step(u,25.4,1),spacing:12});
+  // The spheres (they dissolve into the globe at the end).
+  const beat=heart(u),sphereA=step(u,.4,.8)*(1-merge);
+  const sphere=(x,y,label,color,rr,a)=>{if(a<=0)return;
+    g.save();g.globalAlpha=a;const f=g.createRadialGradient(x-rr*.35,y-rr*.35,rr*.1,x,y,rr);f.addColorStop(0,color+'2E');f.addColorStop(1,color+'08');
+    g.fillStyle=f;g.strokeStyle=color;g.lineWidth=2;g.beginPath();g.arc(x,y,rr,0,Math.PI*2);g.fill();g.stroke();g.restore();
+    text(label,P_?x-rr-10:x,P_?y-rr+30:y-rr-26,{size:30,align:'center',color,alpha:a});};
+  const rA=R*(1+.022*beat);
+  sphere(ax,ay,V.left,JADE,rA,sphereA);
+  if(sphereA>0){for(let k=0;k<2;k++){const ph=((u/1.15)+k*.5)%1;g.save();g.globalAlpha=sphereA*.35*(1-ph);g.strokeStyle=JADE;g.lineWidth=1.5;g.beginPath();g.arc(ax,ay,R+ph*60,0,Math.PI*2);g.stroke();g.restore();}}
+  sphere(bx,by,V.right,SKY,R,sphereA);
+  // Torches: China looks at the world, then the world looks at China.
+  const tA=step(u,2,1)*(1-step(u,11.2,.8)),tB=step(u,13.2,1)*(1-step(u,23,.8));
+  const poolA=P_?torch(ax,ay+R+34,bx,by,tA,u):torch(lx+R+34,cy,rx,cy,tA,u),poolB=P_?torch(bx,by-R-34,ax,ay,tB,u):torch(rx-R-34,cy,lx,cy,tB,u);
+  text(V.views?.[0],W/2,P_?H-120:180,{size:30,align:'center',color:'#FFE9C2',alpha:tA});
+  text(V.views?.[1],W/2,P_?200:960,{size:30,align:'center',color:'#FFE9C2',alpha:tB});
+  // ---- China's sphere: 人格尊严, beating; later it becomes a cell and divides.
+  const shrink=step(u,14.6,.9);
+  if(shrink<1){const sz=72*(1+.06*beat)*(1-.6*shrink);text(V.dignityCN,ax,ay+sz*.36,{size:sz,align:'center',alpha:step(u,.6,.9)*(1-shrink)*(1-merge),spacing:4});}
+  const gx=W/2,gy=P_?H/2:cy;
+  const cnPos=(c,k)=>{
+    const P=drift(c.home,k+40,u);const born=step(u,c.born,1.1),par=c.parent>=0?Wd.china[c.parent]:null;
+    let x=ax+P.x,y=ay+P.y;
+    if(par&&born<1){const Q=drift(par.home,c.parent+40,u);x=ax+Q.x+(P.x-Q.x)*born;y=ay+Q.y+(P.y-Q.y)*born;}
+    if(k===0&&born<1){x=ax+P.x*born;y=ay+P.y*born;}
+    if(merge>0){const Gp=drift(Wd.glb[Wd.world.length+k],k+90,u,7);x+=(gx+Gp.x-x)*merge;y+=(gy+Gp.y-y)*merge;}
+    return {x,y,a:step(u,c.born,.6)};
+  };
+  // ---- The world's sphere: cells of dignity in many languages that divide into derived concepts;
+  // when the world looks back at China they stand still in a regular lattice.
+  const toGrid=step(u,11.6,1.4)*(1-merge),wCell=r=>r;
+  const wPos=(c,k)=>{
+    const P=drift(c.home,k,u),born=step(u,c.born,1.1);
+    let x=bx+P.x,y=by+P.y;
+    if(c.kind==='derived'&&born<1){const Q=drift(Wd.world[c.parent].home,c.parent,u);x=bx+Q.x+(P.x-Q.x)*born;y=by+Q.y+(P.y-Q.y)*born;}
+    if(c.kind==='dignity'&&toGrid>0){const G=Wd.grid[k%Wd.grid.length];x+=(bx+G.x-x)*toGrid;y+=(by+G.y-y)*toGrid;}
+    if(merge>0){const Gp=drift(Wd.glb[k],k+60,u,7);x+=(gx+Gp.x-x)*merge;y+=(gy+Gp.y-y)*merge;}
+    return {x,y};
+  };
+  // The globe.
+  if(gr>0){
+    g.save();g.globalAlpha=gr;const G=Wd.G;
+    const f=g.createRadialGradient(gx-G*.35,gy-G*.4,G*.1,gx,gy,G);f.addColorStop(0,'rgba(125,183,245,.18)');f.addColorStop(1,'rgba(79,209,176,.05)');
+    g.fillStyle=f;g.beginPath();g.arc(gx,gy,G,0,Math.PI*2);g.fill();
+    g.strokeStyle='rgba(247,243,232,.16)';g.lineWidth=1;
+    for(let k=0;k<6;k++){const a=k*Math.PI/6+u*.12,rx2=Math.abs(Math.cos(a))*G;g.beginPath();g.ellipse(gx,gy,rx2,G,0,0,Math.PI*2);g.stroke();}
+    for(const lat of [-60,-30,0,30,60]){const yy=gy+G*Math.sin(lat*Math.PI/180),ww=G*Math.cos(lat*Math.PI/180);g.beginPath();g.ellipse(gx,yy,ww,ww*.1,0,0,Math.PI*2);g.stroke();}
+    g.strokeStyle='rgba(247,243,232,.55)';g.lineWidth=1.6;g.beginPath();g.arc(gx,gy,G,0,Math.PI*2);g.stroke();g.restore();
+  }
+  // Cells, smaller inside the globe.
+  const rW=Wd.r*(1-.065*merge),rC=64*(1-.33*merge);
+  const showDerived=1-step(u,11.4,.8)+step(u,24,1.6);
+  const wp=Wd.world.map((c,k)=>wPos(c,k)),cp=Wd.china.map((c,k)=>cnPos(c,k));
+  // Exchange: in the globe, light runs between neighbouring cells from the two sides.
+  if(merge>.6){
+    g.save();g.lineCap='round';
+    cp.forEach((P,a)=>wp.forEach((Q,b)=>{const d=Math.hypot(P.x-Q.x,P.y-Q.y);if(d>150)return;
+      const al=(merge-.6)/.4*.5;g.strokeStyle=GOLD;g.globalAlpha=al*.5;g.lineWidth=1;g.beginPath();g.moveTo(P.x,P.y);g.lineTo(Q.x,Q.y);g.stroke();
+      const s=((u*.5+a*.13+b*.07)%1),ix=P.x+(Q.x-P.x)*s,iy=P.y+(Q.y-P.y)*s;g.globalAlpha=al;g.fillStyle='#FFE9C2';g.beginPath();g.arc(ix,iy,2.4,0,Math.PI*2);g.fill();}));
+    g.restore();
+  }
+  Wd.world.forEach((c,k)=>{
+    const vis=c.kind==='dignity'?step(u,c.born,.6):step(u,c.born,.6)*clamp(showDerived);
+    const P=wp[k],lit=Math.max(lightAt(poolA,P.x,P.y),merge,toGrid*.6,.25);
+    cell(P.x,P.y,rW,c.txt.split('\n'),c.kind==='dignity'?SKY:VIOLET,{alpha:vis,lit});
+  });
+  // Extra lattice cells fill the sphere while the world stands still.
+  if(toGrid>0)Wd.grid.slice(Wd.world.filter(c=>c.kind==='dignity').length).forEach((G,k)=>{
+    const txt=Wd.world[k%12].txt;cell(bx+G.x,by+G.y,Wd.r,txt.split('\n'),SKY,{alpha:toGrid*(1-merge),lit:.55});});
+  Wd.china.forEach((c,k)=>{const P=cp[k];if(P.a<=0)return;
+    cell(P.x,P.y,rC,c.lines,JADE,{alpha:P.a,lit:Math.max(lightAt(poolB,P.x,P.y),merge,.35),font:SANS,accent:c.lines.length-1});});
+  // Notes.
+  text(V.note,P_?60:110,H-40,{size:18,font:SANS,color:'rgba(247,243,232,.45)',alpha:step(u,17,1)*(1-merge)});
+    text(V.line,W/2,P_?H-140:1030,{size:34,align:'center',alpha:step(u,27,1)});
+}
+
+function bMethods(t,t0){
+  text(TEXT.methods?.[0],W/2,250,{size:64,align:'center',alpha:step(t,t0,.9),spacing:4});
+  const size=32,row=(names,y,opts)=>{
+    const ws=names.map(n=>measure(n,size,SANS)+size*1.4),gap=28,tot=ws.reduce((a,b)=>a+b,0)+gap*(names.length-1);
+    let x=W/2-tot/2;return names.map((n,i)=>{const r={n,x,y,w:ws[i]};x+=ws[i]+gap;return r;});
+  };
+  row(['文义解释','体系解释','历史解释','目的解释'],440).forEach((c,i)=>chip(c.n,c.x,c.y,{alpha:step(t,t0+.8+i*.2,.6),size}));
+  const typed=TEXT.methods?.[2]||'',k=Math.floor(clamp((t-t0-3.6)/1.4)*typed.length),shown=typed.slice(0,k);
+  const second=row(['比较法解释','法权分析',typed],590);
+  chip('比较法解释',second[0].x,590,{alpha:step(t,t0+1.8,.6),size,dashed:true});
+  chip('法权分析',second[1].x,590,{alpha:step(t,t0+2.1,.6),size,dashed:true,color:SEAL});
+  if(t>t0+3.4){
+    const w=second[2].w,x=second[2].x,done=step(t,t0+5.1,.5);
+    g.save();g.strokeStyle=PAPER;g.globalAlpha=.6;g.setLineDash([6,6]);rounded(x,590-28,w,56,28);g.stroke();g.restore();
+    text(shown,x+size*.7,590+size*.36,{size,font:SANS});
+    if(done<1&&Math.floor(t*2.4)%2===0){const cx=x+size*.7+measure(shown,size,SANS)+4;line(cx,566,cx,614,PAPER,2,1);}
+  }
+  text(TEXT.methods?.[1],W/2,680,{size:22,font:SANS,align:'center',color:DIM,alpha:step(t,t0+2.4,.8)});
+  text(TEXT.methods?.[3],W/2,860,{size:36,align:'center',alpha:step(t,t0+6.4,1)});
+}
+
+// 48–55 s: what the notebook offers, nine tiles.
+function bFeatures(t,t0){
+  text(TEXT.features?.[0],W/2,170,{size:52,align:'center',alpha:step(t,t0,.8),spacing:4});
+  const items=TEXT.features?.[1]||[],cw=PORTRAIT?318:470,ch=170,gap=PORTRAIT?18:34,x0=W/2-(cw*3+gap*2)/2,y0=250;
+  const colours=[SKY,JADE,GOLD,CORAL,VIOLET,SEAL,SKY,JADE,GOLD];
+  items.forEach(([name,desc],i)=>{
+    const p=step(t,t0+.5+i*.16,.7);if(p<=0)return;
+    const x=x0+(i%3)*(cw+gap),y=y0+Math.floor(i/3)*(ch+gap)+24*(1-p);
+    g.save();g.globalAlpha=p;g.fillStyle='rgba(247,243,232,.06)';g.strokeStyle='rgba(247,243,232,.18)';g.lineWidth=1;
+    rounded(x,y,cw,ch,14);g.fill();g.stroke();g.fillStyle=colours[i%colours.length];g.fillRect(x+28,y+30,48,4);g.restore();
+    text(name,x+28,y+92,{size:38,alpha:p});
+    text(desc,x+28,y+136,{size:PORTRAIT?20:23,font:SANS,color:DIM,alpha:p});
+  });
+}
+
+// 55–60 s: the plate, with the methods in their colours.
+function bEnd(t,t0){
+  kinetic(TEXT.end?.[0]||'',400,t,t0+.2,{size:110,per:.12,x:W/2});
+  
+  text(TEXT.end?.[1],W/2,552,{size:44,align:'center',alpha:step(t,t0+1.1,1.2)});
+  const names=['文义解释','体系解释','历史解释','目的解释','比较法解释'],size=24;
+  const ws=names.map(n=>measure(n,size,SANS)+size*1.4),gap=18,tot=ws.reduce((a,b)=>a+b)+gap*4;
+  let x=W/2-tot/2;names.forEach((n,i)=>{chip(n,x,650,{alpha:step(t,t0+1.6+i*.12,.6),size});x+=ws[i]+gap;});
+  text(TEXT.end?.[2],W/2,760,{size:26,align:'center',alpha:step(t,t0+2.4,1.2),color:DIM,font:SANS,spacing:3});
+}
+
+
+// =====================================================================================================
+// Film C: 权与权力 — 法权分析 as a method: six categories, the criterion, four steps, the assistant.
+// The categories are those of the framework file (demo/frameworks/faquan.json), shortened in 场景.json.
+// =====================================================================================================
+function box(x,y,w,h,{alpha=1,stroke=PAPER,fill='rgba(247,243,232,.06)',dashed=false,r=10}={}){
+  if(alpha<=0)return;g.save();g.globalAlpha=clamp(alpha);g.fillStyle=fill;g.strokeStyle=stroke;g.lineWidth=1.6;if(dashed)g.setLineDash([6,6]);
+  rounded(x,y,w,h,r);g.fill();g.stroke();g.restore();
+}
+function caption(s,t,start,{color=PAPER,y=H-70,size=30}={}){text(s,W/2,y,{size,align:'center',color,alpha:step(t,start,.8)});}
+function plate(t,t0,lines,{chips=[],chipColor}={}){
+  kinetic(lines[0]||'',400,t,t0+.2,{size:110,per:.12,x:W/2});
+  
+  text(lines[1],W/2,552,{size:44,align:'center',alpha:step(t,t0+1.1,1.2)});
+  const size=24,ws=chips.map(n=>measure(n,size,SANS)+size*1.4),gap=18,tot=ws.reduce((a,b)=>a+b,0)+gap*Math.max(0,chips.length-1);
+  let x=W/2-tot/2;chips.forEach((n,i)=>{chip(n,x,650,{alpha:step(t,t0+1.6+i*.15,.6),size,color:chipColor||METHOD[n]||GOLD});x+=ws[i]+gap;});
+  text(lines[2],W/2,chips.length?760:680,{size:26,align:'center',alpha:step(t,t0+2.4,1.2),color:DIM,font:SANS,spacing:3});
+}
+function cOpen(t,t0){
+  kinetic(TEXT.open?.[0]||'',450,t,t0+.2,{size:100,per:.12,x:W/2});
+  
+  text(TEXT.open?.[1],W/2,590,{size:34,align:'center',alpha:step(t,t0+1.6,1.2),color:DIM});
+  const w=measure('法权分析',30,SANS)+42;chip('法权分析',W/2-w/2,690,{alpha:step(t,t0+2.6,.8),size:30});
+}
+function cCategories(t,t0){
+  const C=TEXT.categories||{},nodes=C.nodes||[];
+  text(C.title,110,130,{size:44,alpha:step(t,t0,.8),spacing:4});
+  const tone={gold:GOLD,seal:SEAL,sky:SKY,coral:CORAL,paper:PAPER,dim:DIM};
+  const pos=Object.fromEntries(nodes.map(n=>[n.name,n]));
+  nodes.forEach((n,i)=>{
+    const p=step(t,t0+1.2+i*1.6,.9);if(p<=0)return;
+    if(n.from){const f=pos[n.from];
+      const x1=f.x,y1=f.y+118,x2=n.x,y2=n.y-40,my=(y1+y2)/2;
+      g.save();g.strokeStyle=tone[n.tone];g.globalAlpha=.7*p;g.lineWidth=1.6;if(n.dashed)g.setLineDash([6,6]);
+      g.beginPath();g.moveTo(x1,y1);g.bezierCurveTo(x1,my,x2,my,x2,y1+(y2-y1)*p);g.stroke();g.restore();
+      if(n.edge)text(n.edge,(x1+x2)/2+(x2>x1?20:-20),my-6,{size:20,font:SANS,align:x2>x1?'left':'right',color:DIM,alpha:p});
+    }
+    const w=Math.max(220,measure(n.name,40)+80);
+    box(n.x-w/2,n.y-40,w,80,{alpha:p,stroke:tone[n.tone],dashed:n.dashed,fill:'rgba(15,42,43,.85)'});
+    text(n.name,n.x,n.y+14,{size:40,align:'center',alpha:p});
+    flow(n.gloss,n.x,n.y+80,380,{size:21,font:SANS,align:'center',color:DIM,alpha:step(t,t0+1.6+i*1.6,.8),lineHeight:1.5});
+  });
+  text(C.cite,W-110,H-52,{size:19,font:SANS,align:'right',color:'rgba(247,243,232,.45)',alpha:step(t,t0+3,1)});
+}
+function cCriterion(t,t0){
+  const C=TEXT.criterion||{};
+  text(C.title,W/2,200,{size:52,align:'center',alpha:step(t,t0,.8)});
+  [[C.left,SKY,W/2-420,'权利'],[C.right,CORAL,W/2+420,'权力']].forEach(([lines,color,x,name],i)=>{
+    const p=step(t,t0+1.2+i*1.4,1);
+    box(x-260,330,520,190,{alpha:p,stroke:color});
+    text(lines?.[0],x,410,{size:40,align:'center',alpha:p});
+    text(lines?.[1],x,470,{size:26,font:SANS,align:'center',color:DIM,alpha:p});
+    const a=step(t,t0+3.6+i*.6,.8);line(x,540,x,540+90*a,color,2,a);
+    if(a>0){g.save();g.globalAlpha=a;g.fillStyle=color;g.beginPath();g.moveTo(x-9,620);g.lineTo(x+9,620);g.lineTo(x,636);g.fill();g.restore();}
+    const w=measure(name,40,SANS)+56;chip(name,x-w/2,700,{alpha:step(t,t0+4.2+i*.6,.8),size:40,color});
+  });
+  text(C.conclusion,W/2,850,{size:40,align:'center',alpha:step(t,t0+6,1)});
+  text(C.cite,W/2,920,{size:22,font:SANS,align:'center',color:DIM,alpha:step(t,t0+6.6,1)});
+}
+// The analysis editor in four steps, on Article 37 — the same illustration as film A, done step by step.
+function cSteps(t,t0){
+  const S=TEXT.steps||{},paras=BD.a37||[],x0=110,width=700,size=30,lh=1.75,span=5.4,first=t0+1.6;
+  const active=Math.floor((t-first)/span);
+  text(S.title,x0,120,{size:40,alpha:step(t,t0,.8),spacing:4});
+  box(x0-30,170,width+60,560,{alpha:step(t,t0+.3,.8),fill:'rgba(247,243,232,.04)',stroke:'rgba(247,243,232,.22)'});
+  let y=240;const starts=[];
+  paras.forEach(p=>{starts.push(y);y=flow(p,x0,y,width,{size,lineHeight:lh,alpha:step(t,t0+.5,.8)}).next+24;});
+  const marks=S.items||[];
+  marks.forEach(([word,para,who,kind],i)=>{
+    const a=step(t,first+.6+i*.5,.6);
+    underlineWord(paras[para],word,x0,starts[para],{maxWidth:width,size,lineHeight:lh,alpha:a,color:kind==='权利'?SKY:CORAL,width:3});
+  });
+  // Right: the four steps; the active one is bright.
+  const rx=900,rw=W-rx-110;
+  (S.names||[]).forEach((name,k)=>{
+    const ry=190+k*190,on=active===k||(active>=4&&k===3),done=active>k;
+    const a=step(t,t0+.6+k*.15,.6)*(on?1:done?.75:.4);
+    g.save();g.globalAlpha=a;g.fillStyle=on?SEAL:'rgba(247,243,232,.25)';g.beginPath();g.arc(rx+22,ry+20,20,0,Math.PI*2);g.fill();g.restore();
+    text(String(k+1),rx+22,ry+29,{size:24,font:SANS,align:'center',alpha:a});
+    text(name,rx+62,ry+32,{size:32,alpha:a});
+    const body=step(t,first+k*span+.5,.8)*(on||done?1:0);
+    if(k===0)marks.forEach(([word,,who,kind],i)=>{
+      const a2=step(t,first+.8+i*.5,.6)*(on||done?1:0);
+      const c=kind==='权利'?SKY:CORAL,x=rx+62+i*((rw-62)/marks.length);
+      text('“'+word+'”',x,ry+86,{size:26,alpha:a2});
+      text(who+' · '+kind,x,ry+118,{size:19,font:SANS,color:c,alpha:a2});
+    });
+    if(k===1)(S.links||[]).forEach(([a,b,rel],i)=>{
+      const a2=step(t,first+span+.8+i*.9,.7)*(on||done?1:0),x=rx+62+i*((rw-62)/2);
+      text(`“${a}”—“${b}”`,x,ry+86,{size:24,alpha:a2});
+      text(rel,x,ry+118,{size:20,font:SANS,color:SEAL,alpha:a2});
+    });
+    if(k===2)flow(S.balance,rx+62,ry+86,rw-62,{size:24,alpha:body,lineHeight:1.5});
+    if(k===3)flow(S.basis,rx+62,ry+86,rw-62,{size:22,font:SANS,color:DIM,alpha:body,lineHeight:1.5});
+  });
+  text(S.note,W/2,H-46,{size:19,font:SANS,align:'center',color:'rgba(247,243,232,.45)',alpha:step(t,t0+2,1)});
+}
+function cAssist(t,t0){
+  const A=TEXT.assist||{},x0=170,cw=W-2*x0;
+  text(A.title,x0,150,{size:44,alpha:step(t,t0,.8),spacing:4});
+  box(x0,230,cw,300,{alpha:step(t,t0+.8,.8)});
+  text(A.promptLabel,x0+36,280,{size:22,font:SANS,color:GOLD,alpha:step(t,t0+.8,.8)});
+  const full=A.prompt||'',shown=full.slice(0,Math.floor(full.length*clamp((t-t0-1.4)/3.6)));
+  flow(shown,x0+36,340,cw-72,{size:28,font:SANS,lineHeight:1.65});
+  const r=step(t,t0+5.6,1);
+  box(x0,580,cw,190,{alpha:r,dashed:true,stroke:GOLD,fill:'rgba(242,181,68,.06)'});
+  text(A.answerLabel,x0+36,630,{size:22,font:SANS,color:GOLD,alpha:r});
+  if(r>0){const w=measure('待核',22,SANS)+36;g.save();g.globalAlpha=r;g.fillStyle='rgba(240,90,60,.25)';rounded(x0+cw-36-w,604,w,38,6);g.fill();g.restore();
+    text('待核',x0+cw-36-w/2,631,{size:22,font:SANS,align:'center',color:'#FFC2B4',alpha:r});}
+  flow(A.answer,x0+36,690,cw-72,{size:26,alpha:step(t,t0+6.2,1),lineHeight:1.6});
+  caption(A.caption,t,t0+8,{y:880,size:36});
+}
+function cEnd(t,t0){plate(t,t0,TEXT.end||[],{chips:['法权分析'],chipColor:SEAL});}
+
+// =====================================================================================================
+// Film D: 二十年后的笔记 — 个性化、可塑性、可扩展、本地化、去中心化、智能化.
+// =====================================================================================================
+function principle(names,t,t0){
+  let x=110;names.forEach((n,i)=>{const w=chip(n,x,120,{alpha:step(t,t0+i*.2,.7),size:28,color:GOLD});x+=w+16;});
+}
+function dOpen(t,t0){
+  kinetic(TEXT.open?.[0]||'',460,t,t0+.2,{size:84,per:.12,x:W/2});
+  
+  text(TEXT.open?.[1],W/2,590,{size:34,align:'center',alpha:step(t,t0+1.8,1.2),color:DIM});
+}
+// Notes accumulate along a career; some are joined; nothing is lost when a course ends.
+function dTime(t,t0){
+  const D=TEXT.time||{},x0=220,x1=W-220,ty=820,grow1=clamp((t-t0-1)/8);
+  grow(x0,ty,x1-x0,step(t,t0+.4,1),'rgba(242,181,68,.45)',2);
+  (D.stages||[]).forEach(([label,at],i)=>{
+    const x=x0+(x1-x0)*at,a=step(t,t0+.8+i*.3,.6);
+    line(x,ty-10,x,ty+10,GOLD,2,a);text(label,x,ty+52,{size:26,font:SANS,align:'center',alpha:a});
+  });
+  const rnd=mulberry(77),dots=[];
+  for(let i=0;i<260;i++){const u=Math.pow(rnd(),.8),h=40+rnd()*480*(.35+.65*u);dots.push({u,x:x0+(x1-x0)*u,y:ty-30-h*rnd(),c:[SKY,JADE,GOLD,CORAL,VIOLET][Math.floor(rnd()*5)]});}
+  dots.sort((a,b)=>a.u-b.u);
+  const shown=dots.filter(d=>d.u<=grow1);
+  shown.forEach((d,i)=>{if(i%9===0&&i>9){const e=shown[i-7];line(d.x,d.y,e.x,e.y,'rgba(247,243,232,.18)',1,1);}});
+  shown.forEach(d=>{g.save();g.globalAlpha=.85;g.fillStyle=d.c;g.beginPath();g.arc(d.x,d.y,4.2,0,Math.PI*2);g.fill();g.restore();});
+  const head=x0+(x1-x0)*grow1;
+  if(grow1>0&&grow1<1){g.save();g.fillStyle=PAPER;g.beginPath();g.arc(head,ty+1,10,0,Math.PI*2);g.fill();g.restore();}
+  caption(D.caption,t,t0+3,{y:150,size:40});
+}
+function dPersonal(t,t0){
+  const D=TEXT.personal||{};principle(D.principles||[],t,t0);
+  // A subtitle rewritten in place: the old one is struck out, the new one typed after it.
+  const x0=170,y=330,old=D.subtitleOld,neu=D.subtitleNew;
+  text(D.article,x0,y,{size:64,alpha:step(t,t0+.6,.8),spacing:6});
+  const ax=x0+measure(D.article,64)+40;
+  const strike=step(t,t0+2.4,.8);
+  text(`【${old}】`,ax,y,{size:48,color:strike?DIM:GOLD,alpha:step(t,t0+1,.8)});
+  if(strike>0)line(ax+20,y-16,ax+20+(measure(`【${old}】`,48)-40)*strike,y-16,CORAL,3,1);
+  const typed=neu.slice(0,Math.floor(neu.length*clamp((t-t0-3.4)/1.6)));
+  if(t>t0+3.2){const nx=ax+measure(`【${old}】`,48)+30;text(`【${typed}`+(typed.length===neu.length?'】':''),nx,y,{size:48,color:GOLD});
+    if(typed.length<neu.length&&Math.floor(t*2.4)%2===0)line(nx+measure('【'+typed,48)+4,y-44,nx+measure('【'+typed,48)+4,y+8,PAPER,2,1);}
+  // The guide and the tags are the user's own, too.
+  const c=step(t,t0+5.4,.9);
+  box(x0,440,760,300,{alpha:c});
+  text(D.guideLabel,x0+36,494,{size:22,font:SANS,color:GOLD,alpha:c});
+  flow(D.guide,x0+36,550,688,{size:28,alpha:c,lineHeight:1.65});
+  const tags=['文义解释','体系解释','比较法解释'];let tx=1010;
+  tags.forEach((n,i)=>{const w=chip(n,tx,500+i*80,{alpha:step(t,t0+6+i*.3,.6),size:28});});
+  const own=D.ownTag||'';chip(own,tx,740,{alpha:step(t,t0+7.4,.7),size:28,dashed:true,color:PAPER});
+  caption(D.caption,t,t0+8,{y:900,size:34});
+}
+function dExtend(t,t0){
+  const D=TEXT.extend||{};principle(D.principles||[],t,t0);
+  const books=D.books||[],bw=380,bh=420,gap=60,total=books.length*bw+(books.length-1)*gap,x0=W/2-total/2,y0=290;
+  books.forEach(([name,meta,dashed],i)=>{
+    const p=step(t,t0+1+i*1.1,1);if(p<=0)return;
+    const x=x0+i*(bw+gap)+(dashed?120*(1-p):0),c=[JADE,SKY,VIOLET,PAPER][i%4];
+    box(x,y0+30*(1-p),bw,bh,{alpha:p,stroke:c,dashed,fill:dashed?'rgba(247,243,232,.03)':'rgba(247,243,232,.07)',r:14});
+    if(!dashed){g.save();g.globalAlpha=p;g.fillStyle=c;g.fillRect(x,y0+30*(1-p),10,bh);g.restore();}
+    text(name,x+bw/2,y0+190,{size:46,align:'center',alpha:p,color:dashed?DIM:PAPER});
+    flow(meta,x+bw/2,y0+260,bw-40,{size:22,font:SANS,align:'center',color:DIM,alpha:p,lineHeight:1.6});
+  });
+  caption(D.caption,t,t0+6,{y:870,size:34});
+}
+function dLocal(t,t0){
+  const D=TEXT.storage||{};principle(D.principles||[],t,t0);
+  // A folder with the notebook's own files.
+  const fx=PORTRAIT?100:200,fy=PORTRAIT?280:300,files=D.files||[];
+  text(D.folder,fx,fy,{size:34,alpha:step(t,t0+.8,.8),color:GOLD});
+  files.forEach(([name,what],i)=>{
+    const sp=PORTRAIT?96:70,a=step(t,t0+1.4+i*.5,.7),y=fy+70+i*sp;
+    line(fx+14,fy+16+i*sp,fx+14,y-8,'rgba(247,243,232,.35)',1,a);line(fx+14,y-8,fx+40,y-8,'rgba(247,243,232,.35)',1,a);
+    text(name,fx+56,y,{size:30,font:SANS,alpha:a});if(PORTRAIT)text(what,fx+56,y+34,{size:22,font:SANS,color:DIM,alpha:a});else text(what,fx+56+measure(name,30,SANS)+20,y,{size:22,font:SANS,color:DIM,alpha:a});
+  });
+  // The same folder on several devices, through a cloud folder you choose.
+  const cx=PORTRAIT?W/2-10:1380,cy=PORTRAIT?760:470,c=step(t,t0+3.6,1);
+  if(c>0){
+    g.save();g.globalAlpha=c;g.strokeStyle=SKY;g.lineWidth=2;g.beginPath();
+    g.arc(cx-40,cy,46,Math.PI*.5,Math.PI*1.5);g.arc(cx+10,cy-30,56,Math.PI,Math.PI*1.9);g.arc(cx+60,cy+4,40,Math.PI*1.5,Math.PI*.5);g.closePath();g.stroke();g.restore();
+    text(D.cloud,cx+10,cy+14,{size:22,font:SANS,align:'center',alpha:c});
+    (D.devices||[]).forEach((d,i)=>{const x=cx-240+i*240,y=cy+230,a=step(t,t0+4.4+i*.4,.7);
+      box(x-70,y-50,140,100,{alpha:a,stroke:SKY});text(d,x,y+10,{size:24,font:SANS,align:'center',alpha:a});
+      line(x,y-54,cx+10+(x-cx)*.2,cy+50,SKY,1.4,a*.7);});
+  }
+  if(PORTRAIT){flow(D.caption||'',W/2,1160,W-140,{size:34,align:'center',alpha:step(t,t0+6.4,.8),lineHeight:1.5});caption(D.license,t,t0+8,{y:1300,size:24,color:DIM});}
+  else{caption(D.caption,t,t0+6.4,{y:860,size:34});caption(D.license,t,t0+8,{y:930,size:24,color:DIM});}
+}
+function dSmart(t,t0){
+  const D=TEXT.smart||{};principle(D.principles||[],t,t0);
+  const x0=170,cw=W-2*x0;
+  const a=step(t,t0+.8,.9);
+  box(x0,250,cw,190,{alpha:a,dashed:true,stroke:GOLD,fill:'rgba(242,181,68,.06)'});
+  text(D.suggestLabel,x0+36,300,{size:22,font:SANS,color:GOLD,alpha:a});
+  flow(D.suggestion,x0+36,360,cw-72,{size:30,alpha:a,lineHeight:1.6});
+  const e=step(t,t0+3,1);
+  box(x0,490,cw,190,{alpha:e,stroke:JADE});
+  text(D.mineLabel,x0+36,540,{size:22,font:SANS,color:JADE,alpha:e});
+  flow(D.mine,x0+36,600,cw-72,{size:30,alpha:step(t,t0+3.6,1),lineHeight:1.6});
+  const h=step(t,t0+5.6,.8);
+  text(D.history,x0,740,{size:24,font:SANS,color:DIM,alpha:h});
+  caption(D.caption,t,t0+6.6,{y:880,size:36});
+}
+function dEnd(t,t0){
+  const names=TEXT.principles||[],cx=W/2,cy=470,r=330;
+  names.forEach((n,i)=>{const a=-Math.PI*2/3+i/names.length*Math.PI*2,p=step(t,t0+.2+i*.18,.7);
+    const w=measure(n,30,SANS)+42;chip(n,cx+Math.cos(a)*r*1.75-w/2,cy+20+Math.sin(a)*r*.95,{alpha:p,size:30,color:[SKY,JADE,GOLD,CORAL,VIOLET,SEAL][i]});});
+  kinetic(TEXT.end?.[0]||'',cy+20,t,t0+1.4,{size:96,per:.12,x:cx});
+  text(TEXT.end?.[1],cx,cy+100,{size:36,align:'center',alpha:step(t,t0+2.2,1)});
+  text(TEXT.end?.[2],cx,H-90,{size:24,align:'center',color:DIM,font:SANS,alpha:step(t,t0+3,1),spacing:3});
+}
+
+// ---------- Film A: 往返 · 穿梭 · 编织 — a mind grows into a net ----------
+// A seed of thought grows towards three fields — law and law, article and article, law and reality —
+// by space colonisation (Runions, Lane, Prusinkiewicz 2007): every branch reaches for the nearest
+// unclaimed points of a field. Where branches from different fields come close they fuse, so the
+// tree turns into a net: some chaos, some order. The growth is computed once, the same every run.
+let NET=null;
+const NET_CENTRES=PORTRAIT?[[270,980],[540,560],[810,980]]:[[470,440],[960,340],[1450,440]];
+// o (optional, the 竖屏 version): centres and spread of the fields, the root, a band of loose points.
+function buildNet(o={}){
+  const rnd=mulberry(2026),root=o.root?{x:o.root[0],y:o.root[1]}:{x:W/2,y:H-150},att=[],CEN=o.centres||NET_CENTRES,SP=o.spread||[PORTRAIT?.72:1.3,PORTRAIT?1.12:.82];
+  CEN.forEach(([fx,fy],f)=>{for(let k=0;k<330;k++){const a=rnd()*Math.PI*2,r=Math.sqrt(rnd())*270;att.push({x:fx+Math.cos(a)*r*SP[0],y:fy+Math.sin(a)*r*SP[1],f,alive:true});}});
+  for(let k=0;k<70;k++)att.push(o.noise?{x:o.noise[0]+rnd()*o.noise[1],y:o.noise[2]+rnd()*o.noise[3],f:-1,alive:true}:PORTRAIT?{x:160+rnd()*760,y:1240+rnd()*260,f:-1,alive:true}:{x:500+rnd()*920,y:540+rnd()*220,f:-1,alive:true});
+  const nodes=[{x:root.x,y:root.y,parent:-1,step:0,f:-1}];
+  // A short trunk first, so the growth starts as one line of thought.
+  for(let k=1;k<=10;k++)nodes.push({x:root.x+Math.sin(k*.7)*4,y:root.y-k*12,parent:k-1,step:k,f:-1});
+  const D=170,KILL=16,LEN=10;
+  for(let it=11;it<420;it++){
+    const pull=new Map();
+    for(const a of att){if(!a.alive)continue;let best=-1,bd=D*D;
+      for(let n=0;n<nodes.length;n++){const dx=a.x-nodes[n].x,dy=a.y-nodes[n].y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=n;}}
+      if(best<0)continue;if(bd<KILL*KILL){a.alive=false;continue;}
+      const v=pull.get(best)||{x:0,y:0,c:[0,0,0]};const l=Math.sqrt(bd);v.x+=(a.x-nodes[best].x)/l;v.y+=(a.y-nodes[best].y)/l;if(a.f>=0)v.c[a.f]++;pull.set(best,v);}
+    if(!pull.size)break;
+    for(const [n,v] of pull){const l=Math.hypot(v.x,v.y)||1,jit=(rnd()-.5)*.3;
+      const dx=v.x/l+jit,dy=v.y/l-jit,ll=Math.hypot(dx,dy);
+      const f=v.c.some(c=>c)?v.c.indexOf(Math.max(...v.c)):nodes[n].f;
+      nodes.push({x:nodes[n].x+dx/ll*LEN,y:nodes[n].y+dy/ll*LEN,parent:n,step:it,f});}
+  }
+  // Thickness from the number of descendants (the pipe model).
+  const desc=new Array(nodes.length).fill(1);
+  for(let n=nodes.length-1;n>0;n--)desc[nodes[n].parent]+=desc[n];
+  nodes.forEach((n,k)=>{n.w=Math.min(7,.7+Math.sqrt(desc[k])*.16);});
+  for(let n=nodes.length-1;n>10;n--){const par=nodes[n].parent;if(nodes[par].f<0&&nodes[n].f>=0&&par>10)nodes[par].f=nodes[n].f;}
+  const maxStep=nodes[nodes.length-1].step;
+  // Fusion: where branches of two different fields come close, they join. Joins are kept apart
+  // from one another so that the net stays open: some chaos, some order.
+  const links=[],used=[];
+  const free=(P)=>used.every(q=>Math.hypot(P.x-q.x,P.y-q.y)>48);
+  for(let a=40;a<nodes.length&&links.length<130;a+=2){
+    const A=nodes[a];if(A.f<0||!free(A))continue;
+    let best=-1,bd=170;
+    for(let b=40;b<nodes.length;b+=2){const B=nodes[b];if(B.f<0||B.f===A.f)continue;const d=Math.hypot(A.x-B.x,A.y-B.y);if(d>60&&d<bd){bd=d;best=b;}}
+    if(best>=0&&free(nodes[best])){links.push([a,best]);used.push(A,nodes[best]);}
+  }
+  // Keywords: spread along each field from bottom to top, each attached to a node of that field.
+  const words=[],placed=[],V=TEXT.weave||{};
+  (V.fields||[]).forEach(([,list],f)=>{
+    const band=o.bandX?o.bandX[f]:PORTRAIT?[[20,470],[300,780],[610,1060]][f]:[[90,700],[720,1200],[1220,1830]][f];
+    const cand=nodes.map((n,k)=>({n,k})).filter(({n,k})=>n.f===f&&k>60&&n.y<(o.root?o.root[1]-200:H-330)&&n.y>(o.minY!=null?o.minY+40:200)&&n.x>band[0]&&n.x<band[1]&&(!PORTRAIT||Math.hypot(n.x-CEN[f][0],n.y-CEN[f][1])<360)).sort((a,b)=>b.n.y-a.n.y);
+    list.forEach((w,i)=>{
+      const target=Math.floor((i+.5)/list.length*cand.length);
+      for(let d=0;d<cand.length;d++){const c=cand[(target+d)%cand.length];
+        if(placed.every(q=>Math.abs(q.x-c.n.x)>(o.keyGap?o.keyGap[0]:PORTRAIT?150:170)||Math.abs(q.y-c.n.y)>(o.keyGap?o.keyGap[1]:48))){placed.push(c.n);
+          words.push({text:w,f,node:c.k,x:c.n.x,y:c.n.y-12,seed:i*1.7+f,last:i>=list.length-2});break;}}
+    });
+  });
+  NET={nodes,links,maxStep,words,CEN};
+}
+function weave(t,t0,o={}){
+  if(!NET)buildNet(o);
+  const V=TEXT.weave||{},fields=V.fields||[],tone=[JADE,SKY,CORAL],toneRGB=['79,209,176','125,183,245','255,138,101'];
+  const gs=t0+(o.gs??2.2),growEnd=t0+(o.growEnd??16),g1=clamp((t-gs)/(growEnd-gs)),shown=Math.floor(Math.pow(g1,1.15)*NET.nodes.length);
+  const N=NET.nodes,maxY=o.root?o.root[1]:H-150,minY=o.minY??60,TG=o.titleGap||(PORTRAIT?230:260),TY=o.titleY??(PORTRAIT?130:84);
+  (V.title||'').split(' · ').forEach((w,k,all)=>{const x=W/2+(k-(all.length-1)/2)*TG;
+    text(w,x,TY,{size:o.titleSize||48,weight:o.titleWeight||400,align:'center',alpha:step(t,growEnd+3.6+k*.9,1),spacing:6});
+    if(k<all.length-1)text('·',x+TG/2,TY,{size:40,align:'center',color:GOLD,alpha:step(t,growEnd+4+k*.9,.8)});});
+  const fieldAt=o.fieldAt!=null?t0+o.fieldAt:growEnd+.6;
+  fields.forEach(([name],f)=>text(name,o.fieldX?o.fieldX[f]:NET.CEN[f][0],o.fieldY?o.fieldY(f):PORTRAIT?NET.CEN[f][1]-(f===1?360:420):160,{size:o.fieldSize||30,weight:o.fieldSize?600:400,align:'center',color:tone[f],alpha:step(t,fieldAt+f*.9,1),spacing:2}));
+  // Branches.
+  g.save();g.lineCap='round';
+  for(let k=1;k<Math.min(shown,N.length);k++){
+    const n=N[k],p=N[n.parent],fresh=clamp((shown-k)/120);
+    g.strokeStyle=n.f<0?GOLD:tone[n.f];g.globalAlpha=.32+.5*fresh;g.lineWidth=n.w;
+    g.beginPath();g.moveTo(p.x,p.y);g.lineTo(n.x,n.y);g.stroke();
+  }
+  g.restore();
+  // Pulses rise from the root to the tips; as the tree grows they come more often.
+  const pulses=[];let tp=gs+.6;
+  while(tp<t){const grown=clamp((tp-gs)/(growEnd-gs));tp+=2.6-1.7*grown;pulses.push(tp);}
+  g.save();g.lineCap='round';
+  pulses.forEach(start=>{const age=t-start;if(age<0||age>2.2)return;
+    const frontY=maxY-(maxY-minY)*(age/2.2);
+    for(let k=1;k<Math.min(shown,N.length);k++){const n=N[k],d=Math.abs(n.y-frontY);if(d>26)continue;const p=N[n.parent];
+      g.strokeStyle=n.f<0?'rgba(242,181,68,1)':'rgba('+toneRGB[n.f]+',1)';g.globalAlpha=.75*(1-d/26)*(1-age/2.6);g.lineWidth=n.w+2;
+      g.beginPath();g.moveTo(p.x,p.y);g.lineTo(n.x,n.y);g.stroke();}
+  });
+  g.restore();
+  // Lightning between fields: a jagged bright link that flashes, glows, and fades, then another.
+  const L=NET.links,cycle=1.15;
+  L.forEach(([a,b],k)=>{
+    if(a>=shown||b>=shown)return;
+    const born=gs+(Math.max(a,b)/N.length)**(1/1.15)*(growEnd-gs);
+    const offset=(k*.613)%1*cycle*4,phase=(t-born-offset)/ (cycle*4);if(t<born)return;
+    const local=((phase%1)+1)%1*4;if(local>1)return;           // each link flashes once every ~4.6 s
+    const life=local<.12?local/.12:1-(local-.12)/.88;
+    const A=N[a],B=N[b],rnd=mulberry(k*97+Math.floor(phase)*13),segs=7;
+    const pts=[[A.x,A.y]];
+    for(let s=1;s<segs;s++){const u=s/segs,nx=-(B.y-A.y),ny=B.x-A.x,l=Math.hypot(nx,ny)||1,o=(rnd()-.5)*26;
+      pts.push([A.x+(B.x-A.x)*u+nx/l*o,A.y+(B.y-A.y)*u+ny/l*o]);}
+    pts.push([B.x,B.y]);
+    g.save();g.lineJoin='round';g.lineCap='round';
+    for(const [w,al] of [[10,.2],[3,.95]]){g.strokeStyle=al<.5?GOLD:'#FFF3D0';g.globalAlpha=al*life;g.lineWidth=w;
+      g.beginPath();g.moveTo(...pts[0]);pts.slice(1).forEach(q=>g.lineTo(...q));g.stroke();}
+    for(const P of [A,B]){const gr=g.createRadialGradient(P.x,P.y,0,P.x,P.y,14);gr.addColorStop(0,'rgba(255,236,190,'+life+')');gr.addColorStop(1,'rgba(242,181,68,0)');
+      g.globalAlpha=1;g.fillStyle=gr;g.beginPath();g.arc(P.x,P.y,14,0,Math.PI*2);g.fill();}
+    g.restore();
+  });
+  // Keywords: each sits near a branch of its field, appears as the tree reaches it (lower ones first),
+  // twinkles like a star for a while, then fades and leaves room for others.
+  (NET.words||[]).forEach(w=>{
+    if(w.node>=shown)return;
+    const born=gs+(w.node/N.length)**(1/1.15)*(growEnd-gs),age=t-born,life=w.last?99:(o.life||4.2),WS=o.wordSize||22;
+    if(age<0||age>life+.8)return;
+    const a=Math.min(1,age/.6)*(1-clamp((age-life)/.8));
+    const tw=.72+.28*Math.sin(t*2.2+w.seed);
+    const gr=g.createRadialGradient(w.x,w.y-7,0,w.x,w.y-7,46);gr.addColorStop(0,'rgba('+toneRGB[w.f]+','+(.32*tw*a)+')');gr.addColorStop(1,'rgba('+toneRGB[w.f]+',0)');
+    g.save();g.fillStyle=gr;g.beginPath();g.arc(w.x,w.y-7,46,0,Math.PI*2);g.fill();
+    // A four-pointed glint beside the word.
+    const sx=w.x-measure(w.text,WS,SANS)/2-16,sy=w.y-8,r=7*tw*WS/22;
+    g.globalAlpha=a*tw;g.fillStyle=PAPER;g.beginPath();g.moveTo(sx,sy-r);g.lineTo(sx+1.6,sy-1.6);g.lineTo(sx+r,sy);g.lineTo(sx+1.6,sy+1.6);g.lineTo(sx,sy+r);g.lineTo(sx-1.6,sy+1.6);g.lineTo(sx-r,sy);g.lineTo(sx-1.6,sy-1.6);g.fill();
+    g.restore();
+    text(w.text,w.x,w.y,{size:WS,font:SANS,weight:o.wordSize?600:400,align:'center',color:PAPER,alpha:a*(.75+.25*tw)});
+  });
+  // The seed: a note, glowing, before anything grows.
+  const sa=step(t,t0+.3,1.2),sx=W/2,sy=o.seedY??H-118;
+  if(sa>0){const gr=g.createRadialGradient(sx,sy-10,0,sx,sy-10,90);gr.addColorStop(0,'rgba(242,181,68,'+(.35*sa*(.8+.2*Math.sin(t*2)))+')');gr.addColorStop(1,'rgba(242,181,68,0)');
+    g.save();g.fillStyle=gr;g.beginPath();g.arc(sx,sy-10,90,0,Math.PI*2);g.fill();g.restore();}
+  text(V.seed,sx,sy+40,{size:o.seedSize||30,weight:o.seedSize?600:400,align:'center',color:GOLD,alpha:sa,spacing:4});
+}
+
+
+// =====================================================================================================
+// Film D (new): 法律人的智能笔记 — shell, tools and soul; the principles of using AI; you are your data;
+// your data is your model.
+// =====================================================================================================
+// Notes as a growing cluster of coloured dots, the same for a given seed and count.
+function noteCloud(cx,cy,count,radius,t,{alpha=1,seed=11}={}){
+  const rnd=mulberry(seed),cols=[SKY,JADE,GOLD,CORAL,VIOLET];
+  for(let i=0;i<count;i++){
+    const a=rnd()*Math.PI*2,r=Math.sqrt(rnd())*radius,c=cols[Math.floor(rnd()*5)],ph=rnd()*6.28;
+    const x=cx+Math.cos(a+.05*Math.sin(t*.4+ph))*r,y=cy+Math.sin(a+.05*Math.sin(t*.4+ph))*r*.9;
+    g.save();g.globalAlpha=alpha*(.55+.45*Math.sin(t*1.3+ph)**2);g.fillStyle=c;g.beginPath();g.arc(x,y,3.4,0,Math.PI*2);g.fill();g.restore();
+    if(i%7===0&&i>7){const b=rnd()*Math.PI*2,rr=Math.sqrt(rnd())*radius;line(x,y,cx+Math.cos(b)*rr,cy+Math.sin(b)*rr*.9,'rgba(247,243,232,.12)',1,alpha);}
+  }
+}
+function d2Open(t,t0){
+  kinetic(TEXT.open?.[0]||'',450,t,t0+.2,{size:96,per:.12,x:W/2});
+  
+  text(TEXT.open?.[1],W/2,590,{size:36,align:'center',alpha:step(t,t0+1.8,1.2),color:DIM});
+}
+// 法典是外壳，代码是工具，笔记是灵魂: the shell changes, the tools are updated, the soul keeps growing.
+function dShell(t,t0){
+  const S=TEXT.shell||{},cx=W/2,cy=520,shells=S.shells||[],tools=S.tools||[];
+  const local=t-t0,span=3.4,first=3.2,k=Math.max(0,Math.min(shells.length-1,Math.floor((local-first)/span)));
+  const swap=clamp((local-first-k*span)/.8);
+  // Soul: the notes, growing all the time, never replaced.
+  const grown=Math.floor(30+260*clamp((local-.6)/(S.grow||11)));
+  const glow=g.createRadialGradient(cx,cy,0,cx,cy,170);glow.addColorStop(0,'rgba(242,181,68,.22)');glow.addColorStop(1,'rgba(242,181,68,0)');
+  g.save();g.globalAlpha=step(t,t0+.6,1);g.fillStyle=glow;g.beginPath();g.arc(cx,cy,170,0,Math.PI*2);g.fill();g.restore();
+  noteCloud(cx,cy,grown,120,t,{alpha:step(t,t0+.6,1)});
+  // Tools: a ring of code that turns, with the version it is at.
+  const ta=step(t,t0+1.6,1);
+  if(ta>0){g.save();g.globalAlpha=ta;g.strokeStyle='rgba(125,183,245,.55)';g.lineWidth=1.4;g.setLineDash([3,9]);g.lineDashOffset=-local*20;
+    g.beginPath();g.arc(cx,cy,230,0,Math.PI*2);g.stroke();g.restore();
+    const code='function readUnit(id){ … } · render() · merge(state, file) · exportMarkdown() · ';
+    for(let i=0;i<code.length;i++){const a=-Math.PI/2+i/code.length*Math.PI*2+local*.08;
+      g.save();g.globalAlpha=ta*.7;g.translate(cx+Math.cos(a)*262,cy+Math.sin(a)*262);g.rotate(a+Math.PI/2);
+      text(code[i],0,0,{size:15,font:'Menlo,monospace',align:'center',color:SKY});g.restore();}
+  }
+  // Shell: the outline of a book around everything, which changes code by code.
+  const sa=step(t,t0+2.4,1);
+  if(sa>0){const fade=k>0?Math.min(1,.25+swap):1;
+    box(cx-420,cy-330,840,660,{alpha:sa*fade,stroke:'rgba(176,138,74,.9)',fill:'rgba(0,0,0,0)',r:24});
+    g.save();g.globalAlpha=sa*fade;g.fillStyle=GOLD;g.fillRect(cx-420,cy-330,12,660);g.restore();
+    text(shells[k],cx,cy-280,{size:34,align:'center',color:GOLD,alpha:sa*fade,spacing:6});
+    text(tools[k],cx,cy+300,{size:22,font:'Menlo,monospace',align:'center',color:SKY,alpha:ta*fade});
+  }
+  // The three words, at the side, each with its layer.
+  if(PORTRAIT){(S.labels||[]).forEach(([word,tone],i)=>{const a=step(t,t0+.8+i*.8,.8);text(word,W/2,cy+440+i*86,{size:44,align:'center',color:{gold:GOLD,sky:SKY,amber:GOLD}[tone]||PAPER,alpha:a});});return;}
+  (S.labels||[]).forEach(([word,tone],i)=>{const a=step(t,t0+.8+i*.8,.8),y=360+i*130,x=160;
+    text(word,x,y,{size:44,alpha:a});line(x+measure(word,44)+20,y-14,cx-430+(i===2?300:i===1?150:0),y-14,{gold:GOLD,sky:SKY,amber:GOLD}[tone]||GOLD,1,a*.6);});
+}
+// The six principles of using AI (course, part one, slide 5), each with what the notebook does.
+function dAI(t,t0){
+  const A=TEXT.ai||{},rows=A.rows||[],x0=150,y0=250,lh=112,first=t0+2,span=3.9;
+  text(A.title,x0,130,{size:46,alpha:step(t,t0,.8),spacing:4});
+  text(A.source,W-110,130,{size:22,font:SANS,align:'right',color:DIM,alpha:step(t,t0+.6,1)});
+  const active=Math.floor((t-first)/span),all=active>=rows.length;
+  rows.forEach(([rule,does],i)=>{
+    const y=y0+i*lh,on=all||i===active,a=step(t,t0+.6+i*.15,.6)*(on?1:.42);
+    text(String(i+1),x0,y,{size:30,font:SANS,color:on?GOLD:DIM,alpha:a});
+    text(rule,x0+50,y,{size:34,alpha:a});
+    const d=on&&!all?step(t,first+i*span+.5,.7):0;
+    if(d>0){const bx=x0+50,by=y+18;
+      text('法典笔记：'+does,bx,by+36,{size:24,font:SANS,color:JADE,alpha:d});
+      }
+  });
+  caption(A.caption,t,first+rows.length*span+.2,{y:H-56,size:34});
+}
+// 你就是数据，数据就是你: the notes gather into the character 你, then into 数据, and back.
+let GLYPHS=null;
+function glyphPoints(str,cx,cy,size,stepPx){
+  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  x.fillStyle='#fff';x.font=`700 ${size}px ${SERIF}`;x.textAlign='center';x.textBaseline='middle';x.fillText(str,cx,cy);
+  const d=x.getImageData(0,0,W,H).data,pts=[];
+  for(let y=0;y<H;y+=stepPx)for(let xx=0;xx<W;xx+=stepPx)if(d[(y*W+xx)*4+3]>128)pts.push([xx,y]);
+  return pts;
+}
+function dYou(t,t0){
+  const Y=TEXT.you||{};
+  if(!GLYPHS){const gy=PORTRAIT?H/2-120:500,a=glyphPoints('你',W/2,gy,PORTRAIT?620:560,9),b=glyphPoints('数据',W/2,gy,PORTRAIT?460:440,9),n=Math.max(a.length,b.length),rnd=mulberry(5);
+    const fill=(p)=>{const out=p.slice();while(out.length<n)out.push(p[Math.floor(rnd()*p.length)]);for(let i=out.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;};
+    const cols=[SKY,JADE,GOLD,CORAL,VIOLET];
+    GLYPHS={you:fill(a),data:fill(b),start:Array.from({length:n},()=>[rnd()*W,H+40+rnd()*300]),col:Array.from({length:n},()=>cols[Math.floor(rnd()*5)]),delay:Array.from({length:n},()=>rnd())};}
+  const G=GLYPHS,local=t-t0;
+  // 0–5 s notes rise and form 你; 7–9 s morph to 数据; 12–14 s back to 你.
+  const gather=c=>clamp((local-.4-c*1.8)/3),toData=ease(clamp((local-7)/2)),back=ease(clamp((local-12.2)/1.8));
+  for(let i=0;i<G.you.length;i++){
+    const gg=ease(gather(G.delay[i])),[sx,sy]=G.start[i],[ux,uy]=G.you[i],[dx,dy]=G.data[i];
+    let x=sx+(ux-sx)*gg,y=sy+(uy-sy)*gg;
+    const m=toData*(1-back);x+= (dx-ux)*m;y+=(dy-uy)*m;
+    const tw=.7+.3*Math.sin(t*2+i);
+    g.save();g.globalAlpha=(.25+.75*gg)*tw;g.fillStyle=G.col[i];g.beginPath();g.arc(x,y,2.8,0,Math.PI*2);g.fill();g.restore();
+  }
+  text(Y.lines?.[0],W/2,H-120,{size:40,align:'center',alpha:step(t,t0+3.4,.8)*(1-step(t,t0+6.8,.6))});
+  text(Y.lines?.[1],W/2,H-120,{size:40,align:'center',alpha:step(t,t0+8.4,.8)*(1-step(t,t0+11.8,.6))});
+  text(Y.lines?.[2],W/2,H-120,{size:40,align:'center',alpha:step(t,t0+13.4,.8)});
+  text(Y.lines?.[3],W/2,H-60,{size:26,font:SANS,align:'center',color:GOLD,alpha:step(t,t0+14,.8)});
+}
+
+// Kinetic type: 外壳可以更换，工具可以更新；在笔记里生长的理性技艺，才是灵魂。
+// Each line types in; its key words take their colour and move as they mean: 更换 flips, 更新 ticks
+// forward, 理性技艺 grows, 灵魂 glows and stays while the rest steps back.
+function kineticLine(str,keys,x,y,size,t,start,{align='center',dim=0}={}){
+  const total=measure(str,size),x0=align==='center'?x-total/2:x;let cx=x0;
+  for(let i=0;i<str.length;i++){
+    const ch=str[i],w=measure(ch,size),ts=start+i*.07,p=ease(clamp((t-ts)/.5));
+    const key=keys.find(k=>i>=k.at&&i<k.at+k.word.length);
+    let sx=1,sy=1,dy=(1-p)*26,color=PAPER,alpha=p*(1-dim);
+    if(key){const kp=ease(clamp((t-key.start)/.7));color=kp>0?key.color:PAPER;alpha=p*(1-dim*(key.keep?0:1));
+      if(key.move==='flip'){const f=clamp((t-key.start)/.8);sx=Math.abs(Math.cos(f*Math.PI*2));if(f>=1)sx=1;}
+      if(key.move==='grow'){const s2=1+.1*kp;sx=sy=s2;dy-=6*kp;}
+      if(key.move==='tick'){dy-=6*Math.sin(clamp((t-key.start)/.6)*Math.PI);}
+      if(key.move==='glow'&&kp>0){const r=size*1.4*(1+.08*Math.sin(t*3));const gr=g.createRadialGradient(cx+w/2,y-size*.35,0,cx+w/2,y-size*.35,r);
+        gr.addColorStop(0,'rgba(242,181,68,'+.35*kp+')');gr.addColorStop(1,'rgba(242,181,68,0)');g.save();g.fillStyle=gr;g.fillRect(cx+w/2-r,y-size*.35-r,2*r,2*r);g.restore();sx=sy=1+.1*kp;}
+    }
+    g.save();g.translate(cx+w/2,y-size*.35+dy);g.scale(sx,sy);g.translate(-(cx+w/2),-(y-size*.35));
+    text(ch,cx,y,{size,color,alpha});g.restore();
+    cx+=w;
+  }
+}
+function dSoul(t,t0){
+  const K=TEXT.soul||{},size=64;
+  const l1=K.lines?.[0]||'',l2=K.lines?.[1]||'',l3=K.lines?.[2]||'',dim=step(t,t0+8.4,1)*.7;
+  const key=(line,word,color,move,start,keep)=>({word,at:line.indexOf(word),color,move,start,keep});
+  kineticLine(l1,[key(l1,'外壳',GOLD,'',t0+1.2),key(l1,'更换',GOLD,'flip',t0+1.8)],W/2,400,size,t,t0+.3,{dim});
+  kineticLine(l2,[key(l2,'工具',SKY,'',t0+3.2),key(l2,'更新',SKY,'tick',t0+3.8)],W/2,530,size,t,t0+2.4,{dim});
+  if(PORTRAIT&&measure(l3,size+8)>W-120){const cut=l3.indexOf('，')+1,a3=l3.slice(0,cut),b3=l3.slice(cut);
+    kineticLine(a3,[key(a3,'理性技艺',JADE,'grow',t0+6.4,true)],W/2,700,size+8,t,t0+4.6,{dim:dim*.6});
+    kineticLine(b3,[key(b3,'灵魂',GOLD,'glow',t0+7.6,true)],W/2,810,size+8,t,t0+4.6+cut*.07,{dim:dim*.6});}
+  else kineticLine(l3,[key(l3,'理性技艺',JADE,'grow',t0+6.4,true),key(l3,'灵魂',GOLD,'glow',t0+7.6,true)],W/2,700,size+8,t,t0+4.6,{dim:dim*.6});
+  const lw=measure(l3,size+8);
+}
+
+// 工作可以外包，学习和思考不可以 — two people, one notebook each. On the left the AI writes the note
+// and the mind goes dark; on the right the AI helps and the mind lights up as the person writes.
+function mind(cx,cy,level,t,seed){
+  const rnd=mulberry(seed),pts=[];
+  for(let i=0;i<56;i++){const a=rnd()*Math.PI*2,r=Math.sqrt(rnd())*150;pts.push({x:cx+Math.cos(a)*r*1.15,y:cy+Math.sin(a)*r*.85,th:rnd()});}
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const A=pts[i],B=pts[j],d=Math.hypot(A.x-B.x,A.y-B.y);if(d>70)continue;
+    const on=A.th<level&&B.th<level;line(A.x,A.y,B.x,B.y,on?JADE:'rgba(247,243,232,.25)',on?1.6:1,on?.6:.18);}
+  pts.forEach(P=>{const on=P.th<level;g.save();g.globalAlpha=on?.95:.35;g.fillStyle=on?(P.th<level*.5?GOLD:JADE):'rgba(247,243,232,.5)';
+    g.beginPath();g.arc(P.x,P.y,on?5+1.2*Math.sin(t*3+P.th*9):3.2,0,Math.PI*2);g.fill();g.restore();});
+}
+function aiNode(x,y,a){if(a<=0)return;g.save();g.globalAlpha=a;g.strokeStyle=VIOLET;g.lineWidth=2;g.fillStyle='rgba(183,156,255,.15)';g.beginPath();
+  for(let k=0;k<6;k++){const an=Math.PI/6+k*Math.PI/3;g.lineTo(x+Math.cos(an)*44,y+Math.sin(an)*44);}g.closePath();g.fill();g.stroke();g.restore();
+  text('AI',x,y+12,{size:34,font:SANS,align:'center',color:VIOLET,alpha:a});}
+function noteCard(x,y,w,h,p,{lines=6,color=PAPER,label='',alpha=1,instant=false}={}){
+  if(p<=0)return;box(x,y,w,h,{alpha,stroke:color,fill:'rgba(15,42,43,.9)',r:10});
+  for(let i=0;i<lines;i++){const q=instant?p:clamp(p*lines-i);if(q<=0)break;const lw=(w-50)*(i===0?.5:.6+.35*((i*37)%10)/10);
+    g.save();g.globalAlpha=alpha*(i===0?.8:.45);g.fillStyle=color;g.fillRect(x+25,y+36+i*26,lw*q,i===0?4:3);g.restore();}
+  text(label,x+w/2,y+h+34,{size:22,font:SANS,align:'center',color,alpha});
+}
+function dOutsource(t,t0){
+  const O=TEXT.outsource||{},L=W*.27,R=W*.73,cy=470,local=t-t0,Z=1.12;
+  text(O.title,W/2,100,{size:52,align:'center',alpha:step(t,t0,.9),spacing:4});
+  line(W/2,210,W/2,H-150,'rgba(247,243,232,.2)',1,step(t,t0+.8,.8));
+  text(O.left,L,175,{size:32,align:'center',color:CORAL,alpha:step(t,t0+1,.8)});
+  text(O.right,R,175,{size:32,align:'center',color:JADE,alpha:step(t,t0+1,.8)});
+  const show=step(t,t0+1.2,.8);if(show<=0)return;
+  g.save();g.globalAlpha=show;g.translate(W/2,cy+40);g.scale(Z,Z);g.translate(-W/2,-cy);
+  // Left: the AI writes the note at once; the mind dims, link by link.
+  aiNode(L-200,cy-160,1);
+  const leftCard=step(t,t0+2.4,.4);
+  line(L-160,cy-140,L+120,cy-130,'rgba(183,156,255,.6)',2,leftCard);
+  noteCard(L+60,cy-200,200,150,leftCard,{color:'rgba(247,243,232,.55)',label:O.leftCard,instant:true});
+  mind(L-40,cy+120,.85-.8*clamp((local-3)/7),t,41);
+  // Right: the AI only helps; each kind of help is a spark into the mind; the person writes.
+  aiNode(R+150,cy-210,1);
+  (O.helps||[]).forEach((h,i)=>{const st=t0+2.4+i*1.4,u=clamp((t-st)/1.1);if(u<=0)return;
+    const sx=R+150,sy=cy-170,ex=R+20+(i-1.5)*30,ey=cy+60,x=sx+(ex-sx)*ease(u),y=sy+(ey-sy)*ease(u);
+    if(u<1){const gr=g.createRadialGradient(x,y,0,x,y,14);gr.addColorStop(0,'rgba(242,181,68,.95)');gr.addColorStop(1,'rgba(242,181,68,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,14,0,Math.PI*2);g.fill();}
+    const w=measure(h,22,SANS)+28,lx=R+250,ly=cy-90+i*52;
+    box(lx-w/2,ly-22,w,38,{alpha:step(t,st,.5),stroke:GOLD,fill:'rgba(15,42,43,.9)',r:19});text(h,lx,ly+6,{size:22,font:SANS,align:'center',alpha:step(t,st,.5)});});
+  const lit=.15+.8*clamp((local-2.6)/7);mind(R+20,cy+120,lit,t,43);
+  const write=clamp((local-5)/4.5);
+  line(R+20,cy+20,R-150,cy-120,'rgba(79,209,176,.6)',2,step(t,t0+5,.6));
+  noteCard(R-300,cy-200,200,150,write,{color:JADE,label:O.rightCard});
+  g.restore();
+  text(O.leftEnd,L,H-150,{size:32,align:'center',color:CORAL,alpha:step(t,t0+9,.8)});
+  text(O.rightEnd,R,H-150,{size:32,align:'center',color:JADE,alpha:step(t,t0+9,.8)});
+  text(O.caption,W/2,H-62,{size:30,align:'center',alpha:step(t,t0+11,1)});
+}
+// Over time: the AI baseline rises; thinking climbs above it, outsourcing falls below it.
+function dCurve(t,t0){
+  const C=TEXT.curve||{},x0=PORTRAIT?110:300,x1=PORTRAIT?W-300:W-380,y0=PORTRAIT?1060:820,y1=PORTRAIT?360:240,local=t-t0,p=clamp((local-1)/6.5);
+  text(C.title,W/2,120,{size:46,align:'center',alpha:step(t,t0,.8)});
+  const a=step(t,t0+.4,.8);
+  line(x0,y0,x1+40,y0,'rgba(247,243,232,.5)',1.5,a);line(x0,y0,x0,y1-40,'rgba(247,243,232,.5)',1.5,a);
+  text(C.axes?.[0],x1+40,y0+44,{size:24,font:SANS,align:'right',color:DIM,alpha:a});
+  text(C.axes?.[1],x0-20,y1-50,{size:24,font:SANS,align:'right',color:DIM,alpha:a});
+  const curves=[
+    {f:u=>.25+.35*u,color:VIOLET,dash:true,label:C.labels?.[0]},
+    {f:u=>.18+.78*Math.pow(u,1.25),color:JADE,label:C.labels?.[1]},
+    {f:u=>.3+.06*Math.sin(u*3)-.18*u*u,color:CORAL,label:C.labels?.[2]}];
+  curves.forEach(c=>{g.save();g.strokeStyle=c.color;g.lineWidth=c.dash?2.4:3.4;if(c.dash)g.setLineDash([10,8]);g.globalAlpha=a;g.beginPath();
+    for(let k=0;k<=100*p;k++){const u=k/100,x=x0+(x1-x0)*u,y=y0-(y0-y1)*c.f(u);k?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();g.restore();
+    if(p>0){const x=x0+(x1-x0)*p,y=y0-(y0-y1)*c.f(p);g.save();g.fillStyle=c.color;g.beginPath();g.arc(x,y,7,0,Math.PI*2);g.fill();g.restore();
+      text(c.label,x+18,y+8,{size:26,font:SANS,color:c.color,alpha:step(t,t0+2,.8)});}});
+  // Where outsourcing falls under the baseline.
+  const cross=.21;if(p>cross){const x=x0+(x1-x0)*cross,y=y0-(y0-y1)*(.25+.35*cross);const q=step(t,t0+1+cross*6.5,.6);
+    g.save();g.globalAlpha=q;g.strokeStyle=CORAL;g.lineWidth=2;g.beginPath();g.arc(x,y,16,0,Math.PI*2);g.stroke();g.restore();
+    text(C.marks?.[0],x,y+56,{size:22,font:SANS,align:'center',color:CORAL,alpha:q});}
+  if(PORTRAIT)flow(C.caption||'',W/2,H-170,W-140,{size:32,align:'center',alpha:step(t,t0+8,1),lineHeight:1.5});else text(C.caption,W/2,H-90,{size:32,align:'center',alpha:step(t,t0+8,1)});
+  text(C.source,W/2,H-40,{size:18,font:SANS,align:'center',color:'rgba(247,243,232,.45)',alpha:step(t,t0+8.6,1)});
+}
+
+// 积累的数据就是模型: notes flow into a network whose connections strengthen as they accumulate.
+function dModel(t,t0){
+  const M2=TEXT.model||{},local=t-t0,acc=clamp((local-1)/10);
+  text(M2.title,W/2,120,{size:48,align:'center',alpha:step(t,t0,.8),spacing:4});
+  const layers=[5,8,8,5,1],x0=PORTRAIT?310:620,x1=PORTRAIT?W-150:1500,cy=520,rnd=mulberry(31);
+  const pos=layers.map((n,l)=>Array.from({length:n},(_,i)=>({x:x0+(x1-x0)*l/(layers.length-1),y:cy+(i-(n-1)/2)*(l===layers.length-1?0:72),th:l===layers.length-1?.78:rnd()*.72})));
+  const act=n=>clamp((acc-n.th)*6);   // each neuron switches on at its own threshold
+  const show=step(t,t0+.8,1),cols=[SKY,JADE,GOLD,CORAL];
+  for(let l=0;l<layers.length-1;l++)for(const a of pos[l])for(const b of pos[l+1]){
+    const on=Math.min(act(a),act(b));line(a.x,a.y,b.x,b.y,on>0?cols[l]:'rgba(247,243,232,.5)',.7+2*on,(.07+.6*on)*show);
+    // Signals travel along active connections.
+    if(on>.5){const u=((local*.9+(a.y+b.x)*.003)%1),x=a.x+(b.x-a.x)*u,y=a.y+(b.y-a.y)*u;
+      g.save();g.globalAlpha=show*on*Math.sin(Math.PI*u);g.fillStyle=PAPER;g.beginPath();g.arc(x,y,2.6,0,Math.PI*2);g.fill();g.restore();}
+  }
+  let count=0,total=0;
+  pos.forEach((L,l)=>L.forEach(n=>{const on=act(n),last=l===layers.length-1,r=last?34:9+3*on;total++;if(on>.5)count++;
+    if(on>0){const gr=g.createRadialGradient(n.x,n.y,0,n.x,n.y,r*3);gr.addColorStop(0,`rgba(242,181,68,${.45*on})`);gr.addColorStop(1,'rgba(242,181,68,0)');g.save();g.globalAlpha=show;g.fillStyle=gr;g.beginPath();g.arc(n.x,n.y,r*3,0,Math.PI*2);g.fill();g.restore();}
+    g.save();g.globalAlpha=show;g.fillStyle=on>0?(last?GOLD:cols[Math.min(l,3)]):'#0F2A2F';g.strokeStyle=on>0?PAPER:'rgba(247,243,232,.55)';g.lineWidth=1.6;
+    g.beginPath();g.arc(n.x,n.y,r,0,Math.PI*2);g.fill();g.stroke();g.restore();}));
+  text(`${count} / ${total}`,x0+(x1-x0)/2,cy+340,{size:24,font:'Menlo,monospace',align:'center',color:DIM,alpha:show});
+  text(M2.active,x0+(x1-x0)/2,cy+374,{size:20,font:SANS,align:'center',color:DIM,alpha:show});
+  text(M2.output,PORTRAIT?x1-40:x1,cy+80,{size:30,align:'center',color:GOLD,alpha:step(t,t0+8.6,1)});
+  const kinds=M2.inputs||[],ic=[SKY,JADE,GOLD,CORAL,VIOLET];
+  for(let i=0;i<15;i++){const lane=i%5,ph=(Math.floor(i/5)/3+lane*.07)%1,u=((local*.16+ph)%1);if(local<1+lane*.3)continue;
+    const sx=PORTRAIT?120:120,ex=x0,y=pos[0][lane].y,x=sx+(ex-sx)*u,label=kinds[(i*3)%kinds.length],a=Math.min(1,Math.sin(Math.PI*u)*1.6)*.95;
+    if(u<.75){const w=measure(label,20,SANS)+22;box(x-w/2,y-16,w,30,{alpha:a,stroke:ic[lane],fill:'rgba(15,42,43,.9)',r:15});text(label,x,y+7,{size:20,font:SANS,align:'center',alpha:a});}
+    else{g.save();g.globalAlpha=a;g.fillStyle=ic[lane];g.beginPath();g.arc(x,y,4,0,Math.PI*2);g.fill();g.restore();}
+  }
+  if(PORTRAIT){flow(M2.lines?.[0]||'',W/2,H-230,W-140,{size:38,align:'center',alpha:step(t,t0+10,1),lineHeight:1.5});}else text(M2.lines?.[0],W/2,H-110,{size:38,align:'center',alpha:step(t,t0+10,1)});
+  text(M2.lines?.[1],W/2,H-52,{size:30,align:'center',color:GOLD,alpha:step(t,t0+11.4,1)});
+}
+function d2End(t,t0){
+  const names=TEXT.principles||[],cx=W/2,cy=PORTRAIT?H/2-60:430,r=330,rx=PORTRAIT?1.15:1.75,ry=PORTRAIT?1.6:.95;
+  names.forEach((n,i)=>{const a=(PORTRAIT?-Math.PI/2:-Math.PI*2/3)+i/names.length*Math.PI*2+.04*Math.sin((t-t0)*.5),p=step(t,t0+.2+i*.18,.7);
+    const w=measure(n,30,SANS)+42;chip(n,cx+Math.cos(a)*r*rx-w/2,cy+60+Math.sin(a)*r*ry,{alpha:p,size:30,color:[SKY,JADE,GOLD,CORAL,VIOLET,SEAL][i]});});
+  kinetic(TEXT.end?.[0]||'',cy+10,t,t0+1.2,{size:90,per:.12,x:cx});
+  const m=TEXT.end?.[1]||'',key=w=>({word:w,at:m.indexOf(w)});
+  kineticLine(m,[{...key('外壳'),color:GOLD,move:'',start:t0+3},{...key('工具'),color:SKY,move:'tick',start:t0+3.6},{...key('灵魂'),color:GOLD,move:'glow',start:t0+4.4,keep:true}],cx,cy+120,44,t,t0+2);
+  
+  text(TEXT.end?.[2],cx,H-90,{size:24,align:'center',color:DIM,font:SANS,alpha:step(t,t0+5.6,1),spacing:3});
+}
+
+// ---------- Film A: 法权分析 on Article 37 — who holds which “权”, and how they meet ----------
+// Only relations that the article itself contains are drawn; the third kind is left in the legend.
+// This is an illustration of the method, not an analysis of the article, and the frame says so.
+function faquan37(t,t0){
+  if(PORTRAIT)return faquan37P(t,t0);
+  const F=TEXT.faquan37||{},lx=480,rx=W-500,top=330;
+  text(F.subjects?.[0],lx,top-70,{size:30,align:'center',alpha:step(t,t0,.9),color:DIM,font:SANS,spacing:2});
+  text(F.subjects?.[1],rx,top-70,{size:30,align:'center',alpha:step(t,t0,.9),color:DIM,font:SANS,spacing:2});
+  
+  const node=(q,who,kind,x,y,side)=>({q,who,kind,x,y,side});
+  const N=[node('人身自由','公民 · 第三十七条','权利',lx,top+40,'l'),node('批准','人民检察院','权力',rx,top+40,'r'),
+           node('决定','人民法院','权力',rx,top+175,'r'),node('执行','公安机关','权力',rx,top+310,'r'),
+           node('人格尊严','另一位公民 · 第三十八条','权利',lx,top+310,'l')];
+  N.forEach((n,i)=>{
+    const p=step(t,t0+.8+i*.4,.7);if(p<=0)return;
+    box(n.x-170,n.y-46,340,92,{alpha:p,stroke:n.side==='l'?SKY:CORAL,fill:'rgba(247,243,232,.05)',r:8});
+    text(n.q,n.x-138,n.y+4,{size:34,alpha:p});
+    text(n.who,n.x-138,n.y+34,{size:18,font:SANS,color:DIM,alpha:p});
+    text(n.kind,n.x+138,n.y+10,{size:20,font:SANS,color:n.side==='l'?SKY:CORAL,align:'right',alpha:p});
+  });
+  const curve=(x1,y1,x2,y2,p,vertical=false,bulge=0)=>{g.save();g.strokeStyle=SEAL;g.lineWidth=2;g.globalAlpha=.9*p;g.beginPath();g.moveTo(x1,y1);
+    for(let s=1;s<=40*p;s++){const u=s/40;const mx=vertical?x1+bulge:(x1+x2)/2;
+      g.lineTo((1-u)**3*x1+3*(1-u)**2*u*mx+3*(1-u)*u*u*mx+u**3*x2,(1-u)**3*y1+3*(1-u)**2*u*y1+3*(1-u)*u*u*y2+u**3*y2);}
+    g.stroke();g.restore();};
+  const rel=F.relations||[];
+  // 权利—权力
+  const a=step(t,t0+3,1.2);curve(N[0].x+170,N[0].y,N[1].x-170,N[1].y,a);
+  text(rel[0],W/2,N[0].y-18,{size:24,align:'center',color:SEAL,font:SANS,alpha:step(t,t0+3.6,.8)});
+  // 权力—权力
+  const b=step(t,t0+4.6,1.2);curve(N[1].x+170,N[1].y,N[3].x+170,N[3].y,b,true,120);
+  if(b>0){g.save();g.translate(N[1].x+298,(N[1].y+N[3].y)/2);g.rotate(Math.PI/2);text(rel[2],0,-14,{size:24,align:'center',color:SEAL,font:SANS,alpha:step(t,t0+5.2,.8)});g.restore();}
+  // 权利—权利: one person's liberty and another's dignity.
+  const c=step(t,t0+6.2,1.2);curve(N[0].x-170,N[0].y,N[4].x-170,N[4].y,c,true,-120);
+  if(c>0){g.save();g.translate(N[0].x-298,(N[0].y+N[4].y)/2);g.rotate(-Math.PI/2);text(rel[1],0,-14,{size:24,align:'center',color:SEAL,font:SANS,alpha:step(t,t0+6.8,.8)});g.restore();}
+  flow(F.rights,lx-170,N[4].y+90,560,{size:21,font:SANS,color:DIM,alpha:step(t,t0+7.4,1),lineHeight:1.6});
+  text(F.title,110,140,{size:40,alpha:step(t,t0,.8),color:DIM,spacing:4});
+  text(F.note,W/2,H-46,{size:18,align:'center',color:'rgba(247,243,232,.45)',font:SANS,alpha:step(t,t0+2,1.2)});
+}
+// Portrait: the citizens above, the organs of the state below; the relations run down and across.
+function faquan37P(t,t0){
+  const F=TEXT.faquan37||{},rel=F.relations||[],bw=300;
+  text(F.title,90,300,{size:44,alpha:step(t,t0,.8),color:DIM,spacing:4});
+  text(F.subjects?.[0],W/2,440,{size:30,align:'center',alpha:step(t,t0,.9),color:SKY,font:SANS,spacing:2});
+  text(F.subjects?.[1],W/2,1000,{size:30,align:'center',alpha:step(t,t0,.9),color:CORAL,font:SANS,spacing:2});
+  const node=(q,who,kind,x,y,side)=>({q,who,kind,x,y,side});
+  const N=[node('人身自由','公民 · 第三十七条','权利',290,560,'l'),node('批准','人民检察院','权力',200,1120,'r'),
+           node('决定','人民法院','权力',540,1120,'r'),node('执行','公安机关','权力',880,1120,'r'),
+           node('人格尊严','另一位公民 · 第三十八条','权利',790,560,'l')];
+  N.forEach((n,i)=>{
+    const p=step(t,t0+.8+i*.4,.7);if(p<=0)return;
+    box(n.x-bw/2,n.y-46,bw,92,{alpha:p,stroke:n.side==='l'?SKY:CORAL,fill:'rgba(247,243,232,.05)',r:8});
+    text(n.q,n.x-bw/2+26,n.y+4,{size:32,alpha:p});
+    text(n.who,n.x-bw/2+26,n.y+34,{size:17,font:SANS,color:DIM,alpha:p});
+    text(n.kind,n.x+bw/2-22,n.y+10,{size:20,font:SANS,color:n.side==='l'?SKY:CORAL,align:'right',alpha:p});
+  });
+  const path=(pts,p)=>{g.save();g.strokeStyle=SEAL;g.lineWidth=2.2;g.globalAlpha=.9*p;g.beginPath();g.moveTo(pts[0][0],pts[0][1]);
+    for(let s=1;s<=40*p;s++){const u=s/40,[a,b,c,d]=pts;g.lineTo((1-u)**3*a[0]+3*(1-u)**2*u*b[0]+3*(1-u)*u*u*c[0]+u**3*d[0],(1-u)**3*a[1]+3*(1-u)**2*u*b[1]+3*(1-u)*u*u*c[1]+u**3*d[1]);}
+    g.stroke();g.restore();};
+  // 权利—权力: from 人身自由 down to 批准.
+  const a=step(t,t0+3,1.2);path([[N[0].x,N[0].y+46],[N[0].x,840],[N[1].x,840],[N[1].x,N[1].y-46]],a);
+  text(rel[0],N[0].x-40,820,{size:26,align:'right',color:SEAL,font:SANS,alpha:step(t,t0+3.6,.8)});
+  // 权力—权力: 批准 to 执行, an arc under the row.
+  const b=step(t,t0+4.6,1.2);path([[N[1].x,N[1].y+46],[N[1].x,1290],[N[3].x,1290],[N[3].x,N[3].y+46]],b);
+  text(rel[2],W/2,1300,{size:26,align:'center',color:SEAL,font:SANS,alpha:step(t,t0+5.2,.8)});
+  // 权利—权利: one person's liberty and another's dignity, an arc over the two.
+  const c=step(t,t0+6.2,1.2);path([[N[0].x,N[0].y-46],[N[0].x,450+20],[N[4].x,450+20],[N[4].x,N[4].y-46]],c);
+  text(rel[1],W/2,500,{size:26,align:'center',color:SEAL,font:SANS,alpha:step(t,t0+6.8,.8)});
+  flow(F.rights,90,1440,W-180,{size:26,font:SANS,color:DIM,alpha:step(t,t0+7.4,1),lineHeight:1.65});
+  text(F.note,W/2,H-90,{size:20,align:'center',color:'rgba(247,243,232,.45)',font:SANS,alpha:step(t,t0+2,1.2)});
+}
+// 配置是否平衡: a beam that tips and settles as the checks on arrest are added one by one.
+function balance37(t,t0){
+  const F=TEXT.balance37||{},cx=W/2,cy=PORTRAIT?760:360,arm=PORTRAIT?320:470,steps=F.steps||[];
+  text(F.title,W/2,PORTRAIT?360:120,{size:48,align:'center',alpha:step(t,t0,.9)});
+  const per=3.2,first=t0+2.6,k=clamp((t-first)/per,0,steps.length);
+  // The weight of power: a block that loses a slice with each check; the beam follows the weight.
+  let taken=0;for(let i=0;i<steps.length;i++)taken+=ease(clamp(k-i));
+  const heavy=1-.22*taken,ang=.28*(heavy-.34)/(1-.34)*step(t,t0+1.2,1.2);
+  const a=step(t,t0+.8,.8);if(a<=0)return;
+  g.save();g.globalAlpha=a;
+  g.strokeStyle=GOLD;g.lineWidth=3;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx-60,cy+420);g.moveTo(cx,cy);g.lineTo(cx+60,cy+420);g.moveTo(cx-150,cy+420);g.lineTo(cx+150,cy+420);g.stroke();
+  const ex=Math.cos(ang)*arm,ey=Math.sin(ang)*arm,Lx=cx-ex,Ly=cy-ey,Rx=cx+ex,Ry=cy+ey;
+  line(Lx,Ly,Rx,Ry,PAPER,4,1);
+  g.fillStyle=GOLD;g.beginPath();g.arc(cx,cy,10,0,Math.PI*2);g.fill();
+  const hang=(x,y,color)=>{line(x,y,x-150,y+250,'rgba(247,243,232,.3)',1.2,1);line(x,y,x+150,y+250,'rgba(247,243,232,.3)',1.2,1);
+    g.save();g.strokeStyle=color;g.lineWidth=3;g.beginPath();g.moveTo(x-170,y+250);g.quadraticCurveTo(x,y+300,x+170,y+250);g.stroke();g.restore();};
+  hang(Lx,Ly,SKY);hang(Rx,Ry,CORAL);
+  text(F.left,Lx,Ly+345,{size:30,align:'center',color:SKY});text(F.right,Rx,Ry+345,{size:30,align:'center',color:CORAL});
+  box(Lx-80,Ly+196,160,60,{stroke:SKY,fill:'rgba(125,183,245,.18)',r:8});text(F.leftItem,Lx,Ly+236,{size:28,align:'center'});
+  const bh=150*heavy,bw=170;
+  g.save();g.fillStyle='rgba(255,138,101,.22)';g.strokeStyle=CORAL;g.lineWidth=1.6;rounded(Rx-bw/2,Ry+256-bh,bw,bh,8);g.fill();g.stroke();g.restore();
+  text(F.rightItem,Rx,Ry+256-bh/2+10,{size:30,align:'center'});
+  g.restore();
+  // Each check: a slice lifts off the block of power and settles beside it as a label.
+  steps.forEach(([name],i)=>{
+    const p=ease(clamp(k-i));if(p<=0)return;
+    const fromY=Ry+256-150*(1-.22*i),toX=PORTRAIT?Rx-40:Rx+250,toY=PORTRAIT?Ry-90-(steps.length-1-i)*66:Ry+20+i*70;
+    const x=Rx+(toX-Rx)*p,y=fromY+(toY-fromY)*p,w=measure(name,28,SANS)+44;
+    line(Rx+bw/2,fromY,x-w/2,y,'rgba(255,138,101,.45)',1,p);
+    box(x-w/2,y-27,w,52,{stroke:CORAL,fill:'rgba(15,42,43,.92)',r:26});
+    text(name,x,y+9,{size:28,font:SANS,align:'center'});
+    if(p>.6){g.save();g.globalAlpha=(p-.6)/.4;g.fillStyle=GOLD;g.beginPath();g.moveTo(x-w/2-22,y-12);g.lineTo(x-w/2-32,y+6);g.lineTo(x-w/2-12,y+6);g.fill();g.restore();}
+  });
+  steps.forEach(([,what],i)=>{const p=step(t,first+i*per,.8)*(1-step(t,first+(i+1)*per-.3,.4));
+    if(PORTRAIT)flow(what,W/2,H-430,W-140,{size:30,font:SANS,align:'center',color:CORAL,alpha:p,lineHeight:1.55});
+    else text(what,W/2,H-140,{size:28,font:SANS,align:'center',color:CORAL,alpha:p});});
+  if(PORTRAIT)flow(F.closing,W/2,H-430,W-140,{size:36,align:'center',alpha:step(t,first+steps.length*per+.2,1),lineHeight:1.55});
+  else text(F.closing,W/2,H-140,{size:32,align:'center',alpha:step(t,first+steps.length*per+.2,1)});
+  text(F.source,W/2,PORTRAIT?H-200:H-92,{size:22,font:SANS,align:'center',color:DIM,alpha:step(t,first+steps.length*per+.8,1)});
+  text(F.note,W/2,PORTRAIT?H-90:H-40,{size:18,align:'center',color:'rgba(247,243,232,.45)',font:SANS,alpha:step(t,t0+2,1.2)});
+}
+
+
+// =====================================================================================================
+// 竖屏短视频版 (scenes named v…): laid out for phones and short-video apps, not adapted from landscape.
+// The apps cover the top ~200 px, the bottom ~360 px and a column of buttons on the right, so a scene
+// keeps its heading at 300–420, its picture at 470–1400 and its caption at 1470–1560. Type is large
+// (captions 50–56, headings 80, hooks 110 and more), every scene starts at once, and the chapters of
+// the film stay visible at the top. Words still come character by character, from a blur to sharp;
+// key words take a colour and glow, nothing is underlined or struck out.
+// =====================================================================================================
+const VS={x0:84,x1:996,w:912,head:340,top:470,bot:1400,cap:1482,note:1640};
+const BLACK=900;
+function fontOf(size,font,weight){return `${weight} ${size}px ${font}`;}
+function mw(s,size,font=SERIF,weight=400){g.save();g.font=fontOf(size,font,weight);const w=g.measureText(s).width;g.restore();return w;}
+// Largest size up to `size` at which the string fits the width.
+function fitSize(s,size,width=VS.w,font=SERIF,weight=400){const w=mw(s,size,font,weight);return w>width?Math.floor(size*width/w):size;}
+// One character: it rises a little and sharpens from a blur; a key character takes its colour and glows.
+function vChar(ch,x,y,p,{size,font,weight,color,key=null,kp=0,alpha=1,t=0,i=0,shadow=true,enter='rise'}){
+  if(p<=0||alpha<=0)return;
+  g.save();g.font=fontOf(size,font,weight);g.textBaseline='alphabetic';
+  const dy=enter==='weave'?(i%2?-1:1)*size*.4*(1-p):size*.2*(1-p);
+  if(p<1)g.filter=`blur(${((1-p)*size*.13).toFixed(2)}px)`;
+  if(shadow){g.shadowColor='rgba(3,12,14,.55)';g.shadowBlur=size*.3;g.shadowOffsetY=size*.04;}
+  g.globalAlpha=clamp(p*alpha);g.fillStyle=color;g.fillText(ch,x,y+dy);
+  if(key&&kp>0){g.shadowOffsetY=0;g.globalAlpha=clamp(p*alpha*kp);g.fillStyle=key;g.shadowColor=key;g.shadowBlur=size*.55*(.82+.18*Math.sin(t*1.5+i*.4));g.fillText(ch,x,y+dy);}
+  g.restore();
+}
+// Lines for a width; never breaks before closing punctuation, nor inside one of the `keep` words.
+function vWrap(s,width,size,font=SERIF,weight=400,keep=[]){
+  const out=[];g.save();g.font=fontOf(size,font,weight);
+  for(const para of String(s??'').split('\n')){
+    const c=[...para];let lineStart=0;
+    for(let i=0;i<c.length;i++){
+      if(i>lineStart&&g.measureText(c.slice(lineStart,i+1).join('')).width>width&&!NO_START.includes(c[i])){
+        let cut=i;
+        for(const w of keep){let s=para.indexOf(w);while(s>=0){const a=[...para.slice(0,s)].length,b=a+[...w].length;if(a<i&&b>i&&a>lineStart)cut=Math.min(cut,a);s=para.indexOf(w,s+1);}}
+        out.push(c.slice(lineStart,cut).join(''));lineStart=cut;
+      }
+    }
+    if(lineStart<c.length)out.push(c.slice(lineStart).join(''));
+  }
+  g.restore();return out;
+}
+// A block of text set character by character; keys: [[word, tone, mode]] (mode 'fade' steps back).
+function vBlock(str,x,y,width,t,start,o={}){
+  const {size=46,font=SERIF,weight=400,color=PAPER,keys=[],lh=1.6,align='left',per=.02,keyAt=null,alpha=1,span=.42,keyGap=.45,shadow=true,enter='rise'}=o;
+  const lines=vWrap(str,width,size,font,weight,keys.map(k=>k[0])),flat=lines.join(''),n=[...flat].length;
+  const ranges=[];
+  keys.forEach(([word,tone,mode],k)=>{let s=flat.indexOf(word);while(s>=0){const i=[...flat.slice(0,s)].length;ranges.push({i,j:i+[...word].length,tone:TONE[tone]||tone,mode,k});s=flat.indexOf(word,s+word.length);}});
+  const k0=keyAt??start+n*per+.2;
+  let idx=0;
+  lines.forEach((L,li)=>{
+    const chars=[...L];g.save();g.font=fontOf(size,font,weight);const ws=chars.map(c=>g.measureText(c).width);g.restore();
+    const tot=ws.reduce((a,b)=>a+b,0),yy=y+li*size*lh;let cx=align==='center'?x-tot/2:align==='right'?x-tot:x;
+    chars.forEach((ch,ci)=>{
+      const i=idx+ci,p=step(t,start+i*per,span),R=ranges.find(R=>i>=R.i&&i<R.j);
+      const kp=R?clamp(step(t,k0+R.k*keyGap,.6)*1.6-(i-R.i)*.06):0;
+      if(R&&R.mode==='fade')vChar(ch,cx,yy,p,{size,font,weight,color,alpha:alpha*(1-.62*kp),shadow,enter,i});
+      else vChar(ch,cx,yy,p,{size,font,weight,color,key:R?.tone,kp,alpha,t,i,shadow,enter});
+      cx+=ws[ci];
+    });
+    idx+=chars.length;
+  });
+  return {lines,end:k0+keys.length*keyGap,next:y+lines.length*size*lh,bottom:y+(lines.length-1)*size*lh};
+}
+function vLine(str,x,y,t,start,o={}){return vBlock(str,x,y,1e5,t,start,{align:'center',per:.05,...o}).end;}
+// Several lines one under another, each typed after the one before; a line may set its own size, keys…
+function vLines(lines,x,y,t,start,o={}){
+  let at=start,yy=y,end=start,prev=0;
+  lines.forEach((L,i)=>{
+    const l=typeof L==='string'?{text:L}:L,size=l.size||o.size||60,per=l.per||o.per||.05;
+    // Baselines are spaced by the mean of the two sizes, so a large line after a small one has room.
+    if(i)yy+=(prev+size)/2*(l.lh||o.lh||1.4);prev=size;
+    const keys=(l.keys||o.keys||[]).filter(k=>l.text.includes(k[0]));
+    const sz=fitSize(l.text,size,VS.w,l.font||o.font||SERIF,l.weight??o.weight??400);
+    end=Math.max(end,vBlock(l.text,l.x??x,yy,1e5,t,at,{align:'center',...o,...l,size:sz,per,keys,keyAt:l.keyAt,color:l.color?(TONE[l.color]||l.color):(o.color||PAPER)}).end);
+    at+=[...l.text].length*per+(o.gap??.08);
+  });
+  return end;
+}
+// Heading of a scene: a question or a name in heavy type, and a line under it.
+function vHeader(title,t,t0,{sub='',subColor=GOLD,keys=[],size=80,alpha=1,y=VS.head}={}){
+  if(title)vLine(title,W/2,y,t,t0,{size:fitSize(title,size,VS.w,SERIF,BLACK),weight:BLACK,per:.035,keys,alpha});
+  if(sub)vLine(sub,W/2,y+78,t,t0+.25,{size:fitSize(sub,36,VS.w,SANS,500),font:SANS,weight:500,color:subColor,per:.018,alpha});
+}
+// Caption: one or two lines in the caption band, set like subtitles; a string is wrapped.
+function vCaption(lines,t,start,stop=1e9,{keys=[],size=54,y=VS.cap,color=PAPER,per=.03}={}){
+  if(t<start-.01)return;const a=1-step(t,stop-.3,.3);if(a<=0)return;
+  // A string a little too long for one line is set smaller rather than leaving a word alone on the second.
+  const L=Array.isArray(lines)?lines:mw(lines,size,SANS,600)<=VS.w*1.22?[lines]:vWrap(lines,VS.w,size,SANS,600,keys.map(k=>k[0]));
+  let at=start;
+  L.forEach((s,i)=>{if(!s)return;const sz=fitSize(s,size,VS.w,SANS,600);
+    vLine(s,W/2,y+i*size*1.42,t,at,{size:sz,font:SANS,weight:600,color,keys:keys.filter(k=>s.includes(k[0])),per,alpha:a});at+=[...s].length*per;});
+}
+function vNote(s,t,start,{y=VS.note,size=28,alpha=1}={}){
+  vWrap(s,VS.w,size,SANS).forEach((l,i)=>text(l,W/2,y+i*size*1.5,{size,font:SANS,align:'center',color:'rgba(247,243,232,.55)',alpha:step(t,start,.6)*alpha}));
+}
+function vChip(name,cx,y,{alpha=1,size=40,color,dashed=false}={}){const w=measure(name,size,SANS)+size*1.4;chip(name,cx-w/2,y,{alpha,size,color:color||METHOD[name]||GOLD,dashed});return w;}
+// Chapters of the film, along the top: where we are, and what comes next.
+function vChapters(t,name){
+  const C=window.CHAPTERS||[];if(!C.length)return;
+  const cur=C.findIndex(([,scenes])=>scenes.includes(name));
+  const scenes=FILMS[window.FILM_ID||'A'],first=scenes.find(s=>C[0][1].includes(s[2].name)),last=[...scenes].reverse().find(s=>C.at(-1)[1].includes(s[2].name));
+  const a=first&&last?step(t,first[0],.4)*(1-step(t,last[1]-.4,.4)):0;if(a<=0)return;
+  const size=30,gap=56,ws=C.map(([l])=>mw(l,size,SANS,600)),tot=ws.reduce((x,y)=>x+y,0)+gap*(C.length-1);
+  let x=W/2-tot/2;
+  C.forEach(([label],i)=>{
+    const on=i===cur,col=on?GOLD:i<cur?'rgba(247,243,232,.75)':'rgba(247,243,232,.38)';
+    g.save();g.globalAlpha=a;g.font=fontOf(size,SANS,600);g.fillStyle=col;if(on){g.shadowColor=GOLD;g.shadowBlur=18;}g.fillText(label,x,214);g.restore();
+    if(on){g.save();g.globalAlpha=a;g.fillStyle=GOLD;g.fillRect(x,230,ws[i],4);g.restore();}
+    if(i<C.length-1){g.save();g.globalAlpha=a*.5;g.fillStyle=PAPER;g.beginPath();g.arc(x+ws[i]+gap/2,204,3,0,Math.PI*2);g.fill();g.restore();}
+    x+=ws[i]+gap;
+  });
+}
+
+// ---------- the hook: a question in large type, then the name of the film ----------
+function vHook(t,t0){
+  const K=TEXT.vhook||{},u=t-t0,sw=K.switch||2.9,out=1-step(u,sw,.35);
+  if(out>0)vLines(K.lines||[],W/2,K.y||820,t,t0-.35,{size:K.size||112,weight:BLACK,per:.06,keys:K.keys||[],alpha:out,lh:1.3});
+  const at=t0+sw+.25;
+  if(K.grid){
+    vLines(K.title||[],W/2,640,t,at,{size:104,weight:BLACK,per:.06,keys:K.titleKeys||[],lh:1.3});
+    K.grid.forEach(([q,m],i)=>{
+      const x=i%2?W/2+12:84,y=920+Math.floor(i/2)*230,p=step(t,at+1.2+i*.3,.45),c=METHOD[m]||GOLD;if(p<=0)return;
+      box(x,y+30*(1-p),444,200,{alpha:p,stroke:c,fill:'rgba(247,243,232,.06)',r:18});
+      g.save();g.globalAlpha=p;g.fillStyle=c;g.fillRect(x+30,y+34+30*(1-p),56,6);g.restore();
+      text(q,x+30,y+110+30*(1-p),{size:fitSize(q,40,384,SERIF,600),weight:600,alpha:p});
+      text(m,x+30,y+164+30*(1-p),{size:34,font:SANS,weight:600,color:c,alpha:p});
+    });
+    return;
+  }
+  vLine(K.title||'',W/2,K.titleY||880,t,at,{size:fitSize(K.title||'',150,VS.w,SERIF,BLACK),weight:BLACK,per:.08,keys:K.titleKeys||[]});
+  if(K.tag)vChip(K.tag,W/2,1040,{alpha:step(t,at+.7,.4),size:44});
+  if(K.sub)vLine(K.sub,W/2,K.tag?1170:1040,t,at+.9,{size:fitSize(K.sub,46,VS.w,SANS,500),font:SANS,weight:500,color:DIM,per:.03});
+}
+
+// ---------- the end: the name, the idea, a question for the comments ----------
+function vEnd(t,t0){
+  const E=TEXT.vend||{},u=t-t0,y=E.y||760;
+  if(E.ring){const names=TEXT.principles||[],cx=W/2,cy=y+110;
+    names.forEach((n,i)=>{const a=-Math.PI/2+i/names.length*Math.PI*2+.04*Math.sin(u*.5),p=step(u,.1+i*.14,.5);
+      vChip(n,cx+Math.cos(a)*350,cy+Math.sin(a)*460,{alpha:p,size:40,color:[SKY,JADE,GOLD,CORAL,VIOLET,SEAL][i]});});}
+  vLine(E.title||'法典笔记',W/2,y,t,t0+.1,{size:160,weight:BLACK,per:.1});
+  const done=vLines(E.lines||[],W/2,y+150,t,t0+.7,{size:E.size||60,keys:E.keys||[],per:.04,lh:1.45});
+  if(E.chips){const size=36,rows=[E.chips.slice(0,3),E.chips.slice(3)];
+    rows.forEach((names,r)=>{const ws=names.map(n=>measure(n,size,SANS)+size*1.4),tot=ws.reduce((a,b)=>a+b,0)+22*(names.length-1);let x=W/2-tot/2;
+      names.forEach((n,i)=>{chip(n,x,y+(E.lines?.length||1)*87+150+r*84,{alpha:step(u,1.6+(r*3+i)*.12,.4),size});x+=ws[i]+22;});});}
+  if(E.ask)vCaption(E.ask,t,t0+2.4,1e9,{keys:E.askKeys||[],size:50});
+  text(E.platforms,W/2,VS.note,{size:32,font:SANS,align:'center',color:DIM,alpha:step(u,3,.6),spacing:2});
+}
+
+// =====================================================================================================
+// A 竖屏: 条文不是孤岛
+// =====================================================================================================
+function vA13(t,t0){
+  const paras=TEXT.a13?.slice(1)||[],web=TEXT.web||{},C=TEXT.va13||{};
+  vHeader(C.title,t,t0,{sub:C.sub,subColor:JADE});
+  let y=590,at=t0+.3;
+  paras.forEach((p,i)=>{
+    const keys=(web.phrases||[]).filter(([w])=>p.includes(w));
+    const r=vBlock(p,W/2,y,VS.w,t,at,{size:54,align:'center',keys,per:.025,lh:1.55,keyAt:t0+2.2+i*.9});
+    y=r.next+40;at+=[...p].length*.025+.1;
+  });
+  vCaption(C.caption,t,t0+5.2,1e9,{keys:C.captionKeys||[]});
+}
+// The system around Article 13, ring by ring; then one thread lit at a time, with its own caption.
+function vWeb(t,t0){
+  const web=TEXT.web||{},C=TEXT.vweb||{},u=t-t0,cx=W/2,cy=950;
+  const RX=[200,315,420],RY=[225,340,428];
+  const rings=(web.rings||[]).map((r,i)=>({...r,rx:RX[i],ry:RY[i]}));
+  const nodes=(web.nodes||[]).map(n=>({...n,angle:(C.angles||{})[n.id]??n.angle,name:(C.names||{})[n.id]||n.name}));
+  const threads=web.threads||[],byId=Object.fromEntries(nodes.map(n=>[n.id,n]));byId.c={id:'c'};
+  const pos=id=>webPoint(byId[id],cx,cy,rings,t);
+  const ringAt=i=>.5+i*1.7,core=step(u,0,.5);
+  const appear=n=>n.id==='c'?core:step(u,ringAt(n.ring)+.5+(n.order||0)*.16,.5);
+  vHeader(C.title,t,t0,{size:80});
+  // The name of each layer under the heading while it opens; then the line of the scene.
+  rings.forEach((r,i)=>{const a=step(u,ringAt(i),.4)*(1-step(u,ringAt(i+1)-.1,.3)*(i<rings.length-1?1:0))*(1-step(u,6.2,.4));
+    text(r.name,W/2,VS.head+78,{size:fitSize(r.name,38,VS.w,SANS,600),font:SANS,weight:600,align:'center',color:TONE[r.tone],alpha:a});});
+  text(C.sub,W/2,VS.head+78,{size:38,font:SANS,weight:600,align:'center',color:DIM,alpha:step(u,6.6,.5)});
+  rings.forEach((r,i)=>{const open=step(u,ringAt(i),1);if(open<=0)return;
+    g.save();g.strokeStyle=TONE[r.tone]||GOLD;g.globalAlpha=.4*open;g.lineWidth=1.6;g.setLineDash([4,8]);
+    g.beginPath();g.ellipse(cx,cy,r.rx*open,r.ry*open,0,0,Math.PI*2);g.stroke();g.restore();});
+  const tStart=6.4,tSpan=3.5,k=Math.floor((u-tStart)/tSpan),current=u<tStart?-1:k<threads.length?k:threads.length;
+  const lit=new Map();
+  threads.forEach((th,i)=>{if(current===threads.length||i===current)for(const [a,b] of th.edges){lit.set(a+'>'+b,th);lit.set(a,th);lit.set(b,th);}});
+  const dimmed=current>=0&&current<threads.length;
+  threads.forEach(th=>th.edges.forEach(([a,b])=>{
+    const A=pos(a),B=pos(b),p=Math.min(appear(byId[a]),appear(byId[b]));if(p<=0)return;
+    const on=lit.has(a+'>'+b),glow=on?step(u,current===threads.length?tStart+threads.length*tSpan:tStart+threads.indexOf(th)*tSpan,.6):0;
+    const mx=(A.x+B.x)/2,my=(A.y+B.y)/2,qx=a==='c'?mx:cx+(mx-cx)*1.18,qy=a==='c'?my:cy+(my-cy)*1.18;
+    g.save();g.lineCap='round';g.strokeStyle=on?TONE[th.tone]:'rgba(247,243,232,.5)';g.globalAlpha=p*(on?.4+.6*glow:dimmed?.1:.24);g.lineWidth=on?2+2.4*glow:1.3;
+    g.beginPath();g.moveTo(A.x,A.y);const steps=Math.max(2,Math.round(40*p));
+    for(let s=1;s<=steps;s++){const v=s/40;g.lineTo((1-v)**2*A.x+2*(1-v)*v*qx+v*v*B.x,(1-v)**2*A.y+2*(1-v)*v*qy+v*v*B.y);}
+    g.stroke();g.restore();
+    if(p>=1){const n=on?3:1,sd=seedOf(a+b);
+      for(let q=0;q<n;q++){const v=((t*(on?.34:.18)+sd/6.283+q/n)%1),ix=(1-v)**2*A.x+2*(1-v)*v*qx+v*v*B.x,iy=(1-v)**2*A.y+2*(1-v)*v*qy+v*v*B.y,R=on?18:11;
+        const gr=g.createRadialGradient(ix,iy,0,ix,iy,R);gr.addColorStop(0,on?TONE[th.tone]:'rgba(247,243,232,.9)');gr.addColorStop(1,'rgba(0,0,0,0)');
+        g.save();g.globalAlpha=(on?.95:dimmed?.15:.4)*Math.sin(Math.PI*v);g.fillStyle=gr;g.beginPath();g.arc(ix,iy,R,0,Math.PI*2);g.fill();g.restore();}}
+  }));
+  // Nodes: the name under each; the note only while its thread is lit.
+  nodes.forEach(n=>{
+    const p=appear(n);if(p<=0)return;
+    const P=pos(n.id),th=lit.get(n.id),fade=dimmed&&!th?.35:1,tone=th?TONE[th.tone]:TONE[rings[n.ring].tone];
+    g.save();g.globalAlpha=p*fade;g.fillStyle=th?tone:'#0F2A2F';g.strokeStyle=tone;g.lineWidth=2.2;
+    if(th){g.shadowColor=tone;g.shadowBlur=16;}g.beginPath();g.arc(P.x,P.y,th?11:8,0,Math.PI*2);g.fill();g.stroke();g.restore();
+    const size=th&&dimmed?36:32,w=Math.max(mw(n.name,size,SERIF,600),th&&n.note?mw(n.note,26,SANS):0),lx=clamp(P.x,40+w/2,W-40-w/2);
+    const below=P.y>cy-40,ly=below?P.y+48:P.y-24-(th&&dimmed&&n.note?32:0);
+    text(n.name,lx,ly,{size,weight:600,align:'center',alpha:p*fade});
+    if(th&&dimmed&&n.note)text(n.note,lx,ly+36,{size:26,font:SANS,align:'center',color:tone,alpha:p*step(u,tStart+threads.indexOf(th)*tSpan+.3,.4)});
+  });
+  if(core>=1)for(let q=0;q<2;q++){const v=((u)/3+q/2)%1,r=135+170*v;
+    g.save();g.globalAlpha=.35*(1-v);g.strokeStyle=SEAL;g.lineWidth=2;g.beginPath();g.ellipse(cx,cy,r,r*1.2,0,0,Math.PI*2);g.stroke();g.restore();}
+  if(core>0){
+    g.save();g.globalAlpha=core;g.fillStyle='#2A2F2B';g.strokeStyle=SEAL;g.lineWidth=3;g.shadowColor=SEAL;g.shadowBlur=30;
+    g.beginPath();g.arc(cx,cy,128*(.6+.4*core),0,Math.PI*2);g.fill();g.shadowBlur=0;g.fillStyle='rgba(240,90,60,.2)';g.fill();g.stroke();g.restore();
+    text(TEXT.a13?.[0],cx,cy+2,{size:52,weight:BLACK,align:'center',alpha:core});
+    (C.centre||[]).forEach((l,i)=>text(l,cx,cy+46+i*34,{size:26,font:SANS,align:'center',color:'#FFD2C4',alpha:core}));
+  }
+  threads.forEach((th,i)=>{const s=tStart+i*tSpan,[a,b]=th.caption.split('：');
+    vCaption([a+'：',b],t,t0+s+.1,t0+s+tSpan,{size:50,keys:[[a,th.tone]]});});
+  vCaption(web.closing,t,t0+tStart+threads.length*tSpan+.1,1e9,{keys:[['连成体系','gold']]});
+}
+// 143 articles inside, 56 laws outside; the count runs up in the middle.
+function vA56(t,t0){
+  const C=TEXT.va56||{},u=t-t0,cx=W/2,cy=930,rIn=250,rOut=372,ring=step(u,.1,1.3);
+  vHeader(C.title,t,t0,{sub:C.sub,subColor:GOLD});
+  for(let i=0;i<143;i++){const on=clamp(ring*1.25-i/143);if(on<=0)continue;
+    const a=-Math.PI/2+i/143*Math.PI*2,strict=STRICT.includes('a'+(i+1)),len=strict?44:16;
+    line(cx+Math.cos(a)*rIn,cy+Math.sin(a)*rIn,cx+Math.cos(a)*(rIn+len),cy+Math.sin(a)*(rIn+len),strict?SEAL:GOLD,strict?4:1.6,on*(strict?1:.8));}
+  for(let i=0;i<LAWS.length;i++){const on=clamp(ring*1.2-i/LAWS.length*1.1);if(on<=0)continue;
+    const a=-Math.PI/2+i/LAWS.length*Math.PI*2;line(cx+Math.cos(a)*rOut,cy+Math.sin(a)*rOut,cx+Math.cos(a)*(rOut+30),cy+Math.sin(a)*(rOut+30),GOLD,3,on*.95);}
+  const art=n=>-Math.PI/2+(n-1)/143*Math.PI*2;
+  [[9,59],[59,97],[97,129],[13,33],[33,37],[37,40],[86,95],[111,124]].forEach(([a,b],i)=>{
+    const p=step(u,2.6+i*.22,.8);if(p<=0)return;const A=art(a),B=art(b);
+    const x1=cx+Math.cos(A)*rIn,y1=cy+Math.sin(A)*rIn,x2=cx+Math.cos(B)*rIn,y2=cy+Math.sin(B)*rIn,qx=cx+((x1+x2)/2-cx)*1.5,qy=cy+((y1+y2)/2-cy)*1.5;
+    g.save();g.strokeStyle=GOLD;g.lineWidth=1.6;g.globalAlpha=.42;g.setLineDash([6,8]);g.lineDashOffset=-t*14;g.beginPath();g.moveTo(x1,y1);
+    for(let s=1;s<=Math.max(2,Math.round(40*p));s++){const v=s/40;g.lineTo((1-v)**2*x1+2*(1-v)*v*qx+v*v*x2,(1-v)**2*y1+2*(1-v)*v*qy+v*v*y2);}g.stroke();g.restore();});
+  // The count.
+  const n=Math.round(LAWS.length*ease(clamp((u-.3)/1.8)));
+  g.save();g.font=fontOf(230,SERIF,BLACK);g.textAlign='center';g.fillStyle=GOLD;g.shadowColor=GOLD;g.shadowBlur=40*step(u,2,.6);g.globalAlpha=step(u,.2,.3);g.fillText(String(n),cx,cy+60);g.restore();
+  text(C.unit,cx,cy+138,{size:44,weight:600,align:'center',alpha:step(u,.6,.4)});
+  text(C.legend,W/2,1385,{size:30,font:SANS,align:'center',color:DIM,alpha:step(u,1.6,.6)});
+  vCaption(C.caption,t,t0+3,1e9,{keys:[['由法律规定','seal']]});
+}
+// One note: the words that stopped the reader, and the card that keeps why and how.
+function vBook(t,t0){
+  const C=TEXT.vbook||{},u=t-t0,para=TEXT.a33?.[1]||'',fields=TEXT.note||[];
+  vHeader(C.title,t,t0,{keys:[['机械摘抄','coral','fade']],size:80});
+  text('宪法'+(TEXT.a33?.[0]||''),VS.x0,540,{size:40,weight:600,color:GOLD,alpha:step(u,.3,.4)});
+  vBlock(para,VS.x0,620,VS.w,t,t0+.4,{size:52,keys:[['中华人民共和国国籍','seal']],per:.025,lh:1.55});
+  const card=step(u,1.6,.6),cy=800;
+  if(card>0){g.save();g.globalAlpha=card;g.shadowColor='rgba(0,0,0,.5)';g.shadowBlur=50;g.shadowOffsetY=20;
+    g.fillStyle='rgba(244,241,232,.07)';g.strokeStyle='rgba(244,241,232,.34)';g.lineWidth=1.6;rounded(VS.x0,cy+30*(1-card),VS.w,560,18);g.fill();g.stroke();g.restore();}
+  fields.forEach(([label,value,tone],i)=>{
+    const p=step(u,2+i*.45,.5);if(p<=0)return;const fy=cy+80+i*128+14*(1-p),x=VS.x0+48;
+    text(label,x,fy,{size:30,font:SANS,weight:600,color:GOLD,alpha:p,spacing:4});
+    if(tone==='tag'){let bx=x;value.split('·').map(v=>v.trim()).forEach(v=>{const w=chip(v,bx,fy+48,{alpha:p,size:34});bx+=w+18;});}
+    else if(tone==='pending'){g.save();g.globalAlpha=p;g.fillStyle='rgba(240,90,60,.25)';rounded(x,fy+18,mw(value,34,SANS)+52,56,8);g.fill();g.restore();
+      text(value,x+26,fy+58,{size:34,font:SANS,color:'#FFC2B4',alpha:p});}
+    else text(value,x,fy+62,{size:fitSize(value,44,VS.w-96),alpha:p});
+  });
+  vCaption(C.caption,t,t0+4.4,1e9,{keys:[['为何驻足','sky'],['凭何作答','gold']]});
+}
+function vWeave(t,t0){
+  const C=TEXT.vweave||{};
+  weave(t,t0,{centres:[[255,940],[540,700],[825,940]],spread:[.62,.9],root:[540,1330],noise:[150,780,1120,150],gs:1.2,growEnd:13,
+    titleY:VS.head,titleSize:76,titleGap:280,titleWeight:BLACK,fieldAt:3,fieldX:[230,540,850],fieldY:()=>418,fieldSize:34,wordSize:32,seedY:1320,seedSize:40,
+    bandX:[[30,470],[300,780],[610,1050]],minY:470,keyGap:[170,58],life:3.4});
+  (C.captions||[]).forEach(([a,b,lines,keys])=>vCaption(lines,t,t0+a,t0+b,{keys:keys||[]}));
+}
+function vMotto(t,t0){const M=TEXT.vmotto||{};vLines(M.lines||[],W/2,M.y||640,t,t0+.2,{per:.06,lh:1.36});}
+// 法权分析 of Article 37: the citizens above, the organs of the state below, three kinds of relation.
+function vFaquan(t,t0){
+  const F=TEXT.faquan37||{},C=TEXT.vfaquan||{},rel=F.relations||[],u=t-t0;
+  vHeader(C.title,t,t0,{sub:C.sub,subColor:SEAL});
+  const top=[['人身自由','公民 · 第三十七条 · 权利',290],['人格尊严','另一位公民 · 第三十八条 · 权利',790]];
+  const low=[['批准','人民检察院 · 权力',200],['决定','人民法院 · 权力',540],['执行','公安机关 · 权力',880]];
+  const ty=720,ly=1130;
+  text(F.subjects?.[0],VS.x0,585,{size:34,font:SANS,weight:600,color:SKY,alpha:step(u,.3,.4)});
+  text(F.subjects?.[1],VS.x0,995,{size:34,font:SANS,weight:600,color:CORAL,alpha:step(u,1.2,.4)});
+  const drawBox=([q,who,x],y,w,color,p)=>{if(p<=0)return;
+    box(x-w/2,y-80+20*(1-p),w,160,{alpha:p,stroke:color,fill:'rgba(247,243,232,.06)',r:14});
+    text(q,x,y+4+20*(1-p),{size:58,weight:600,align:'center',alpha:p});
+    text(who,x,y+52+20*(1-p),{size:fitSize(who,26,w-24,SANS),font:SANS,align:'center',color,alpha:p});};
+  top.forEach((b,i)=>drawBox(b,ty,400,SKY,step(u,.5+i*.3,.5)));
+  low.forEach((b,i)=>drawBox(b,ly,268,CORAL,step(u,1.4+i*.25,.5)));
+  const path=(pts,p)=>{if(p<=0)return;g.save();g.strokeStyle=SEAL;g.lineWidth=3.4;g.shadowColor=SEAL;g.shadowBlur=12;g.globalAlpha=.95;g.beginPath();g.moveTo(pts[0][0],pts[0][1]);
+    for(let s=1;s<=40*p;s++){const v=s/40,[a,b,c,d]=pts;g.lineTo((1-v)**3*a[0]+3*(1-v)**2*v*b[0]+3*(1-v)*v*v*c[0]+v**3*d[0],(1-v)**3*a[1]+3*(1-v)**2*v*b[1]+3*(1-v)*v*v*c[1]+v**3*d[1]);}
+    g.stroke();g.restore();};
+  const relText=(s,x,y,start,align='center')=>{const p=step(u,start,.5);if(p<=0)return;g.save();g.globalAlpha=p;g.font=fontOf(40,SANS,600);g.textAlign=align;g.fillStyle=SEAL;g.shadowColor=SEAL;g.shadowBlur=20;g.fillText(s,x,y);g.restore();};
+  path([[290,ty+80],[290,930],[200,930],[200,ly-80]],step(u,2.8,.9));relText(rel[0],370,945,3.3,'left');
+  path([[200,ly+80],[200,1290],[880,1290],[880,ly+80]],step(u,4.4,.9));relText(rel[2],W/2,1350,4.9);
+  path([[290,ty-80],[290,612],[790,612],[790,ty-80]],step(u,6,.9));relText(rel[1],W/2,600,6.5);
+  vCaption(C.caption,t,t0+7.6,1e9,{keys:[['权利与权利','sky']],size:50});
+  vNote(F.note,t,t0+1.6);
+}
+// 配置是否平衡: the beam tips, then settles as the checks on arrest are taken off the side of power.
+function vBalance(t,t0){
+  const F=TEXT.balance37||{},C=TEXT.vbalance||{},steps=F.steps||[],u=t-t0,cx=W/2,cy=760,arm=330;
+  vHeader(F.title,t,t0,{sub:C.sub,subColor:CORAL});
+  const per=3.1,first=2.2,k=clamp((u-first)/per,0,steps.length);
+  let taken=0;for(let i=0;i<steps.length;i++)taken+=ease(clamp(k-i));
+  const heavy=1-.22*taken,ang=.28*(heavy-.34)/(1-.34)*step(u,.9,1);
+  const a=step(u,.4,.5);if(a<=0)return;
+  g.save();g.globalAlpha=a;
+  g.strokeStyle=GOLD;g.lineWidth=5;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx-70,cy+470);g.moveTo(cx,cy);g.lineTo(cx+70,cy+470);g.moveTo(cx-170,cy+470);g.lineTo(cx+170,cy+470);g.stroke();
+  const ex=Math.cos(ang)*arm,ey=Math.sin(ang)*arm,Lx=cx-ex,Ly=cy-ey,Rx=cx+ex,Ry=cy+ey;
+  line(Lx,Ly,Rx,Ry,PAPER,6,1);g.fillStyle=GOLD;g.beginPath();g.arc(cx,cy,14,0,Math.PI*2);g.fill();
+  const hang=(x,y,color)=>{line(x,y,x-150,y+250,'rgba(247,243,232,.4)',1.6,1);line(x,y,x+150,y+250,'rgba(247,243,232,.4)',1.6,1);
+    g.save();g.strokeStyle=color;g.lineWidth=4;g.beginPath();g.moveTo(x-170,y+250);g.quadraticCurveTo(x,y+305,x+170,y+250);g.stroke();g.restore();};
+  hang(Lx,Ly,SKY);hang(Rx,Ry,CORAL);
+  text(F.left,Lx,Ly+350,{size:48,weight:600,align:'center',color:SKY});text(F.right,Rx,Ry+350,{size:48,weight:600,align:'center',color:CORAL});
+  box(Lx-110,Ly+176,220,80,{stroke:SKY,fill:'rgba(125,183,245,.2)',r:10});text(F.leftItem,Lx,Ly+230,{size:42,weight:600,align:'center'});
+  const bh=170*heavy,bw=200;
+  g.save();g.fillStyle='rgba(255,138,101,.25)';g.strokeStyle=CORAL;g.lineWidth=2;rounded(Rx-bw/2,Ry+256-bh,bw,bh,10);g.fill();g.stroke();g.restore();
+  text(F.rightItem,Rx,Ry+256-bh/2+14,{size:44,weight:600,align:'center'});
+  g.restore();
+  steps.forEach(([name],i)=>{
+    const p=ease(clamp(k-i));if(p<=0)return;
+    const fromY=Ry+256-170*(1-.22*i),toX=Rx-20,toY=Ry-110-(steps.length-1-i)*82;
+    const x=Rx+(toX-Rx)*p,y=fromY+(toY-fromY)*p,w=mw(name,38,SANS,600)+52;
+    line(Rx+bw/2,fromY,x+w/2,y,'rgba(255,138,101,.5)',1.4,p);
+    box(x-w/2,y-32,w,62,{stroke:CORAL,fill:'rgba(15,42,43,.94)',r:31});
+    text(name,x,y+13,{size:38,font:SANS,weight:600,align:'center'});
+  });
+  steps.forEach(([,what],i)=>vCaption(what,t,t0+first+i*per+.2,t0+first+(i+1)*per,{size:50}));
+  vCaption(F.closing,t,t0+first+steps.length*per+.2,1e9,{size:48,keys:[['维护公共利益','jade'],['保障基本权利','gold']]});
+  vNote(F.source+' · '+F.note,t,t0+1.6);
+}
+
+// =====================================================================================================
+// B 竖屏: 怎样读懂一条宪法
+// =====================================================================================================
+function vLiteral(t,t0){
+  const L=TEXT.literal||{},C=TEXT.vliteral||{},u=t-t0;
+  vHeader(C.title,t,t0,{sub:C.sub,subColor:SKY});
+  const top=1-step(u,10.8,.5);
+  if(top>0)vBlock(BD.a37?.[1]||'',W/2,560,VS.w,t,t0+.3,{size:48,align:'center',keys:[['公安机关',SKY]],per:.02,lh:1.55,alpha:top});
+  const ox=W/2,oy=860,cy=1080,lx=290,rx=790,bw=360,bh=110;
+  const org=step(u,2,.5),nsa=step(u,3.4,.5),council=org*(1-step(u,10.8,.5));
+  box(ox-160,oy-50,320,100,{alpha:council,stroke:'rgba(247,243,232,.6)'});text(L.council,ox,oy+16,{size:46,weight:600,align:'center',alpha:council});
+  line(ox,oy+50,ox,960,'rgba(247,243,232,.5)',2,council);line(lx,960,rx,960,'rgba(247,243,232,.5)',2,council);
+  line(lx,960,lx,cy-bh/2,'rgba(247,243,232,.5)',2,council);line(rx,960,rx,cy-bh/2,'rgba(247,243,232,.5)',2,council*nsa);
+  box(lx-bw/2,cy-bh/2,bw,bh,{alpha:org,stroke:SKY,fill:'rgba(125,183,245,.14)',r:12});text(L.ministries?.[0],lx,cy+16,{size:48,weight:600,align:'center',alpha:org});
+  box(rx-bw/2,cy-bh/2+16*(1-nsa),bw,bh,{alpha:nsa,stroke:PAPER,r:12});text(L.ministries?.[1],rx,cy+16+16*(1-nsa),{size:48,weight:600,align:'center',alpha:nsa});
+  text(C.founded,rx,cy+bh/2+52,{size:30,font:SANS,align:'center',color:GOLD,alpha:step(u,3.8,.4)*(1-step(u,10.2,.4))});
+  text(L.level,ox,cy+bh/2+52,{size:30,font:SANS,align:'center',color:DIM,alpha:step(u,4.4,.4)*(1-step(u,10.2,.4))});
+  const ring=step(u,2.8,.6),grow2=step(u,10.4,1.2);
+  if(ring>0){const ex=lx+(ox-lx)*grow2,rw=bw/2+34+(rx-lx)/2*grow2,rh=bh/2+36;
+    g.save();g.globalAlpha=ring;g.strokeStyle=SKY;g.lineWidth=3.4;g.shadowColor=SKY;g.shadowBlur=16*grow2;g.setLineDash(grow2>=1?[]:[10,8]);g.fillStyle='rgba(125,183,245,'+(.05+.08*grow2)+')';
+    g.beginPath();g.ellipse(ex,cy,rw,rh,0,0,Math.PI*2);g.fill();g.stroke();g.restore();
+    text('“公安机关”',ex-rw+10,cy-rh-16,{size:36,font:SANS,weight:600,color:SKY,alpha:ring});}
+  const q=step(u,6.4,.4)*(1-step(u,10.2,.4));
+  if(q>0){g.save();g.globalAlpha=q;g.font=fontOf(110,SERIF,BLACK);g.textAlign='center';g.fillStyle=GOLD;g.shadowColor=GOLD;g.shadowBlur=30;g.fillText('?',rx,cy-bh/2-40+6*Math.sin(u*5));g.restore();}
+  vCaption(C.ask,t,t0+6.4,t0+10.4,{keys:[['公安机关','sky']]});
+  if(grow2>0)vChip(L.method,W/2,cy+bh/2+90,{alpha:step(u,11.2,.4),size:44,color:SKY});
+  const c=step(u,11,.5);
+  if(c>0){box(VS.x0,500+20*(1-c),VS.w,420,{alpha:c,stroke:'rgba(125,183,245,.5)',fill:'rgba(125,183,245,.09)',r:16});
+    text(C.decisionTag,VS.x0+40,566,{size:34,font:SANS,weight:600,color:SKY,alpha:c});
+    vBlock(L.quote,VS.x0+40,650,VS.w-80,t,t0+11.4,{size:42,per:.018,lh:1.55,keys:[['是国家公安机关的性质',SKY]]});}
+  vCaption(C.closing,t,t0+12.6,1e9,{keys:[['扩大解释','sky']]});
+  vNote(L.decision,t,t0+12);
+}
+function vHistory(t,t0){
+  const H11=BD.a11||{},years=BD.years||[],changes=years.filter(y=>H11[y]?.changed),C=TEXT.vhistory||{},u=t-t0;
+  vHeader(C.title,t,t0,{sub:C.sub,subColor:GOLD});
+  const first=2.4,span=4.6,stage=Math.max(0,Math.min(changes.length,Math.floor((u-first)/span)+1)),year=stage?changes[stage-1]:years[0];
+  const sAt=first+(stage-1)*span;
+  // Years along the top of the picture.
+  const tx0=130,tx1=950,ty=520;
+  grow(tx0,ty,tx1-tx0,step(u,.3,.8),'rgba(242,181,68,.35)',3);
+  years.forEach((y,i)=>{const x=tx0+(tx1-tx0)*i/(years.length-1),ch=changes.indexOf(y),on=y===year,past=ch>=0&&ch<stage,al=step(u,.3+i*.06,.4);
+    g.save();g.globalAlpha=al;g.fillStyle=on?PAPER:past?GOLD:'rgba(247,243,232,.35)';if(on){g.shadowColor=GOLD;g.shadowBlur=20;}g.beginPath();g.arc(x,ty+1,on?14:ch>=0?10:6,0,Math.PI*2);g.fill();g.restore();
+    text(String(y),x,ty+52,{size:30,font:SANS,weight:on?600:400,align:'center',color:on?PAPER:DIM,alpha:al});});
+  // The year and the amendment.
+  const ya=stage?step(u,sAt,.4):step(u,.6,.4);
+  g.save();g.globalAlpha=ya;g.font=fontOf(84,SERIF,BLACK);g.fillStyle=GOLD;g.shadowColor=GOLD;g.shadowBlur=24;g.fillText(`${year}`,VS.x0,690);g.restore();
+  text(stage?`宪法修正案${H11[year].amendment}`:'现行宪法原文',VS.x1,684,{size:38,font:SANS,weight:600,align:'right',alpha:ya});
+  text(BD.title11,VS.x0+mw(`${year}`,84,SERIF,BLACK)+24,684,{size:38,weight:600,alpha:ya});
+  // The text, with what was added lit and what was taken out stepping back.
+  const segs=stage?H11[year].diff:[{type:'equal',text:H11[years[0]].text}],show=stage?step(u,sAt+.6,1.2):0,size=40,lhp=size*1.62;
+  let x=VS.x0,y=780;const base=stage?Math.min(1,.2+step(u,sAt,.4)):step(u,.6,.5);
+  g.save();g.font=fontOf(size,SERIF,400);
+  for(const seg of segs)for(const ch of seg.text){
+    if(ch==='\n'){x=VS.x0;y+=lhp+8;continue;}
+    const w=g.measureText(ch).width;if(x+w>VS.x1&&!NO_START.includes(ch)){x=VS.x0;y+=lhp;}
+    if(seg.type==='insert'){g.globalAlpha=base*show*.9;g.fillStyle='rgba(79,209,176,.24)';g.fillRect(x,y-size*.9,w+.5,size*1.2);
+      g.globalAlpha=base*(.35+.65*show);g.fillStyle='#C9FBEC';g.shadowColor=JADE;g.shadowBlur=14*show;g.fillText(ch,x,y);g.shadowBlur=0;}
+    else if(seg.type==='delete'){g.globalAlpha=base*(1-.68*show);g.fillStyle=CORAL;g.fillText(ch,x,y);}
+    else{g.globalAlpha=base;g.fillStyle=PAPER;g.fillText(ch,x,y);}
+    x+=w;
+  }
+  g.restore();
+  if(stage)vCaption(TEXT.history?.[2]?.[stage-1],t,t0+sAt+1.4,t0+sAt+span,{keys:[[TEXT.history?.[2]?.[stage-1],'jade']]});
+  else vCaption(C.caption,t,t0+.8,t0+first);
+  vNote(C.legend,t,t0+first+.6);
+}
+function vPurpose(t,t0){
+  const P=TEXT.purpose||{},C=TEXT.vpurpose||{},u=t-t0,media=P.media||[];
+  vHeader(C.title,t,t0,{sub:C.sub,subColor:CORAL});
+  const textA=1-step(u,3.6,.4);
+  if(textA>0)vBlock(BD.a40||'',VS.x0,560,VS.w,t,t0+.2,{size:42,per:.012,lh:1.6,keys:[['通信自由和通信秘密',CORAL]],alpha:textA,keyAt:t0+1.6});
+  const caseOn=step(u,11,.5),pic=step(u,3.8,.5)*(1-caseOn);
+  const sx=W/2,sy=920;
+  if(pic>0){
+    g.save();g.globalAlpha=pic;g.fillStyle='rgba(255,138,101,.16)';g.strokeStyle=CORAL;g.lineWidth=3;g.shadowColor=CORAL;g.shadowBlur=24;
+    g.beginPath();g.ellipse(sx,sy,330,84,0,0,Math.PI*2);g.fill();g.stroke();g.restore();
+    text(P.shield,sx,sy+17,{size:50,weight:600,align:'center',alpha:pic});
+    const before=media.filter(m=>m[2]<P.year1982),after=media.filter(m=>m[2]>P.year1982);
+    const row=(list,y,start,late)=>list.forEach(([name,era],i)=>{
+      const x=W/2+(i-(list.length-1)/2)*300,a=step(u,start+i*.35,.4)*pic;if(a<=0)return;
+      text(name,x,y,{size:48,weight:600,align:'center',alpha:a});text(era,x,y+44,{size:28,font:SANS,align:'center',color:DIM,alpha:a});
+      const k=late?step(u,8,1.2):1,y1=late?y-62:y+64,y2=late?sy+84:sy-84,x2=sx+(x-sx)*.45;
+      if(late&&k<=0){text('?',x,y-74,{size:48,weight:BLACK,align:'center',color:GOLD,alpha:a});return;}
+      g.save();g.strokeStyle=CORAL;g.lineWidth=late?2+1.4*k:3;g.globalAlpha=a*(late?.4+.55*k:.9);if(late&&k<1)g.setLineDash([8,8]);
+      g.beginPath();g.moveTo(x,y1);for(let s=1;s<=30*(late?k:a);s++){const v=s/30;g.lineTo(x+(x2-x)*v,y1+(y2-y1)*v*v);}g.stroke();g.restore();});
+    text(C.before,W/2,560,{size:32,font:SANS,weight:600,align:'center',color:DIM,alpha:step(u,4,.4)*pic});
+    row(before,650,4.2,false);
+    line(VS.x0,1100,VS.x1,1100,SEAL,2,step(u,5.6,.4)*pic);
+    text(P.marker,W/2,1088,{size:32,font:SANS,weight:600,align:'center',color:SEAL,alpha:step(u,5.6,.4)*pic});
+    text(C.after,W/2,1160,{size:32,font:SANS,weight:600,align:'center',color:DIM,alpha:step(u,6,.4)*pic});
+    row(after,1250,6.2,true);
+  }
+  vCaption(P.closing,t,t0+9,t0+11,{keys:[['目的','coral']]});
+  if(caseOn>0){box(VS.x0,520,VS.w,700,{alpha:caseOn,stroke:'rgba(255,138,101,.5)',fill:'rgba(255,138,101,.09)',r:16});
+    vBlock(P.caseTitle,VS.x0+44,600,VS.w-88,t,t0+11.2,{size:34,font:SANS,weight:600,color:CORAL,per:.01,lh:1.5});
+    vBlock(P.caseText,VS.x0+44,760,VS.w-88,t,t0+11.6,{size:42,per:.014,lh:1.6,keys:[['不符合保护公民通信自由和通信秘密的原则和精神',CORAL]]});}
+  vCaption(C.caseCaption,t,t0+12.6,1e9,{keys:[['备案审查','coral']]});
+}
+function vCompare(t,t0){
+  const C=TEXT.vcompare||{},T=TEXT.compare||[],u=t-t0;
+  vHeader(C.title,t,t0,{sub:C.sub,subColor:VIOLET});
+  const cards=[[T[2],BD.a38,'',T[4],BD.a38at||.26,520],[T[3],T[5],T[6],T[7],0,900]];
+  cards.forEach(([src,body,extra,where,at,y],i)=>{
+    const a=step(u,.6+i*1.4,.5);if(a<=0)return;
+    box(VS.x0,y+20*(1-a),VS.w,330,{alpha:a,stroke:'rgba(183,156,255,.5)',fill:'rgba(183,156,255,.08)',r:16});
+    text(src,VS.x0+40,y+62,{size:32,font:SANS,weight:600,color:VIOLET,alpha:a});
+    const r=vBlock(body||'',VS.x0+40,y+140,VS.w-80,t,t0+.8+i*1.4,{size:i?60:46,weight:600,per:.03,lh:1.45,keys:[[i?'人的尊严':'人格尊严',VIOLET]]});
+    if(extra)text(extra,VS.x0+40,r.next-6,{size:34,font:'Georgia,serif',color:DIM,alpha:a});
+    const by=y+268,pb=step(u,1.6+i*1.4,.6);grow(VS.x0+40,by,VS.w-80,pb,'rgba(183,156,255,.35)',3);
+    if(pb>0){const mx=VS.x0+40+(VS.w-80)*at;g.save();g.globalAlpha=pb;g.fillStyle=VIOLET;g.shadowColor=VIOLET;g.shadowBlur=14;g.fillRect(mx-3,by-20,7,42);g.restore();
+      text(where,VS.x1-40,by+50-12,{size:28,font:SANS,color:DIM,align:'right',alpha:pb});}
+  });
+  vCaption(T[8],t,t0+4.4,1e9,{keys:[['人格尊严','violet'],['人的尊严','violet']],size:50});
+}
+// 比较法视野, for the phone: one sphere at a time fills the screen, the camera travels along the light.
+let VWORLD=null;
+function vWorld(t,t0){
+  const V_=TEXT.world||{},C=TEXT.vworld||{},u=t-t0,D=1250,R=390;
+  if(!VWORLD){const dig=V_.dignity||[],der=V_.derived||[],cn=V_.china||[],r=52,rc=70,G=450;
+    const wa=relax(dig.length+der.length,R,r,7),cp=relax(cn.length,R,rc,11),glb=relax(dig.length+der.length+cn.length,G,40,23);
+    VWORLD={r,rc,G,glb,world:[...dig.map((txt,k)=>({txt,kind:'dignity',home:wa[k],born:2.6+k*.07,parent:-1})),...der.map((txt,k)=>({txt,kind:'derived',home:wa[dig.length+k],born:4+k*.16,parent:k%dig.length}))],
+      china:cn.map((c,k)=>({lines:c.lines,home:cp[k],parent:c.parent,born:k?9.8+k*.26:9.4}))};}
+  const Wd=VWORLD,ax=W/2,ay=930,bx=W/2,by=930+D;
+  // Camera: China, down to the world, back up to China, out to both, and into one globe.
+  const down=step(u,2,1.6),up=step(u,7,1.4),out=step(u,13.4,1.4),merge=step(u,15.2,2),back=step(u,15.4,1.8);
+  const camY=D*down-D*up+D/2*out,s=1-.5*out+.5*back;
+  const gx=W/2,gy=930+D/2;
+  g.save();g.translate(W/2,930);g.scale(s,s);g.translate(-W/2,-930-camY);
+  const beat=heart(u),sphereA=step(u,0,.5)*(1-merge);
+  const sphere=(x,y,color,rr,a)=>{if(a<=0)return;g.save();g.globalAlpha=a;const f=g.createRadialGradient(x-rr*.35,y-rr*.35,rr*.1,x,y,rr);f.addColorStop(0,color+'33');f.addColorStop(1,color+'08');
+    g.fillStyle=f;g.strokeStyle=color;g.lineWidth=3;g.beginPath();g.arc(x,y,rr,0,Math.PI*2);g.fill();g.stroke();g.restore();};
+  sphere(ax,ay,JADE,R*(1+.022*beat),sphereA);
+  if(sphereA>0)for(let k=0;k<2;k++){const ph=((u/1.15)+k*.5)%1;g.save();g.globalAlpha=sphereA*.35*(1-ph);g.strokeStyle=JADE;g.lineWidth=2;g.beginPath();g.arc(ax,ay,R+ph*70,0,Math.PI*2);g.stroke();g.restore();}
+  sphere(bx,by,SKY,R,sphereA);
+  const tA=step(u,1.4,.6)*(1-step(u,6.6,.5)),tB=step(u,7.4,.6)*(1-step(u,13.2,.5));
+  const poolA=torch(ax,ay+R+40,bx,by,tA,u),poolB=torch(bx,by-R-40,ax,ay,tB,u);
+  const shrink=step(u,9,.8);
+  if(shrink<1){const sz=120*(1+.06*beat)*(1-.6*shrink);g.save();g.globalAlpha=step(u,0,.4)*(1-shrink);g.font=fontOf(sz,SERIF,BLACK);g.textAlign='center';g.fillStyle=PAPER;g.shadowColor=JADE;g.shadowBlur=30*beat;g.fillText(V_.dignityCN,ax,ay+sz*.36);g.restore();}
+  const cnPos=(c,k)=>{const P=drift(c.home,k+40,u),born=step(u,c.born,1),par=c.parent>=0?Wd.china[c.parent]:null;let x=ax+P.x,y=ay+P.y;
+    if(par&&born<1){const Q=drift(par.home,c.parent+40,u);x=ax+Q.x+(P.x-Q.x)*born;y=ay+Q.y+(P.y-Q.y)*born;}
+    if(k===0&&born<1){x=ax+P.x*born;y=ay+P.y*born;}
+    if(merge>0){const Gp=drift(Wd.glb[Wd.world.length+k],k+90,u,7);x+=(gx+Gp.x-x)*merge;y+=(gy+Gp.y-y)*merge;}
+    return {x,y,a:step(u,c.born,.5)};};
+  const wPos=(c,k)=>{const P=drift(c.home,k,u),born=step(u,c.born,1);let x=bx+P.x,y=by+P.y;
+    if(c.kind==='derived'&&born<1){const Q=drift(Wd.world[c.parent].home,c.parent,u);x=bx+Q.x+(P.x-Q.x)*born;y=by+Q.y+(P.y-Q.y)*born;}
+    if(merge>0){const Gp=drift(Wd.glb[k],k+60,u,7);x+=(gx+Gp.x-x)*merge;y+=(gy+Gp.y-y)*merge;}
+    return {x,y};};
+  const gr=step(u,15.8,1.4);
+  if(gr>0){g.save();g.globalAlpha=gr;const G=Wd.G,f=g.createRadialGradient(gx-G*.35,gy-G*.4,G*.1,gx,gy,G);f.addColorStop(0,'rgba(125,183,245,.2)');f.addColorStop(1,'rgba(79,209,176,.05)');
+    g.fillStyle=f;g.beginPath();g.arc(gx,gy,G,0,Math.PI*2);g.fill();g.strokeStyle='rgba(247,243,232,.18)';g.lineWidth=1.2;
+    for(let k=0;k<6;k++){const a=k*Math.PI/6+u*.12;g.beginPath();g.ellipse(gx,gy,Math.abs(Math.cos(a))*G,G,0,0,Math.PI*2);g.stroke();}
+    for(const lat of [-60,-30,0,30,60]){const yy=gy+G*Math.sin(lat*Math.PI/180),ww=G*Math.cos(lat*Math.PI/180);g.beginPath();g.ellipse(gx,yy,ww,ww*.1,0,0,Math.PI*2);g.stroke();}
+    g.strokeStyle='rgba(247,243,232,.6)';g.lineWidth=2;g.beginPath();g.arc(gx,gy,G,0,Math.PI*2);g.stroke();g.restore();}
+  const rW=Wd.r*(1-.23*merge),rC=Wd.rc*(1-.43*merge);
+  const wp=Wd.world.map((c,k)=>wPos(c,k)),cp=Wd.china.map((c,k)=>cnPos(c,k));
+  if(merge>.6){g.save();cp.forEach((P,a)=>wp.forEach((Q,b)=>{const d=Math.hypot(P.x-Q.x,P.y-Q.y);if(d>150)return;const al=(merge-.6)/.4*.5;
+    g.strokeStyle=GOLD;g.globalAlpha=al*.5;g.lineWidth=1.2;g.beginPath();g.moveTo(P.x,P.y);g.lineTo(Q.x,Q.y);g.stroke();
+    const v=((u*.5+a*.13+b*.07)%1);g.globalAlpha=al;g.fillStyle='#FFE9C2';g.beginPath();g.arc(P.x+(Q.x-P.x)*v,P.y+(Q.y-P.y)*v,3,0,Math.PI*2);g.fill();}));g.restore();}
+  Wd.world.forEach((c,k)=>{const vis=step(u,c.born,.5),P=wp[k],lit=Math.max(lightAt(poolA,P.x,P.y),merge,.3);
+    cell(P.x,P.y,rW,c.txt.split('\n'),c.kind==='dignity'?SKY:VIOLET,{alpha:vis,lit,maxSize:21});});
+  Wd.china.forEach((c,k)=>{const P=cp[k];if(P.a<=0)return;
+    cell(P.x,P.y,rC,c.lines,JADE,{alpha:P.a,lit:Math.max(lightAt(poolB,P.x,P.y),merge,.4),font:SANS,accent:c.lines.length-1,maxSize:19});});
+  g.restore();
+  // Words over the picture: which way we look, then the line of the scene.
+  vHeader(V_.title,t,t0,{size:80});
+  text(V_.left,W/2,VS.head+78,{size:38,font:SANS,weight:600,align:'center',color:JADE,alpha:step(u,.3,.4)*(1-step(u,1.8,.3))});
+  text(V_.views?.[0],W/2,VS.head+78,{size:40,font:SANS,weight:600,align:'center',color:'#FFE9C2',alpha:step(u,2,.4)*(1-step(u,6.8,.3))});
+  text(V_.views?.[1],W/2,VS.head+78,{size:40,font:SANS,weight:600,align:'center',color:'#FFE9C2',alpha:step(u,7.2,.4)*(1-step(u,13.2,.3))});
+  vCaption(C.worldCaption,t,t0+3.2,t0+6.8,{keys:[['人的尊严','sky']]});
+  vCaption(C.chinaCaption,t,t0+9.6,t0+13.2,{keys:[['人格尊严','jade']]});
+  vCaption(V_.line,t,t0+17,1e9,{keys:[['中国法视角下的世界','jade'],['世界法视角下的中国','sky']]});
+  vNote(V_.note,t,t0+10,{alpha:1-step(u,13.2,.4)});
+}
+function vMethods(t,t0){
+  const M=TEXT.methods||[],u=t-t0;
+  vHeader(M[0],t,t0,{size:80});
+  ['文义解释','体系解释','历史解释','目的解释'].forEach((n,i)=>vChip(n,i%2?760:320,610+Math.floor(i/2)*120,{alpha:step(u,.5+i*.15,.4),size:48}));
+  vChip('比较法解释',320,900,{alpha:step(u,1.4,.4),size:48,dashed:true});
+  vChip('法权分析',760,900,{alpha:step(u,1.6,.4),size:48,dashed:true,color:SEAL});
+  const typed=M[2]||'',k=Math.floor(clamp((u-2.6)/1.2)*typed.length),shown=typed.slice(0,k),size=48;
+  if(u>2.4){const w=measure(typed,size,SANS)+size*1.4,x=W/2-w/2,y=1030;
+    g.save();g.strokeStyle=PAPER;g.globalAlpha=.65;g.lineWidth=2;g.setLineDash([8,8]);rounded(x,y-size*.875,w,size*1.75,size*.875);g.stroke();g.restore();
+    text(shown,x+size*.7,y+size*.36,{size,font:SANS});
+    if(k<typed.length&&Math.floor(t*2.4)%2===0){const cx=x+size*.7+measure(shown,size,SANS)+4;line(cx,y-30,cx,y+30,PAPER,3,1);}}
+  text(M[1],W/2,1180,{size:fitSize(M[1]||'',34,VS.w,SANS),font:SANS,align:'center',color:DIM,alpha:step(u,2,.5)});
+  vCaption(M[3],t,t0+4.6,1e9,{keys:[['不替你选择学说','gold']]});
+}
+function vFeatures(t,t0){
+  const C=TEXT.vfeatures||{},items=TEXT.features?.[1]||[],u=t-t0,cols=[SKY,JADE,GOLD,CORAL,VIOLET,SEAL,SKY,JADE,GOLD];
+  vHeader(C.title,t,t0,{size:80});
+  items.forEach(([name,desc],i)=>{
+    const p=step(u,.4+i*.18,.45);if(p<=0)return;
+    const last=i===items.length-1&&items.length%2,cw=last?VS.w:444,x=last?VS.x0:i%2?W/2+12:VS.x0,y=470+Math.floor(i/2)*178+30*(1-p);
+    box(x,y,cw,156,{alpha:p,stroke:'rgba(247,243,232,.22)',fill:'rgba(247,243,232,.07)',r:16});
+    g.save();g.globalAlpha=p;g.fillStyle=cols[i];g.shadowColor=cols[i];g.shadowBlur=12;g.fillRect(x+30,y+30,52,6);g.restore();
+    text(name,x+30,y+92,{size:46,weight:600,alpha:p});
+    text(desc,x+30,y+136,{size:fitSize(desc,28,cw-60,SANS),font:SANS,color:DIM,alpha:p});
+  });
+  vCaption(C.caption,t,t0+2.6,1e9,{keys:C.keys||[]});
+}
+
+// =====================================================================================================
+// D 竖屏: 法律人的智能笔记
+// =====================================================================================================
+function vShell(t,t0){
+  const S=TEXT.shell||{},C=TEXT.vshell||{},cx=W/2,cy=930,u=t-t0,shells=S.shells||[],tools=S.tools||[];
+  const first=3.4,span=2.4,k=Math.max(0,Math.min(shells.length-1,Math.floor((u-first)/span))),swap=clamp((u-first-k*span)/.6);
+  // The three words, each with its layer: soul, tools, shell.
+  const labels=S.labels||[],size=50,gap=44,ws=labels.map(([w])=>mw(w,size,SERIF,BLACK)),tot=ws.reduce((a,b)=>a+b,0)+gap*(labels.length-1);
+  let x=W/2-tot/2;
+  labels.forEach(([word,tone],i)=>{const at=[2.2,1.2,.2][i],kw=word.slice(-2);
+    vBlock(word,x,VS.head+20,1e5,t,t0+at,{size,weight:BLACK,per:.05,keys:[[kw,{gold:GOLD,sky:SKY,amber:GOLD}[tone]||GOLD]]});x+=ws[i]+gap;});
+  const grown=Math.floor(40+300*clamp((u-.2)/(S.grow||9)));
+  const glow=g.createRadialGradient(cx,cy,0,cx,cy,280);glow.addColorStop(0,'rgba(242,181,68,.26)');glow.addColorStop(1,'rgba(242,181,68,0)');
+  g.save();g.globalAlpha=step(u,.2,.6);g.fillStyle=glow;g.beginPath();g.arc(cx,cy,280,0,Math.PI*2);g.fill();
+  g.translate(cx,cy);g.scale(1.65,1.65);g.translate(-cx,-cy);noteCloud(cx,cy,grown,120,t,{alpha:1});g.restore();
+  const ta=step(u,1.2,.6);
+  if(ta>0){g.save();g.globalAlpha=ta;g.strokeStyle='rgba(125,183,245,.6)';g.lineWidth=2;g.setLineDash([4,10]);g.lineDashOffset=-u*20;g.beginPath();g.arc(cx,cy,300,0,Math.PI*2);g.stroke();g.restore();
+    const code='function readUnit(id){ … } · render() · merge(state, file) · exportMarkdown() · ';
+    for(let i=0;i<code.length;i++){const a=-Math.PI/2+i/code.length*Math.PI*2+u*.08;
+      g.save();g.globalAlpha=ta*.8;g.translate(cx+Math.cos(a)*338,cy+Math.sin(a)*338);g.rotate(a+Math.PI/2);text(code[i],0,0,{size:22,font:'Menlo,monospace',align:'center',color:SKY});g.restore();}}
+  const sa=step(u,2.2,.6);
+  if(sa>0){const fade=k>0?Math.min(1,.25+swap):1,bw=880,bh=880;
+    box(cx-bw/2,cy-bh/2,bw,bh,{alpha:sa*fade,stroke:'rgba(242,181,68,.9)',fill:'rgba(0,0,0,0)',r:30});
+    g.save();g.globalAlpha=sa*fade;g.fillStyle=GOLD;g.shadowColor=GOLD;g.shadowBlur=20;g.fillRect(cx-bw/2,cy-bh/2,14,bh);g.restore();
+    text(shells[k],cx,cy-bh/2+74,{size:56,weight:BLACK,align:'center',color:GOLD,alpha:sa*fade,spacing:8});
+    text(tools[k],cx,cy+bh/2-40,{size:34,font:'Menlo,monospace',align:'center',color:SKY,alpha:ta*fade});}
+  vCaption(C.caption,t,t0+3.6,1e9,{keys:[['更换','gold'],['更新','sky']]});
+}
+// Kinetic lines; a key word moves as it means: 更换 turns over, 更新 ticks forward, 理性技艺 grows, 灵魂 glows.
+function vKinetic(str,keys,y,size,t,start,{weight=BLACK,dim=0,per=.07}={}){
+  const chars=[...str];g.save();g.font=fontOf(size,SERIF,weight);const ws=chars.map(c=>g.measureText(c).width);g.restore();
+  let cx=W/2-ws.reduce((a,b)=>a+b,0)/2;
+  chars.forEach((ch,i)=>{const w=ws[i],p=step(t,start+i*per,.45),key=keys.find(k=>i>=k.at&&i<k.at+[...k.word].length);
+    let sx=1,sy=1,dy=0,color=PAPER,alpha=1-dim,kp=0;
+    if(key){kp=step(t,key.start,.6);alpha=1-dim*(key.keep?0:1);
+      if(key.move==='flip'){const f=clamp((t-key.start)/.8);sx=f>=1?1:Math.abs(Math.cos(f*Math.PI*2));}
+      if(key.move==='grow'){sx=sy=1+.12*kp;dy=-8*kp;}
+      if(key.move==='tick')dy=-10*Math.sin(clamp((t-key.start)/.6)*Math.PI);
+      if(key.move==='glow'&&kp>0){const r=size*1.5*(1+.08*Math.sin(t*3)),gr=g.createRadialGradient(cx+w/2,y-size*.35,0,cx+w/2,y-size*.35,r);
+        gr.addColorStop(0,'rgba(242,181,68,'+.38*kp+')');gr.addColorStop(1,'rgba(242,181,68,0)');g.save();g.fillStyle=gr;g.fillRect(cx+w/2-r,y-size*.35-r,2*r,2*r);g.restore();sx=sy=1+.1*kp;}}
+    g.save();g.translate(cx+w/2,y-size*.35+dy);g.scale(sx,sy);g.translate(-(cx+w/2),-(y-size*.35));
+    vChar(ch,cx,y,p,{size,font:SERIF,weight,color,key:key?.color,kp,alpha,t,i});g.restore();cx+=w;});
+}
+function vSoul(t,t0){
+  const L=TEXT.vsoul?.lines||[],dim=step(t,t0+6.6,.8)*.7,K=(s,word,color,move,start,keep)=>({word,at:[...s.slice(0,s.indexOf(word))].length,color,move,start,keep});
+  const [l1,l2,l3,l4,l5]=L;
+  // At the end everything but 理性技艺 and 灵魂 steps back.
+  vKinetic(l1,[K(l1,'外壳',GOLD,'',t0+.7),K(l1,'更换',GOLD,'flip',t0+1.1)],650,104,t,t0+0,{dim});
+  vKinetic(l2,[K(l2,'工具',SKY,'',t0+2),K(l2,'更新',SKY,'tick',t0+2.4)],800,104,t,t0+1.3,{dim});
+  vKinetic(l3,[],1000,80,t,t0+3,{weight:600,dim:dim*.6});
+  vKinetic(l4,[K(l4,'理性技艺',JADE,'grow',t0+4.4,true)],1160,128,t,t0+3.7,{dim});
+  vKinetic(l5,[K(l5,'灵魂',GOLD,'glow',t0+5.6,true)],1340,150,t,t0+4.6,{dim});
+}
+function vOutsource(t,t0){
+  const O=TEXT.outsource||{},C=TEXT.voutsource||{},u=t-t0;
+  vLines(C.title||[],W/2,312,t,t0,{size:76,weight:BLACK,per:.035,keys:[['外包','coral'],['学习和思考','jade']],lh:1.2});
+  const scaleAt=(x,y,k,fn)=>{g.save();g.translate(x,y);g.scale(k,k);g.translate(-x,-y);fn();g.restore();};
+  const b1=step(u,.4,.4)*(1-step(u,6,.4)),b2=step(u,6.4,.4)*(1-step(u,12,.4)),b3=step(u,12.2,.5);
+  // Beat 1: the AI writes the note; the mind dims link by link.
+  if(b1>0){g.save();g.globalAlpha=b1;
+    text(O.left,W/2,560,{size:48,font:SANS,weight:600,align:'center',color:CORAL});
+    scaleAt(230,760,1.5,()=>aiNode(230,760,1));
+    const lc=step(u,1.2,.3);line(300,760,520,760,'rgba(183,156,255,.7)',3,lc);
+    scaleAt(700,760,1.5,()=>noteCard(600,690,200,140,lc,{color:'rgba(247,243,232,.6)',instant:true}));
+    text(O.leftCard,700,920,{size:32,font:SANS,align:'center',color:DIM,alpha:lc});
+    scaleAt(540,1130,2,()=>mind(540,1130,.85-.8*clamp((u-1.6)/3.6),t,41));
+    g.restore();
+    vCaption(O.leftEnd,t,t0+3.8,t0+6.2,{keys:[['失去意义','coral']]});}
+  // Beat 2: the AI only helps; every kind of help is a spark into the mind, and the person writes.
+  if(b2>0){g.save();g.globalAlpha=b2;const v=u-6.4;
+    text(O.right,W/2,560,{size:48,font:SANS,weight:600,align:'center',color:JADE});
+    scaleAt(840,720,1.5,()=>aiNode(840,720,1));
+    (O.helps||[]).forEach((h,i)=>{const st=.4+i*.9,p=clamp((v-st)/1),hx=290,hy=660+i*76;if(v<st)return;
+      const w=mw(h,34,SANS)+40;box(hx-w/2,hy-28,w,54,{alpha:step(v,st,.3),stroke:GOLD,fill:'rgba(15,42,43,.92)',r:27});text(h,hx,hy+12,{size:34,font:SANS,align:'center',alpha:step(v,st,.3)});
+      if(p<1){const sx=840,sy=720,ex=540,ey=1130,x=sx+(ex-sx)*ease(p),y=sy+(ey-sy)*ease(p),gr=g.createRadialGradient(x,y,0,x,y,22);gr.addColorStop(0,'rgba(242,181,68,.95)');gr.addColorStop(1,'rgba(242,181,68,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,22,0,Math.PI*2);g.fill();}});
+    scaleAt(540,1130,2,()=>mind(540,1130,.12+.85*clamp((v-.4)/4.4),t,43));
+    scaleAt(840,890,1.3,()=>noteCard(760,840,160,110,clamp((v-1.6)/3.4),{color:JADE}));
+    text(O.rightCard,840,1000,{size:32,font:SANS,align:'center',color:JADE,alpha:step(v,1.6,.4)});
+    g.restore();
+    vCaption(O.rightEnd,t,t0+10,t0+12.2,{keys:[['思考的产物','jade']]});}
+  // Beat 3: the two side by side.
+  if(b3>0){g.save();g.globalAlpha=b3;
+    text(C.left,290,640,{size:44,font:SANS,weight:600,align:'center',color:CORAL});text(C.right,790,640,{size:44,font:SANS,weight:600,align:'center',color:JADE});
+    scaleAt(290,940,1.25,()=>mind(290,940,.05,t,41));scaleAt(790,940,1.25,()=>mind(790,940,.97,t,43));
+    line(W/2,600,W/2,1200,'rgba(247,243,232,.22)',1.5,1);g.restore();
+    vCaption(C.caption||O.caption,t,t0+12.6,1e9,{keys:[['不能外包','jade']]});}
+}
+function vCurve(t,t0){
+  const C=TEXT.curve||{},u=t-t0,x0=130,x1=900,y0=1260,y1=580,p=clamp((u-.8)/5.4);
+  vHeader(C.title,t,t0,{size:80});
+  const a=step(u,.2,.5);
+  line(x0,y0,x1+30,y0,'rgba(247,243,232,.55)',2.4,a);line(x0,y0,x0,y1-50,'rgba(247,243,232,.55)',2.4,a);
+  text(C.axes?.[0],x1+30,y0+52,{size:34,font:SANS,align:'right',color:DIM,alpha:a});
+  text(C.axes?.[1],x0+16,y1-40,{size:34,font:SANS,color:DIM,alpha:a});
+  const curves=[{f:v=>.25+.35*v,color:VIOLET,dash:true,label:C.labels?.[0]},{f:v=>.18+.78*Math.pow(v,1.25),color:JADE,label:C.labels?.[1]},{f:v=>.3+.06*Math.sin(v*3)-.18*v*v,color:CORAL,label:C.labels?.[2]}];
+  curves.forEach(c=>{g.save();g.strokeStyle=c.color;g.lineWidth=c.dash?4:6;if(c.dash)g.setLineDash([14,10]);g.globalAlpha=a;g.shadowColor=c.color;g.shadowBlur=c.dash?0:14;g.beginPath();
+    for(let k=0;k<=100*p;k++){const v=k/100,x=x0+(x1-x0)*v,y=y0-(y0-y1)*c.f(v);k?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();g.restore();
+    if(p>0){const x=x0+(x1-x0)*p,y=y0-(y0-y1)*c.f(p);g.save();g.fillStyle=c.color;g.shadowColor=c.color;g.shadowBlur=20;g.beginPath();g.arc(x,y,11,0,Math.PI*2);g.fill();g.restore();
+      text(c.label,Math.min(x,x1),y-28,{size:38,font:SANS,weight:600,align:'right',color:c.color,alpha:step(u,1.6,.5)});}});
+  const cross=.21;if(p>cross){const x=x0+(x1-x0)*cross,y=y0-(y0-y1)*(.25+.35*cross),q=step(u,.8+cross*5.4,.5);
+    g.save();g.globalAlpha=q;g.strokeStyle=CORAL;g.lineWidth=3;g.beginPath();g.arc(x,y,24,0,Math.PI*2);g.stroke();g.restore();
+    text(C.marks?.[0],x+10,y+78,{size:34,font:SANS,weight:600,align:'center',color:CORAL,alpha:q});}
+  vCaption(TEXT.vcurve?.caption||C.caption,t,t0+6.6,1e9,{keys:[['被 AI 超越','coral']]});
+  vNote(C.source,t,t0+7);
+}
+let VGLYPHS=null;
+function vYou(t,t0){
+  const Y=TEXT.you||{},C=TEXT.vyou||{},u=t-t0;
+  if(!VGLYPHS){const gy=900,a=glyphPoints('你',W/2,gy,820,10),b=glyphPoints('数据',W/2,gy,450,10),n=Math.max(a.length,b.length),rnd=mulberry(5);
+    const fill=p=>{const out=p.slice();while(out.length<n)out.push(p[Math.floor(rnd()*p.length)]);for(let i=out.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;};
+    const cols=[SKY,JADE,GOLD,CORAL,VIOLET];
+    VGLYPHS={you:fill(a),data:fill(b),start:Array.from({length:n},()=>[rnd()*W,H+40+rnd()*300]),col:Array.from({length:n},()=>cols[Math.floor(rnd()*5)]),delay:Array.from({length:n},()=>rnd())};}
+  const G=VGLYPHS,gather=c=>clamp((u-.1-c*1.4)/2.4),toData=ease(clamp((u-5)/1.6)),back=ease(clamp((u-9.4)/1.6));
+  for(let i=0;i<G.you.length;i++){
+    const gg=ease(gather(G.delay[i])),[sx,sy]=G.start[i],[ux,uy]=G.you[i],[dx,dy]=G.data[i],m=toData*(1-back);
+    const x=sx+(ux-sx)*gg+(dx-ux)*m,y=sy+(uy-sy)*gg+(dy-uy)*m,tw=.7+.3*Math.sin(t*2+i);
+    g.save();g.globalAlpha=(.25+.75*gg)*tw;g.fillStyle=G.col[i];g.beginPath();g.arc(x,y,3.4,0,Math.PI*2);g.fill();g.restore();
+  }
+  vCaption([Y.lines?.[0]],t,t0+2.2,t0+5,{size:64});
+  vCaption([Y.lines?.[1]],t,t0+6,t0+9.4,{size:64,keys:[['数据','gold']]});
+  vCaption([Y.lines?.[2]],t,t0+10.4,1e9,{size:64,keys:[['你','gold']]});
+  vNote(Y.lines?.[3],t,t0+11.4,{size:32});
+}
+function vLocal(t,t0){
+  const D=TEXT.storage||{},C=TEXT.vlocal||{},u=t-t0,files=D.files||[];
+  vHeader(C.title,t,t0,{sub:(D.principles||[]).join(' · '),subColor:GOLD});
+  const fx=VS.x0+10,fy=540;
+  text(D.folder,fx,fy,{size:46,weight:600,color:GOLD,alpha:step(u,.4,.4)});
+  files.forEach(([name,what],i)=>{const a=step(u,.8+i*.4,.4),y=fy+86+i*116;
+    line(fx+16,fy+20+i*116,fx+16,y-12,'rgba(247,243,232,.4)',2,a);line(fx+16,y-12,fx+44,y-12,'rgba(247,243,232,.4)',2,a);
+    text(name,fx+64,y,{size:40,font:SANS,weight:600,alpha:a});text(what,fx+64,y+44,{size:30,font:SANS,color:DIM,alpha:a});});
+  const cx=W/2,cy=1060,c=step(u,2.6,.6);
+  if(c>0){g.save();g.globalAlpha=c;g.translate(cx,cy);g.scale(1.7,1.7);g.translate(-cx,-cy);g.strokeStyle=SKY;g.lineWidth=2;g.shadowColor=SKY;g.shadowBlur=10;g.beginPath();
+    g.arc(cx-40,cy,46,Math.PI*.5,Math.PI*1.5);g.arc(cx+10,cy-30,56,Math.PI,Math.PI*1.9);g.arc(cx+60,cy+4,40,Math.PI*1.5,Math.PI*.5);g.closePath();g.stroke();g.restore();
+    text(D.cloud,cx+16,cy+14,{size:32,font:SANS,weight:600,align:'center',alpha:c});
+    (D.devices||[]).forEach((d,i)=>{const x=cx-300+i*300,y=1300,a=step(u,3.2+i*.3,.4);
+      box(x-110,y-60,220,120,{alpha:a,stroke:SKY,r:14});text(d,x,y+14,{size:40,font:SANS,weight:600,align:'center',alpha:a});
+      line(x,y-64,cx+16+(x-cx)*.25,cy+80,SKY,2,a*.7);});}
+  vCaption(C.caption,t,t0+4.6,1e9,{keys:[['带得走','gold']]});
+  vNote(D.license,t,t0+5.6,{size:30});
+}
+// 积累的数据就是模型: the network runs from top to bottom, the notes fall in at the top.
+function vModel(t,t0){
+  const M2=TEXT.model||{},u=t-t0,acc=clamp((u-.8)/8);
+  vHeader(M2.title,t,t0,{size:80});
+  const layers=[5,8,8,5,1],ys=[600,770,940,1110,1290],sp=104,rnd=mulberry(31);
+  const pos=layers.map((n,l)=>Array.from({length:n},(_,i)=>({x:W/2+(i-(n-1)/2)*sp,y:ys[l],th:l===layers.length-1?.78:rnd()*.72})));
+  const act=n=>clamp((acc-n.th)*6),show=step(u,.4,.6),cols=[SKY,JADE,GOLD,CORAL];
+  for(let l=0;l<layers.length-1;l++)for(const a of pos[l])for(const b of pos[l+1]){
+    const on=Math.min(act(a),act(b));line(a.x,a.y,b.x,b.y,on>0?cols[l]:'rgba(247,243,232,.5)',1+2.6*on,(.07+.6*on)*show);
+    if(on>.5){const v=((u*.9+(a.x+b.y)*.003)%1),x=a.x+(b.x-a.x)*v,y=a.y+(b.y-a.y)*v;g.save();g.globalAlpha=show*on*Math.sin(Math.PI*v);g.fillStyle=PAPER;g.beginPath();g.arc(x,y,3.4,0,Math.PI*2);g.fill();g.restore();}}
+  pos.forEach((L,l)=>L.forEach(n=>{const on=act(n),last=l===layers.length-1,r=last?50:13+4*on;
+    if(on>0){const gr=g.createRadialGradient(n.x,n.y,0,n.x,n.y,r*3);gr.addColorStop(0,`rgba(242,181,68,${.45*on})`);gr.addColorStop(1,'rgba(242,181,68,0)');g.save();g.globalAlpha=show;g.fillStyle=gr;g.beginPath();g.arc(n.x,n.y,r*3,0,Math.PI*2);g.fill();g.restore();}
+    g.save();g.globalAlpha=show;g.fillStyle=on>0?(last?GOLD:cols[Math.min(l,3)]):'#0F2A2F';g.strokeStyle=on>0?PAPER:'rgba(247,243,232,.55)';g.lineWidth=2;g.beginPath();g.arc(n.x,n.y,r,0,Math.PI*2);g.fill();g.stroke();g.restore();}));
+  text(M2.output,W/2+90,1290+16,{size:44,weight:600,color:GOLD,alpha:step(u,7.6,.6)});
+  // Notes drop into the first layer.
+  const kinds=M2.inputs||[],ic=[SKY,JADE,GOLD,CORAL,VIOLET];
+  for(let i=0;i<10;i++){const lane=i%5,ph=(Math.floor(i/5)/2+lane*.11)%1,v=((u*.32+ph)%1);if(u<.6+lane*.2)continue;
+    const x=pos[0][lane].x,y=440+(ys[0]-440)*v,label=kinds[(i*3)%kinds.length],a=Math.min(1,Math.sin(Math.PI*v)*1.6)*.95;
+    if(v<.7){const w=mw(label,28,SANS)+30;box(x-w/2,y-22,w,42,{alpha:a,stroke:ic[lane],fill:'rgba(15,42,43,.92)',r:21});text(label,x,y+10,{size:28,font:SANS,align:'center',alpha:a});}
+    else{g.save();g.globalAlpha=a;g.fillStyle=ic[lane];g.beginPath();g.arc(x,y,6,0,Math.PI*2);g.fill();g.restore();}}
+  vCaption(M2.lines?.[0],t,t0+3.4,t0+7.4,{keys:[['理性技艺','jade']]});
+  vCaption(M2.lines?.[1],t,t0+7.6,1e9,{keys:[['专属模型','gold']]});
+}
+
+// ---------- films: [start, end, scene] ----------
+const SCENE_FUNCTIONS={open,a13,a56,book,motto1,motto2,weave,faquan,faquan37,balance37,end,bOpen,bLiteral,bHistory,bPurpose,bCompare,bWorld,bMethods,bFeatures,bEnd,cOpen,cCategories,cCriterion,cSteps,cAssist,cEnd,dOpen,dTime,dPersonal,dExtend,dLocal,dSmart,dEnd,d2Open,dShell,dSoul,dOutsource,dCurve,dYou,dModel,d2End,
+  vHook,vEnd,vA13,vWeb,vA56,vBook,vWeave,vMotto,vFaquan,vBalance,vLiteral,vHistory,vPurpose,vCompare,vWorld,vMethods,vFeatures,vShell,vSoul,vOutsource,vCurve,vYou,vLocal,vModel};
+const FILMS={};{let at=0;FILMS[window.FILM_ID||'A']=(window.SCENES||[]).map(([name,len])=>{const r=[at,at+len,SCENE_FUNCTIONS[name]];at+=len;return r;});}
+
+// ---------- portrait cameras ----------
+// A scene without its own portrait layout is drawn in landscape coordinates through a camera set in
+// 场景.json (portrait.views): 'zoom' crops to a region and scales it to the screen width; 'split'
+// shows two regions, one above the other (for side-by-side layouts). Scenes listed as 'native' handle
+// PORTRAIT themselves.
+function landscape(fn){
+  const keep=[PORTRAIT,W,H,VY];PORTRAIT=false;W=1920;H=1080;VY=0;
+  try{fn();}finally{[PORTRAIT,W,H,VY]=keep;}
+}
+function region(r,dx,dy,k,t,scene){
+  const [x0,x1,y0,y1]=r;
+  g.save();g.beginPath();g.rect(dx,dy,(x1-x0)*k,(y1-y0)*k);g.clip();
+  g.translate(dx,dy);g.scale(k,k);g.translate(-x0,-y0);
+  landscape(()=>scene[2](t,scene[0]));g.restore();
+}
+function drawScene(scene,t){
+  // 竖屏短视频: each scene comes in with a short push-in instead of a slow fade from an empty screen.
+  if(window.SHORT){const u=t-scene[0],k=1+.04*(1-ease(clamp(u/.45)));g.save();g.translate(W/2,H/2);g.scale(k,k);g.translate(-W/2,-H/2);scene[2](t,scene[0]);g.restore();return;}
+  const view=PORTRAIT&&(window.VIEWS||{})[scene[2].name];
+  if(!view||view.mode==='native'){scene[2](t,scene[0]);return;}
+  // 'square': the scene lays itself out on a 1080-wide, h-high canvas (default 1080) that is placed in
+  // the middle of the screen; text keeps its size and wraps.
+  if(view.mode==='square'){const h=view.h||1080,dy=(H-h)/2+(view.dy||0),keep=[W,H,VY];
+    g.save();g.translate(0,dy);W=1080;H=h;VY=0;try{scene[2](t,scene[0]);}finally{[W,H,VY]=keep;g.restore();}return;}
+  if(view.mode==='zoom'){const [x0,x1,y0,y1]=view.r,k=Math.min((W-40)/(x1-x0),(H-200)/(y1-y0),view.max||1.2);
+    region(view.r,(W-(x1-x0)*k)/2,(H-(y1-y0)*k)/2+(view.dy||0),k,t,scene);return;}
+  if(view.mode==='split'){const parts=[view.a,view.b],gap=view.gap??60;
+    const ks=parts.map(([x0,x1,y0,y1])=>Math.min((W-40)/(x1-x0),view.max||1.1));
+    const hs=parts.map(([x0,x1,y0,y1],i)=>(y1-y0)*ks[i]),total=hs[0]+hs[1]+gap;
+    let y=(H-total)/2;
+    parts.forEach((r,i)=>{region(r,(W-(r[1]-r[0])*ks[i])/2,y,ks[i],t,scene);y+=hs[i]+gap;});
+    // Elements that belong to the whole scene (title, footer) can be drawn once from a third region.
+    if(view.head){const [x0,x1,y0,y1]=view.head,k=Math.min((W-40)/(x1-x0),1.1);region(view.head,(W-(x1-x0)*k)/2,view.headY??120,k,t,scene);}
+    if(view.foot){const [x0,x1,y0,y1]=view.foot,k=Math.min((W-40)/(x1-x0),1.1);region(view.foot,(W-(x1-x0)*k)/2,view.footY??H-200,k,t,scene);}
+    return;}
+}
+
+// ---------- frame ----------
+window.renderFrame=function(time){
+  if(window.COVER&&!window.__inCover){window.__inCover=true;window.renderCover(time);window.__inCover=false;return time;}
+  const t=clamp(time,0,TOTAL);window.__t=t;
+  g.clearRect(0,0,W,H);background(t);
+  const scenes=FILMS[window.FILM_ID||'A'],scene=scenes.find(([a,b])=>t>=a&&t<b)||scenes.at(-1);
+  drawScene(scene,t);
+  // Each scene fades into the ground in its last 0.6 s, and the film in its last second: no hard cuts.
+  const next=scenes.map(x=>x[1]).find(e=>e>t&&e<TOTAL);
+  const out=window.SHORT?(next?step(t,next-.28,.28):step(t,TOTAL-.8,.8)):next?step(t,next-.6,.6):step(t,TOTAL-1,1);
+  if(out>0){g.save();g.globalAlpha=out;background(t);g.restore();}
+  if(window.SHORT)vChapters(t,scene[2].name);
+  vignette();drawGrain(Math.round(t*(window.FPS||30)));
+  return t;
+};
+// Cover: the frame of the cover moment with the name of the notebook and the film over it.
+window.renderCover=function(time){
+  window.renderFrame(time);
+  g.save();g.fillStyle='rgba(10,24,26,.62)';g.fillRect(0,0,W,H);g.restore();
+  text('法典笔记',W/2,H/2-10,{size:150,align:'center',spacing:24});
+  
+  text(window.FILM_TITLE||'',W/2,H/2+130,{size:52,align:'center',color:GOLD,spacing:8});
+};
+// 竖屏短视频 cover: the title large, in two lines, for a grid of thumbnails.
+if(window.SHORT)window.renderCover=function(time){
+  window.renderFrame(time);const K=TEXT.vcover||{};
+  g.save();g.fillStyle='rgba(10,24,26,.66)';g.fillRect(0,0,W,H);g.restore();
+  text('法典笔记',W/2,600,{size:60,weight:600,align:'center',color:GOLD,spacing:18});
+  (K.lines||[]).forEach((l,i)=>{g.save();g.font=fontOf(fitSize(l,190,VS.w,SERIF,BLACK),SERIF,BLACK);g.textAlign='center';g.fillStyle=PAPER;g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=40;g.fillText(l,W/2,860+i*220);g.restore();});
+  text(K.sub,W/2,860+(K.lines||[]).length*220+20,{size:fitSize(K.sub||'',50,VS.w,SANS,600),font:SANS,weight:600,align:'center',color:GOLD});
+};
+window.FILM={duration:TOTAL,fps:window.FPS||30,width:W,height:H};
+window.renderFrame(0);
+</script>
+</body></html>

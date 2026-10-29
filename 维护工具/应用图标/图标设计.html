@@ -12,15 +12,15 @@ const q=new URLSearchParams(location.search);
 const SERIF='font-family="Fadian Serif,Songti SC,serif" font-weight="600" text-anchor="middle"';
 const YEARS=['#a6a3a3','#8eaadb','#f4b183','#e6c560','#9cc480'];  // 1988、1993、1999、2004、2018 年修正的标色
 const DESIGNS={
-  // 索引贴：法规汇编的侧边贴满彩色索引贴，五种颜色就是软件中五次修正的标色。封面题“法典”，竖排（?title=horizontal 为横排）。
+  // 索引贴（封面为华政绛紫）：法规汇编的侧边贴满彩色索引贴，五种颜色就是软件中五次修正的标色。封面题“法典”，竖排（?title=horizontal 为横排）。
   index:{
     name:'索引贴',
     bg:`<defs><linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8f4ea"/><stop offset="1" stop-color="#ece5d3"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#paper)"/>`,
-    fg:`<defs><linearGradient id="cover" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b5f4f"/><stop offset="1" stop-color="#173a30"/></linearGradient><clipPath id="coverClip"><rect x="236" y="168" width="476" height="688" rx="30"/></clipPath></defs>
+    fg:`<defs><linearGradient id="cover" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9a3d5c"/><stop offset="1" stop-color="#682237"/></linearGradient><clipPath id="coverClip"><rect x="236" y="168" width="476" height="688" rx="30"/></clipPath></defs>
       <rect x="250" y="190" width="490" height="660" rx="22" fill="#000" opacity=".10" transform="translate(14 18)"/>
       ${YEARS.map((c,i)=>`<rect x="652" y="${238+i*110}" width="150" height="82" rx="16" fill="${c}"/>`).join('')}
       <rect x="276" y="186" width="456" height="664" rx="20" fill="#fbf8f0"/>
-      <g clip-path="url(#coverClip)"><rect x="236" y="168" width="476" height="688" fill="url(#cover)"/><rect x="236" y="168" width="62" height="688" fill="#0d2820" opacity=".45"/></g>
+      <g clip-path="url(#coverClip)"><rect x="236" y="168" width="476" height="688" fill="url(#cover)"/><rect x="236" y="168" width="62" height="688" fill="#3a0f1e" opacity=".45"/></g>
       <g stroke="#d6b66c" fill="none"><path d="M352 318H640M352 336H640M352 690H640M352 708H640" stroke-width="5"/></g>
       ${(q.get('title')||'vertical')==='vertical'?`<text x="496" y="486" font-size="154" fill="#e2c37a" ${SERIF}>法</text><text x="496" y="654" font-size="154" fill="#e2c37a" ${SERIF}>典</text>`:`<text x="496" y="582" font-size="150" fill="#e2c37a" ${SERIF} letter-spacing="6">法典</text>`}`
   },

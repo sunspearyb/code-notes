@@ -161,6 +161,14 @@ function createNotebookModel(data) {
     const candidate=copy(s); candidate.groups=old?candidate.groups.map(g=>g.id===old.id?group:g):[...candidate.groups,group];
     validate(candidate); s.groups=candidate.groups; return group;
   }
+  // Deleting a part keeps the text and notes; its links to other parts go with it, and its sub-parts become independent.
+  function deleteGroup(s, id) {
+    if (!s.groups.some(g=>g.id===id)) throw Error('这个部分已不存在。');
+    const candidate=copy(s);
+    candidate.groups=candidate.groups.filter(g=>g.id!==id).map(g=>g.parentId===id?{...g,parentId:null,updatedAt:base.timestamp()}:g);
+    candidate.groupLinks=candidate.groupLinks.filter(l=>l.fromId!==id&&l.toId!==id);
+    validate(candidate); s.groups=candidate.groups; s.groupLinks=candidate.groupLinks;
+  }
   function connectGroups(s, {fromId,toId,relation,reason}) {
     const l={id:base.id(),fromId,toId,relation:relation.trim()||'关联',reason:reason.trim(),createdAt:base.timestamp()};
     const candidate=copy(s); candidate.groupLinks.push(l); validate(candidate); s.groupLinks=candidate.groupLinks; return l;
@@ -227,5 +235,5 @@ function createNotebookModel(data) {
     for(const t of tokens){const last=segments.at(-1);if(last&&last.born===t.born&&last.removed===t.removed&&!!last.bornEditorial===!!t.bornEditorial&&!!last.removedEditorial===!!t.removedEditorial)last.text+=t.text;else segments.push({...t});}
     return segments;
   }
-  return {...base,codex,tree,node,path,laws,lawOf,methods,optionalMethods,methodLabel,methodLabels,tags,sectionList,scopeUnits,migrate,fresh,validate,addNote,saveGroup,connectGroups,addPerson,canRead,canComment,saveDiscussion,addComment,merge,lineage};
+  return {...base,codex,tree,node,path,laws,lawOf,methods,optionalMethods,methodLabel,methodLabels,tags,sectionList,scopeUnits,migrate,fresh,validate,addNote,saveGroup,deleteGroup,connectGroups,addPerson,canRead,canComment,saveDiscussion,addComment,merge,lineage};
 }

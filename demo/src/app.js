@@ -45,7 +45,8 @@ function icon(name) {
     cards:'<path d="M4 7h13v13H4z"/><path d="M8 3h12v13"/>',
     spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
     people:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
-    layers:'<path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5"/>'
+    layers:'<path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5"/>',
+    gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>'
   };
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.book}</svg>`;
 }
@@ -68,7 +69,7 @@ function label(unit,year=state.year){return unitName(unit,year)+(M.subtitle(stat
 function paraList(xs,className=''){return `<div class="${className}">${xs.map(t=>`<p>${esc(t)}</p>`).join('')}</div>`;}
 function isBookmarked(id){return state.bookmarks.includes(id);}
 function draftKey(){return `${state.current}@${state.year}`;}
-function titleOf(view){return ({reader:'法条精读',practice:'记忆卡片',notes:'我的笔记',terms:'关联阅读',outline:'体系阅读',discussions:'共享讨论',updates:'新知导入',guide:'使用说明',settings:'导出同步',ai:'智能辅助',search:'搜索'})[view];}
+function titleOf(view){return ({reader:'法条精读',practice:'记忆卡片',notes:'我的笔记',terms:'关联阅读',outline:'体系阅读',discussions:'共享讨论',updates:'新知导入',guide:'使用说明',settings:'导出同步',ai:'智能辅助',search:'搜索',prefs:'设置'})[view];}
 function unitOptions(selected=state.current,year=state.year){return M.units.filter(u=>ver(u,year).exists).map(u=>`<option value="${u.id}" ${u.id===selected?'selected':''}>${esc(label(u,year))}${u.kind==='article'&&u.versions[year]?.label!==u.label?`（${LATEST} 年${esc(u.label)}）`:''}</option>`).join('');}
 function yearLabel(y){return CODEX.yearLabels?.[y]||(M.years.length===1?`${y} 年文本`:`${y} 年${y===FIRST?'原文':'修正后'}`);}
 function yearOptions(selected=state.year){return M.years.map(y=>`<option value="${y}" ${y===selected?'selected':''}>${esc(yearLabel(y))}</option>`).join('');}
@@ -134,7 +135,7 @@ function clearSelection(){ui.selection=[];window.getSelection?.()?.removeAllRang
 function readUnit(id,year=state.year,rail,anchors=[]){
   if(!M.get(id)||!M.years.includes(year))return;
   state.current=id;state.year=year;ui.view='reader';ui.history=false;ui.selection=[];ui.flash=anchors;ui.words=false;
-  if(rail)ui.rail=rail;persist();render();window.scrollTo({top:0,behavior:'instant'});
+  if(rail)ui.rail=rail;persist();render();
   if(anchors[0]?.block!==null&&anchors.length)document.querySelector(`[data-law-block="${anchors[0].block}"]`)?.scrollIntoView({block:'nearest'});
 }
 const NAV_GROUPS=[['研读',[['outline','layers'],['reader','book'],['terms','link'],['notes','note']]],['工具',[['ai','spark'],['settings','download'],['discussions','people']]]];
@@ -142,14 +143,76 @@ function navActive(view){return ui.view===view||view==='reader'&&ui.view==='prac
 function navButton([view,name]){const on=navActive(view);return `<button data-action="nav" data-view="${view}" class="${on?'active':''}" ${on?'aria-current="page"':''}>${icon(name)}<span>${titleOf(view)}</span></button>`;}
 function brandmark(){return DATA.icon?`<img class="brandmark icon" src="${DATA.icon}" alt="" aria-hidden="true">`:'<span class="brandmark" aria-hidden="true">法</span>';}
 function saveStateText(){return storageAvailable?'已保存在此浏览器':'保存失败 · 请导出备份';}
+// ---------- Where the reader was: each page keeps its place when one switches between pages ----------
+// Places are kept on this device only (KEY-positions), never in the notes or their backups. In 体系阅读
+// the place is the article at the top of the screen, so it survives notes being added above it.
+const POSITIONS_KEY=KEY+'-positions';
+const positions=(()=>{try{const p=JSON.parse(localStorage.getItem(POSITIONS_KEY)||'{}');return p&&typeof p==='object'&&!Array.isArray(p)?p:{};}catch{return {};}})();
+let positionsTimer=0;
+function savePositions(){clearTimeout(positionsTimer);positionsTimer=0;positions.__ui={view:ui.view,rail:ui.rail,outlineScope:ui.outlineScope,outlineMode:ui.outlineMode,outlineSide:ui.outlineSide,notesTab:ui.notesTab,relationTab:ui.relationTab,materialTab:ui.materialTab};try{localStorage.setItem(POSITIONS_KEY,JSON.stringify(positions));}catch{}}
+function viewKey(){
+  switch(ui.view){
+    case 'outline':return `outline|${ui.outlineScope}|${ui.outlineMode}`;
+    case 'notes':return 'notes|'+(ui.notesTab||'notes');
+    case 'terms':return 'terms|'+(ui.relationTab||'concepts');
+    case 'updates':return 'updates|'+(ui.materialTab||'');
+    case 'search':return 'search|'+ui.search;
+    default:return ui.view;
+  }
+}
+// The reader keeps its place only for the same article and year; another article opens at its start.
+function viewContext(){return ui.view==='reader'?`${state.current}@${state.year}`:'';}
+function topInset(){return (document.querySelector('.topbar')?.getBoundingClientRect().bottom||0)+8;}
+function rememberPosition(key=ui.renderedKey){
+  if(!key||!document.querySelector('main'))return;
+  let anchor=null,offset=0;const inset=topInset();
+  for(const el of document.querySelectorAll('main [data-pos]')){const r=el.getBoundingClientRect();if(r.bottom>inset){anchor=el.dataset.pos;offset=r.top;break;}}
+  positions[key]={y:Math.round(window.scrollY),anchor,offset:Math.round(offset),ctx:ui.renderedContext,current:state.current,at:Date.now()};
+}
+function scrollToPos(el){window.scrollTo({top:Math.max(0,window.scrollY+el.getBoundingClientRect().top-topInset()),behavior:'instant'});}
+function restorePosition(key,from){
+  const p=positions[key];
+  if(key.startsWith('outline|')){
+    // Coming back from 法条精读 after turning to other articles: show the article last read.
+    const target=document.getElementById('outline-'+state.current);
+    if(target&&(from==='reader'||from==='practice')&&(!p||p.current!==state.current)){scrollToPos(target);target.classList.add('jump-flash');setTimeout(()=>target.classList.remove('jump-flash'),1600);return;}
+    const el=p?.anchor&&document.querySelector(`main [data-pos="${CSS.escape(p.anchor)}"]`);
+    if(el){window.scrollTo({top:Math.max(0,window.scrollY+el.getBoundingClientRect().top-p.offset),behavior:'instant'});return;}
+  }
+  window.scrollTo({top:p&&p.ctx===viewContext()?p.y:0,behavior:'instant'});
+}
+window.addEventListener('scroll',()=>{if(!ui.renderedKey||positionsTimer)return;positionsTimer=setTimeout(()=>{rememberPosition();savePositions();},400);},{passive:true});
+window.addEventListener('pagehide',()=>{rememberPosition();savePositions();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){rememberPosition();savePositions();}});
+// Reopening the app returns to the page last used (a search is not kept).
+function restoreLastView(){
+  const u=positions.__ui;if(!u||typeof u!=='object')return;
+  if(['outline','reader','notes','terms','updates','practice','guide','settings','ai','discussions','prefs'].includes(u.view))ui.view=u.view;
+  if(ui.view==='practice')ui.view='reader';
+  for(const k of ['rail','outlineMode','outlineSide','notesTab','relationTab','materialTab'])if(typeof u[k]==='string')ui[k]=u[k];
+  if(typeof u.outlineScope==='string'&&(u.outlineScope==='all'||u.outlineScope.startsWith('group:')?u.outlineScope==='all'||state.groups.some(g=>'group:'+g.id===u.outlineScope):M.node(u.outlineScope.split(':')[1],state.year)))ui.outlineScope=u.outlineScope;
+}
 function render(){
+  const key=viewKey(),context=viewContext(),changed=key!==ui.renderedKey||context!==ui.renderedContext,from=ui.renderedView;
+  if(changed&&ui.renderedKey)rememberPosition();
+  if(from&&ui.view!==from)ui.returnView=from;
+  renderPage();
+  ui.renderedKey=key;ui.renderedContext=context;ui.renderedView=ui.view;
+  // The address names the article being read (#a37, statutes.js); drop it on leaving 法条精读, so reopening returns to the page last used.
+  if(from==='reader'&&ui.view!=='reader'&&location.hash){try{history.replaceState(null,'',location.pathname+location.search);}catch{}}
+  if(changed){restorePosition(key,from);savePositions();}
+  // On opening, later scripts and the web font still change the page after the first render; place it again once they are done, unless the reader has already moved.
+  if(!from){const again=()=>{if(!ui.movedSinceOpen&&ui.renderedKey===key)restorePosition(key);};setTimeout(again,0);document.fonts?.ready.then(()=>setTimeout(again,0));}
+}
+for(const type of ['wheel','touchstart','keydown','pointerdown'])window.addEventListener(type,()=>{ui.movedSinceOpen=true;},{passive:true,once:true});
+function renderPage(){
   const scrollPositions=[...document.querySelectorAll('[data-scroll-key]')].map(el=>[el.dataset.scrollKey,el.scrollTop]);
   const noteCount=state.notes.length+state.materialRelations.filter(r=>r.scope.kind!=='articles'&&r.destination==='note').length,linkCount=state.links.length+state.groupLinks.length+state.materialRelations.length;
-  root.innerHTML=`<aside class="sidebar"><div class="brand">${brandmark()}<div><h1>法典笔记</h1><span>${esc(CODEX.name)}</span></div></div><nav class="nav" aria-label="主导航">${NAV_GROUPS.map(([group,items])=>`<div class="nav-group"><span class="nav-label">${group}</span>${items.map(navButton).join('')}</div>`).join('')}</nav><div class="side-bottom"><dl class="personal-summary"><div><dt>笔记</dt><dd>${noteCount}</dd></div><div><dt>关联</dt><dd>${linkCount}</dd></div><div><dt>部分</dt><dd>${state.groups.length}</dd></div></dl><div class="nav">${navButton(['guide','help'])}</div><div class="save-state" role="status"><span class="dot"></span>${saveStateText()}</div></div></aside><div class="workspace"><header class="topbar"><span class="mobile-brand">${brandmark()}法典笔记</span><form class="search" id="search-form" role="search">${icon('search')}<input id="global-search" type="search" aria-label="搜索条文、序言、词句或笔记" placeholder="条号、词句或笔记，如 第三十七条" value="${esc(ui.search)}"><button type="submit">搜索</button></form><button class="icon-btn" data-action="data" title="导出与备份" aria-label="导出与备份">${icon('download')}</button></header><main id="main" class="page view-${ui.view}">${({reader:renderReader,practice:renderPractice,notes:renderNotes,terms:renderTerms,outline:renderOutline,discussions:renderDiscussions,updates:renderUpdates,search:renderSearch,guide:renderGuide,settings:renderSettings,ai:renderAI}[ui.view])()}</main></div><nav class="mobile-nav" aria-label="主导航">${NAV_GROUPS[0][1].map(navButton).join('')}<button data-action="more-nav" class="${['ai','settings','discussions','guide'].includes(ui.view)?'active':''}">${icon('more')}<span>更多</span></button></nav>`;
+  root.innerHTML=`<aside class="sidebar"><div class="brand">${brandmark()}<div><h1>法典笔记</h1>${(DATA.codes||[]).length>1?`<button class="code-switch" data-action="code-menu" title="切换到其他法典">${esc(CODEX.name)}<span aria-hidden="true">▾</span></button>`:`<span>${esc(CODEX.name)}</span>`}</div></div><nav class="nav" aria-label="主导航">${NAV_GROUPS.map(([group,items])=>`<div class="nav-group"><span class="nav-label">${group}</span>${items.map(navButton).join('')}</div>`).join('')}</nav><div class="side-bottom"><div class="personal-summary">${[['notes','笔记',noteCount,'查看我的笔记'],['links','关联',linkCount,'查看词条与关联'],['groups','部分',state.groups.length,'查看我的部分']].map(([go,name,count,title])=>`<button data-action="summary" data-go="${go}" title="${title}"><span>${name}</span><strong>${count}</strong></button>`).join('')}</div><div class="nav">${navButton(['prefs','gear'])}${navButton(['guide','help'])}</div><div class="save-state" role="status"><span class="dot"></span>${saveStateText()}</div></div></aside><div class="workspace"><header class="topbar"><span class="mobile-brand">${brandmark()}法典笔记</span><form class="search" id="search-form" role="search">${icon('search')}<input id="global-search" type="search" aria-label="搜索条文、序言、词句或笔记" placeholder="条号、词句或笔记，如 第三十七条" value="${esc(ui.search)}"><button type="submit">搜索</button></form><button class="icon-btn" data-action="data" title="导出与备份" aria-label="导出与备份">${icon('download')}</button></header><main id="main" class="page view-${ui.view}">${({reader:renderReader,practice:renderPractice,notes:renderNotes,terms:renderTerms,outline:renderOutline,discussions:renderDiscussions,updates:renderUpdates,search:renderSearch,guide:renderGuide,settings:renderSettings,ai:renderAI,prefs:renderPrefs}[ui.view])()}</main></div><nav class="mobile-nav" aria-label="主导航">${NAV_GROUPS[0][1].map(navButton).join('')}<button data-action="more-nav" class="${['ai','settings','discussions','guide','prefs'].includes(ui.view)?'active':''}">${icon('more')}<span>更多</span></button></nav>`;
   for(const [key,top] of scrollPositions){const el=[...document.querySelectorAll('[data-scroll-key]')].find(el=>el.dataset.scrollKey===key);if(el)el.scrollTop=top;}
   updateSelectionTools();
 }
-function showMoreNav(){showModal('更多',`<nav class="more-nav" aria-label="更多功能">${[...NAV_GROUPS[1][1],['guide','help']].map(navButton).join('')}</nav>`);}
+function showMoreNav(){showModal('更多',`${(DATA.codes||[]).length>1?`<button class="btn code-switch-wide" data-action="code-menu">切换法典 · 当前：${esc(CODEX.short)}</button>`:''}<nav class="more-nav" aria-label="更多功能">${[...NAV_GROUPS[1][1],['prefs','gear'],['guide','help']].map(navButton).join('')}</nav>`);}
 function relevantAnchors(unitId,year){
   return [...state.notes.flatMap(n=>n.anchors),...state.terms.flatMap(t=>t.anchors),...state.links.flatMap(l=>[...l.from,...l.to]),...ui.flash].filter(a=>a.unitId===unitId&&a.year===year&&a.block!==null);
 }
@@ -160,13 +223,15 @@ function lawParagraph(text,unitId,year,block,scope='reader',clause=''){
   const known=relevantAnchors(unitId,year);
   let html='';
   if(ui.words&&scope==='reader'||scope==='link'){
-    html=M.tokenize(text).map(t=>t.word?`<button class="word ${anchorMatches(active,unitId,year,block,t.start,t.end)?'selected':''} ${anchorMatches(known,unitId,year,block,t.start,t.end)?'has-annotation':''}" data-action="${scope==='link'?'link-word':'word'}" data-unit="${unitId}" data-year="${year}" data-block="${block}" data-start="${t.start}" data-end="${t.end}" aria-pressed="${anchorMatches(active,unitId,year,block,t.start,t.end)}">${esc(t.text)}</button>`:esc(t.text)).join('');
+    const styled=M.markedRanges(state,unitId,year,block),wordStyles=t=>[...new Set(styled.filter(m=>m.start<t.end&&m.end>t.start).flatMap(m=>m.styles))];
+    html=M.tokenize(text).map(t=>t.word?`<button class="word ${anchorMatches(active,unitId,year,block,t.start,t.end)?'selected':''} ${anchorMatches(known,unitId,year,block,t.start,t.end)?'has-annotation':''} ${wordStyles(t).length?markClass(wordStyles(t)):''}" data-action="${scope==='link'?'link-word':'word'}" data-unit="${unitId}" data-year="${year}" data-block="${block}" data-start="${t.start}" data-end="${t.end}" aria-pressed="${anchorMatches(active,unitId,year,block,t.start,t.end)}">${esc(t.text)}</button>`:esc(t.text)).join('');
   }else{
     // paragraphMarks lets later files underline phrases (e.g. words leaving a matter to law) as buttons.
-    const marks=known.filter(a=>a.block===block),extra=scope==='reader'?paragraphMarks(text,unitId,year,block):[];
-    const cuts=[...new Set([0,text.length,...marks.flatMap(a=>[a.start,a.end]),...extra.flatMap(m=>[m.start,m.end])])].sort((a,b)=>a-b);
+    const marks=known.filter(a=>a.block===block),extra=scope==='reader'?paragraphMarks(text,unitId,year,block):[],styled=M.markedRanges(state,unitId,year,block);
+    const cuts=[...new Set([0,text.length,...marks.flatMap(a=>[a.start,a.end]),...extra.flatMap(m=>[m.start,m.end]),...styled.flatMap(m=>[m.start,m.end])])].sort((a,b)=>a-b);
     html=cuts.slice(0,-1).map((start,i)=>{
-      const end=cuts[i+1],mark=extra.find(m=>m.start<=start&&end<=m.end),fragment=mark?`<span class="${mark.className}" role="button" tabindex="0" title="${esc(mark.title||'')}" data-action="${mark.action}" data-unit="${unitId}" data-year="${year}" data-block="${block}" data-start="${mark.start}" data-end="${mark.end}">${esc(text.slice(start,end))}</span>`:esc(text.slice(start,end));
+      const end=cuts[i+1],mark=extra.find(m=>m.start<=start&&end<=m.end),styles=styled.find(m=>m.start<=start&&end<=m.end)?.styles,piece=styles?`<span class="${markClass(styles)}">${esc(text.slice(start,end))}</span>`:esc(text.slice(start,end));
+      const fragment=mark?`<span class="${mark.className}" role="button" tabindex="0" title="${esc(mark.title||'')}" data-action="${mark.action}" data-unit="${unitId}" data-year="${year}" data-block="${block}" data-start="${mark.start}" data-end="${mark.end}">${piece}</span>`:piece;
       return anchorMatches(known,unitId,year,block,start,end)?`<span class="annotated ${anchorMatches(ui.flash,unitId,year,block,start,end)?'flash':''}" tabindex="0" role="button" aria-label="查看 ${esc(text.slice(start,end))} 的词语注记" data-action="anchor" data-unit="${unitId}" data-year="${year}" data-block="${block}" data-start="${start}" data-end="${end}">${fragment}</span>`:fragment;
     }).join('');
   }
@@ -200,10 +265,11 @@ function renderRail(a){
 }
 function updateSelectionTools(){
   const bar=document.getElementById('selection-tools');if(!bar)return;
-  bar.hidden=!ui.selection.length||ui.view!=='reader'||modal.open;
+  bar.hidden=!ui.selection.length||!['reader','outline'].includes(ui.view)||modal.open;
   if(bar.hidden)return;
   const joined=M.mergeAnchors(ui.selection);
-  bar.innerHTML=`<span class="selected-label">${esc(anchorSummary(joined))}</span><div class="row"><button class="btn small primary" data-action="selection-note">记笔记</button><button class="btn small" data-action="selection-term">建词条</button><button class="btn small" data-action="new-link">建立关联</button><button class="btn small" data-action="cite">引用</button><button class="btn small" data-action="selection-group">划入部分</button><button class="icon-btn" data-action="selection-clear" aria-label="取消选择">${icon('close')}</button></div>`;
+  if(ui.view==='outline'){bar.innerHTML=`<span class="selected-label">${esc(anchorSummary(joined))}</span><div class="row">${markTools()}<button class="icon-btn" data-action="selection-clear" aria-label="取消选择">${icon('close')}</button></div>`;return;}
+  bar.innerHTML=`<span class="selected-label">${esc(anchorSummary(joined))}</span><div class="row">${markTools()}<button class="btn small primary" data-action="selection-note">记笔记</button><button class="btn small" data-action="selection-term">建词条</button><button class="btn small" data-action="new-link">建立关联</button><button class="btn small" data-action="cite">引用</button><button class="btn small" data-action="selection-group">划入部分</button><button class="icon-btn" data-action="selection-clear" aria-label="取消选择">${icon('close')}</button></div>`;
 }
 function randomNext(pool,last,deckName){
   ui[deckName]=ui[deckName].filter(id=>pool.includes(id));
@@ -292,12 +358,26 @@ function renderUpdates(){
   const pending=state.updates.filter(u=>u.status==='pending');
   return `${pageHead('待处理材料','先阅读和判断，再收入自己的笔记。',`<button class="btn primary" data-action="add-update">${icon('plus')}收录材料</button>`)}<div class="update-layout"><section>${pending.length?pending.map(u=>`<article class="update-card"><span class="pill warm">${esc(u.type)} · 待判断</span><h3>${esc(u.title)}</h3>${u.url?`<a href="${esc(safeUrl(u.url))}" target="_blank" rel="noopener noreferrer">打开来源 ↗</a>`:''}<p>${esc(u.text)}</p><div class="row"><button class="btn primary small" data-action="accept-update" data-id="${u.id}">关联到条文或序言</button><button class="text-btn" data-action="ignore-update" data-id="${u.id}">忽略</button></div></article>`).join(''):'<div class="big-empty"><h3>给新材料留一个入口</h3><p>这里使用手动收录，也可上传文件，或到“智能辅助”配置分析与联网检索。</p><button class="btn" data-action="add-update">添加材料</button></div>'}${state.updates.some(u=>u.status!=='pending')?`<details class="source-note"><summary>已处理的材料</summary>${state.updates.filter(u=>u.status!=='pending').map(u=>`<div>${esc(u.title)} · ${u.status==='accepted'?'已关联':'已忽略'} <button class="text-btn" data-action="restore-update" data-id="${u.id}">放回待判断</button></div>`).join('')}</details>`:''}</section><aside class="update-intro"><h3>先判断，再收入</h3><p>材料先放在这里。选定条文或序言自然段、写明关联理由后再收入。</p><p class="muted">软件不会自动修改条文、笔记或关联。</p></aside></div>`;
 }
+// The search box finds articles (by number or words), and everything the reader wrote: notes, materials,
+// material notes, terms and parts. Results are grouped by kind.
 function renderSearch(){
-  const q=ui.search.trim(),ref=resolveReference(q);
-  const results=q?M.units.filter(u=>ref?u.id===ref&&ver(u).exists:[u.label,...ver(u).paragraphs,...state.notes.filter(n=>n.unitId===u.id).map(n=>n.text)].some(t=>t.toLowerCase().includes(q.toLowerCase()))):[];
+  const q=ui.search.trim(),ref=resolveReference(q),lower=q.toLowerCase(),has=(...xs)=>xs.some(t=>String(t||'').toLowerCase().includes(lower));
   const mark=(text,at)=>{const start=Math.max(0,at-40),piece=text.slice(start,start+180);return (start?'…':'')+(at<0?esc(piece):esc(piece).split(esc(q)).join(`<mark>${esc(q)}</mark>`));};
-  const excerpt=u=>{const text=ver(u).paragraphs.find(t=>t.includes(q));if(text&&!ref)return mark(text,text.indexOf(q));const note=ref?null:state.notes.find(n=>n.unitId===u.id&&n.text.includes(q));return note?`<span class="pill">笔记</span> ${mark(note.text,note.text.indexOf(q))}`:mark(ver(u).paragraphs[0]||`该年${CODEX.short}尚无此条`,-1);};
-  return `${pageHead(`搜索“${esc(q)}”`,`${results.length} 处 · 按 ${state.year} 年文本检索，也查找你的笔记`)}<div class="search-results">${results.map(u=>`<button class="result-card" data-action="goto" data-unit="${u.id}"><h3>${esc(label(u))}</h3><p>${excerpt(u)}</p></button>`).join('')||'<div class="big-empty"><h3>没有找到</h3><p>可以输入条号，如“第三十三条”“33”“序言第七自然段”，或输入正文中的词句。</p></div>'}</div>`;
+  const excerpt=(...texts)=>{const text=texts.map(t=>String(t||'')).find(t=>t.toLowerCase().includes(lower));return text?mark(text,text.toLowerCase().indexOf(lower)):mark(String(texts.find(Boolean)||''),-1);};
+  const units=q?M.units.filter(u=>ref?u.id===ref&&ver(u).exists:ver(u).exists&&has(u.label,ver(u).label,M.subtitle(state,u.id),...ver(u).paragraphs)):[];
+  const groups=ref||!q?[]:[
+    ['笔记',state.notes.filter(n=>has(n.text,n.question,n.quote)).map(n=>[`data-action="goto-note" data-id="${n.id}"`,`${label(M.get(n.unitId),n.year)} · ${n.year} 年`,excerpt(n.question,n.text,n.quote)])],
+    ['材料',[...state.materials.filter(m=>has(m.title,m.reason,m.sourceText,m.question)).map(m=>[`data-action="goto-materials" data-unit="${m.unitId}" data-year="${m.year}"`,`${m.title} · ${label(M.get(m.unitId),m.year)}`,excerpt(m.reason,m.question,m.sourceText,m.title)]),
+      ...state.materialRelations.filter(r=>has(r.title,r.text,r.question,r.sourceText)).map(r=>[`data-action="relation-record" data-id="${r.id}"`,r.question||r.title||'材料关联',excerpt(r.text,r.question,r.sourceText,r.title)])]],
+    ['词条',state.terms.filter(t=>has(t.name,t.text)).map(t=>[`data-action="term-open" data-id="${t.id}"`,`[[${t.name}]]`,excerpt(t.text,t.name)])],
+    ['部分',state.groups.filter(g=>has(g.name,g.description)).map(g=>[`data-action="open-group" data-id="${g.id}"`,g.name,excerpt(g.description,g.name)])],
+  ].filter(([,list])=>list.length);
+  const count=units.length+groups.reduce((n,[,list])=>n+list.length,0);
+  const unitExcerpt=u=>ref?mark(ver(u).paragraphs[0]||'',-1):excerpt(...ver(u).paragraphs,M.subtitle(state,u.id),ver(u).label);
+  const section=(title,cards)=>`<section class="search-group"><h3 class="search-group-title">${title}<span class="pill">${cards.length}</span></h3><div class="search-results">${cards.join('')}</div></section>`;
+  const unitCards=units.map(u=>`<button class="result-card" data-action="goto" data-unit="${u.id}"><h3>${esc(label(u))}</h3><p>${unitExcerpt(u)}</p></button>`);
+  const body=(units.length?section('条文',unitCards):'')+groups.map(([title,list])=>section(title,list.map(([action,head,text])=>`<button class="result-card own" ${action}><h3>${esc(head)}</h3><p>${text}</p></button>`))).join('');
+  return `${pageHead(`搜索“${esc(q)}”`,`${count} 处 · 条文按 ${state.year} 年文本检索；同时查找笔记、材料、词条和自己划分的部分`)}${body||'<div class="big-empty"><h3>没有找到</h3><p>可以输入条号，如“第三十三条”“33”“序言第七自然段”，或输入正文、笔记中的词句。</p></div>'}`;
 }
 
 function showModal(title, content) {
@@ -308,7 +388,7 @@ function showModal(title, content) {
   updateSelectionTools();
 }
 // Android back key: close the dialog first, then return to 体系阅读; false lets the shell leave the app.
-function androidBack(){if(modal.open){closeModal();return true;}if(ui.view!=='outline'){ui.view='outline';render();window.scrollTo({top:0});return true;}return false;}
+function androidBack(){if(modal.open){closeModal();return true;}if(ui.view!=='outline'){ui.view='outline';render();return true;}return false;}
 function closeModal() { modal.close(); if(modalReturnFocus?.isConnected) modalReturnFocus.focus(); }
 // Table of contents: the top level (章; 编 in larger codes) as tabs, deeper levels as folding headings.
 // Typing in the box searches every article of the year, by number, label or 条旨.
@@ -366,18 +446,40 @@ function renderLinkPreview(){
 
 function showUpdate(){showModal('收录一则材料',`<form id="update-form"><label for="update-title">标题</label><input id="update-title" name="title" required maxlength="500"><label for="update-type">类型</label><select id="update-type" name="type"><option>法律修改</option><option>案例</option><option>资讯</option><option>制宪史料</option><option>修宪史料</option><option>学术文献</option></select><label for="update-url">来源链接（可选）</label><input id="update-url" name="url" type="url" placeholder="https://…"><label for="update-text">材料摘记</label><textarea id="update-text" name="text" required maxlength="20000"></textarea><div class="modal-actions"><button type="button" class="btn" data-action="close">取消</button><button type="submit" class="btn primary">放入收件箱</button></div></form>`);}
 function citeQuote(text){return text.replace(ITEM_MARK,'').replace(/[；，]$/,'');}
+// Three ways to cite: the quotation with its source, the source written out in full (for papers), or a
+// short mark for notes such as 【宪 33-4】. The choice is remembered on this device.
+const CITE_FORMATS=[['quote','引文'],['full','完整出处'],['short','简写']];
+function citeFormat(){try{const f=localStorage.getItem(KEY+'-cite');return CITE_FORMATS.some(([k])=>k===f)?f:'quote';}catch{return 'quote';}}
+// 宪法 → 宪, 网安法 → 网安, 民法典 → 民: a pack can also set citation.abbr.
+function citeAbbr(unit){
+  const law=M.lawOf(unit.id),c=law?.citation||CODEX.citation;if(c.abbr)return c.abbr;
+  const short=[...(c.aliases||[]),law?.short||CODEX.short].filter(x=>x&&x.length<=4&&x.endsWith('法')).sort((a,b)=>a.length-b.length)[0];
+  return short?short.slice(0,-1):(law?.short||CODEX.short).slice(0,1);
+}
+function citeShort(unit,year,block=null){
+  const v=ver(unit,year),number=cnValue(v.label.replace(/^第|条$/g,''));
+  let place=unit.kind==='preamble'?v.label.replace(/^序言第?/,'序言').replace(/自然段$/,''):String(Number.isFinite(number)?number:v.label);
+  if(block!==null&&unit.kind==='article'){const cite=clauseLabels(unit,year)[block]?.cite||'',k=cite.match(/第(.+?)款/),x=cite.match(/第(.+?)项/);if(k)place+='-'+cnValue(k[1]);if(x)place+=`(${cnValue(x[1])})`;}
+  return `【${citeAbbr(unit)} ${place}】`;
+}
 function showCite(selection=[]){
   const unit=current(),year=state.year,v=ver(unit,year);if(!v?.exists){toast(`该年份${CODEX.short}尚无此条。`);return;}
-  const title=citeTitle(year,unit),labels=clauseLabels(unit,year),verb=unit.kind==='preamble'?'写明':'规定',options=[];
-  for(const a of M.mergeAnchors(selection).filter(a=>a.unitId===unit.id&&a.year===year&&a.block!==null))options.push(['所选字句',`${title}${citePlace(unit,year,a.block)}中的“${a.quote}”`]);
-  options.push([unit.kind==='preamble'?'整个自然段':'整条',v.paragraphs.length===1?`${title}${v.label}${verb}：“${v.paragraphs[0]}”`:`${title}${v.label}${verb}：\n${v.paragraphs.join('\n')}`]);
+  const format=citeFormat(),title=citeTitle(year,unit),labels=clauseLabels(unit,year),verb=unit.kind==='preamble'?'写明':'规定',options=[];
+  const source=block=>format==='short'?citeShort(unit,year,block):`${title}${citePlace(unit,year,block)}`;
+  for(const a of M.mergeAnchors(selection).filter(a=>a.unitId===unit.id&&a.year===year&&a.block!==null))options.push(['所选字句',format==='quote'?`${title}${citePlace(unit,year,a.block)}中的“${a.quote}”`:format==='full'?`${source(a.block)}中的“${a.quote}”`:`“${a.quote}”${source(a.block)}`]);
+  const whole=unit.kind==='preamble'?'整个自然段':'整条';
+  options.push([whole,format!=='quote'?source(null)+(format==='full'?verb:''):v.paragraphs.length===1?`${title}${v.label}${verb}：“${v.paragraphs[0]}”`:`${title}${v.label}${verb}：\n${v.paragraphs.join('\n')}`]);
   // A 款 followed by its 项 is quoted whole: the lead sentence and every item.
   if(v.paragraphs.length>1)v.paragraphs.forEach((p,i)=>{
     if(!labels[i]?.cite)return;
+    if(format!=='quote'){options.push([labels[i].cite,source(i)+(format==='full'?verb:'')]);return;}
     const items=[];if(!ITEM_MARK.test(p))for(let j=i+1;j<v.paragraphs.length&&ITEM_MARK.test(v.paragraphs[j]);j++)items.push(v.paragraphs[j]);
     options.push([labels[i].cite,items.length?`${title}${v.label}${labels[i].cite}${verb}：\n${[p,...items].join('\n')}`:`${title}${v.label}${labels[i].cite}${verb}：“${citeQuote(p)}”`]);
   });
-  showModal('复制引文',`<div class="cite-list">${options.map(([kind,text])=>`<div class="cite-item"><span class="cite-kind">${esc(kind)}</span><p class="cite-text">${esc(text).replace(/\n/g,'<br>')}</p><button class="btn small" data-action="cite-copy" data-text="${esc(text)}">${icon('copy')}复制</button></div>`).join('')}</div><p class="note-source">${esc(CODEX.citation.note)}</p>`);
+  const tabs=`<div class="segmented cite-formats" role="radiogroup" aria-label="引用格式">${CITE_FORMATS.map(([key,name])=>`<button role="radio" data-action="cite-format" data-format="${key}" class="${format===key?'active':''}" aria-checked="${format===key}">${name}</button>`).join('')}</div>`;
+  const hint=format==='short'?'简写便于在笔记中节省篇幅：条号用阿拉伯数字，连字符后为款，括号内为项。正式写作请用完整出处。':format==='full'?'写论文、作业时使用，按需要接上引文。':esc(CODEX.citation.note);
+  showModal('复制引文',`${tabs}<div class="cite-list">${options.map(([kind,text])=>`<div class="cite-item"><span class="cite-kind">${esc(kind)}</span><p class="cite-text">${esc(text).replace(/\n/g,'<br>')}</p><button class="btn small" data-action="cite-copy" data-text="${esc(text)}">${icon('copy')}复制</button></div>`).join('')}</div><p class="note-source">${hint}</p>`);
+  ui.citeSelection=selection;
 }
 async function copyText(text,message){
   if(SHELL?.copyText){await SHELL.copyText(text);toast(message);return;}
@@ -390,8 +492,9 @@ function showShare(){showDiscussionEditor(null,state.notes.filter(n=>n.unitId===
 // the Windows app (维护工具/windows-app) exposes window.FadianShell. saveText may return a message or a Promise of one.
 const SHELL=window.FadianShell||window.FadianAndroid||null;
 // Editions that never reach the local service: '安卓版', 'Windows 版' or '网页版'; '' for the PC&Mac 通用版 page.
-function serviceFreeEdition(){return window.FadianAndroid?'安卓版':window.FadianShell?'Windows 版':location.protocol==='file:'||/^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname)?'':'网页版';}
-function download(name,content,type){if(SHELL?.saveText){Promise.resolve(SHELL.saveText(name,String(content),type)).then(toast,error=>toast('保存失败：'+(error?.message||error)));return;}const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);toast('文件已生成，请查看浏览器下载。');}
+// The Mac app (维护工具/mac-app) also exposes FadianShell, but runs the local service: FadianShell.localService.
+function serviceFreeEdition(){return window.FadianAndroid?'安卓版':window.FadianShell&&!window.FadianShell.localService?(window.FadianShell.edition||'Windows 版'):document.querySelector('meta[name="fadian-web-routes"]')?'网页版':location.protocol==='file:'||/^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname)?'':'网页版';}
+function download(name,content,type){if(content instanceof Blob&&SHELL?.saveBytes){content.arrayBuffer().then(buffer=>{const bytes=new Uint8Array(buffer);let binary='';for(let i=0;i<bytes.length;i+=32768)binary+=String.fromCharCode(...bytes.subarray(i,i+32768));return SHELL.saveBytes(name,btoa(binary));}).then(toast,error=>toast('保存失败：'+(error?.message||error)));return;}if(SHELL?.saveText&&!(content instanceof Blob)){Promise.resolve(SHELL.saveText(name,String(content),type)).then(toast,error=>toast('保存失败：'+(error?.message||error)));return;}const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);toast('文件已生成，请查看浏览器下载。');}
 function exportMarkdown(){
   const lines=['# 我的法典笔记','',`导出日期：${date(now())}`,''];
   for(const n of state.notes){lines.push(`## ${label(M.get(n.unitId),n.year)} · ${n.year} 年`,'');if(n.anchors.length)lines.push(`定位：${anchorSummary(n.anchors)}`,'');if(n.quote)lines.push('> '+n.quote.replace(/\n/g,'\n> '),'');lines.push(n.question?`解释问题：${n.question}`:'',n.methods?.length?`解释方法：${M.methodLabels(n.methods).join('、')}`:'',n.text,'',n.source?`来源：${n.source.file} 第${n.source.page}页；原文：${n.source.excerpt}`:'','正文快照：','',...n.textSnapshot,'');}
@@ -415,9 +518,11 @@ document.addEventListener('click',event=>{
   const el=event.target.closest('[data-action]');if(!el||el.disabled)return;
   const action=el.dataset.action,unitId=el.dataset.unit,id=el.dataset.id;
   try{switch(action){
-    case 'nav':if(modal.open)closeModal();ui.view=el.dataset.view;ui.search='';ui.selection=[];if(ui.view==='practice'&&!ui.feedId)resetFeed();render();window.scrollTo({top:0,behavior:'instant'});break;
+    case 'nav':if(modal.open)closeModal();ui.view=el.dataset.view;ui.search='';ui.selection=[];if(ui.view==='practice'&&!ui.feedId)resetFeed();render();break;
     case 'more-nav':showMoreNav();break;
+    case 'summary':{const go=el.dataset.go;if(go==='notes'){ui.view='notes';ui.notesTab='notes';}else if(go==='links'){ui.view='terms';ui.relationTab='concepts';}else{ui.view='outline';ui.outlineSide='groups';}render();break;}
     case 'cite':showCite(ui.selection);break;
+    case 'cite-format':try{localStorage.setItem(KEY+'-cite',el.dataset.format);}catch{}showCite(ui.citeSelection||[]);break;
     case 'cite-copy':copyText(el.dataset.text,'引文已复制。');break;
     case 'data':showData();break;case 'close':closeModal();break;
     case 'toc':ui.tocChapter=null;showToc();break;
@@ -461,9 +566,10 @@ document.addEventListener('click',event=>{
     case 'ignore-update':case 'restore-update':{const u=state.updates.find(x=>x.id===id);if(u)u.status=action==='ignore-update'?'ignored':'pending';persist();render();break;}
     case 'share':showShare();break;
     case 'export-json':download(`${CODEX.id==='cn-constitution'?'法典笔记备份':'法典笔记备份-'+CODEX.short}_${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({...state,exportedAt:now()},null,2),'application/json;charset=utf-8');break;
+    case 'export-json-files':localFiles.exportAll().then(files=>download(`${CODEX.id==='cn-constitution'?'法典笔记备份':'法典笔记备份-'+CODEX.short}_含附件_${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({...state,exportedAt:now(),attachmentFiles:files}),'application/json;charset=utf-8'),error=>toast(error.message));break;
     case 'export-md':exportMarkdown();break;
     case 'export-unreadable':download('法典笔记_未能读取的原始记录.txt',unreadableBackup||'','text/plain;charset=utf-8');break;
-    case 'import-json':document.getElementById('import-file').click();break;
+    case 'import-json':{const input=document.getElementById('import-file');input.value='';input.click();break;}
     case 'reset':showModal('清空此浏览器中的记录？','<p>这会清空此浏览器中的笔记、词条、关联、材料和复习安排。请先导出备份。旧版存储不受影响。</p><div class="modal-actions"><button class="btn" data-action="close">取消</button><button class="btn accent" data-action="confirm-reset">确认清空</button></div>');break;
     case 'confirm-reset':state=M.fresh();unreadableBackup=null;persist();closeModal();ui.view='reader';ui.rail='mine';ui.selection=[];ui.feedId=null;render();break;
   }}catch(error){toast(error.message||'操作未完成，请重试。');}
@@ -482,7 +588,18 @@ document.addEventListener('change',async event=>{
     if(el.id==='feed-mode'||el.id==='feed-pool'||el.id==='feed-year'){if(el.id==='feed-mode')ui.feedMode=el.value;if(el.id==='feed-pool')ui.feedPool=el.value;if(el.id==='feed-year'){state.year=Number(el.value);persist();}resetFeed();render();}
     if(el.id==='link-unit'){ui.linkDraft.target=el.value;ui.linkDraft.to=[];renderLinkPreview();}
     if(el.id==='link-year'){ui.linkDraft.year=Number(el.value);if(!M.version(ui.linkDraft.target,ui.linkDraft.year)?.exists)ui.linkDraft.target=M.sequence(ui.linkDraft.year)[0];ui.linkDraft.to=[];showLink(true);}
-    if(el.id==='import-file'){const file=el.files[0];if(!file)return;if(file.size>25*1024*1024)throw Error('备份超过25MB。');const result=M.merge(state,JSON.parse(await file.text()));state=result.state;persist();closeModal();render();toast(`已合并：新增 ${result.added} 条，另保留 ${result.conflicts} 条不同版本。`);}
+    if(el.id==='import-file'){
+      const file=el.files[0];if(!file)return;
+      // A backup with attachments (导出数据（含附件）) may be larger; one with notes only stays under 25 MB.
+      if(file.size>200*1024*1024)throw Error('备份超过 200 MB，不能导入。');
+      let data;try{data=JSON.parse((await file.text()).replace(/^\uFEFF/,''));}catch{throw Error('这不是法典笔记导出的 JSON 备份，或者文件已损坏。');}
+      if(!data||typeof data!=='object'||data.schemaVersion===undefined&&!Array.isArray(data.notes))throw Error('这不是法典笔记导出的 JSON 备份。');
+      if(data.bookId&&data.bookId!==CODEX.id){const other=(DATA.codes||[]).find(c=>c.id===data.bookId);throw Error(`这是${other?other.short:'另一部法典'}的备份。请先切换到${other?other.short:'对应的法典'}，再导入。`);}
+      const files=data.attachmentFiles;delete data.attachmentFiles;
+      const result=M.merge(state,data);state=result.state;persist();
+      let restored=0;if(Array.isArray(files)&&files.length){if(service.connected)toast('这份备份中的附件需在网页版或应用版中恢复；电脑完整版请用目录备份。');else{restored=await localFiles.importAll(files);await loadLocalFiles();}}
+      closeModal();render();toast(`已合并：新增 ${result.added} 条，另保留 ${result.conflicts} 条不同版本${restored?`；恢复附件 ${restored} 份`:''}。`);
+    }
   }catch(error){toast(`未完成：${error.message}`);}
 });
 document.addEventListener('submit',event=>{
@@ -500,15 +617,15 @@ document.addEventListener('submit',event=>{
   }catch(error){toast(error.message||'保存失败。');}
 });
 function captureSelection(){
-  if(ui.view!=='reader'||ui.history||modal.open||ui.words)return;
+  const container=selectableText();if(!container)return;
   const selection=window.getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount)return;
-  const range=selection.getRangeAt(0),container=document.getElementById('law-text');if(!container||!container.contains(range.startContainer)||!container.contains(range.endContainer))return;
+  const range=selection.getRangeAt(0);if(!container.contains(range.startContainer)||!container.contains(range.endContainer))return;
   const anchors=[];
   for(const p of container.querySelectorAll('[data-law-block]')){
     if(!range.intersectsNode(p))continue;
     const r=range.cloneRange();if(!p.contains(r.startContainer))r.setStart(p,0);if(!p.contains(r.endContainer))r.setEnd(p,p.childNodes.length);
     const before=document.createRange();before.selectNodeContents(p);before.setEnd(r.startContainer,r.startOffset);
-    const start=before.toString().length,end=start+r.toString().length;if(end>start)anchors.push(M.anchor(state.current,state.year,Number(p.dataset.lawBlock),start,end));
+    const start=before.toString().length,end=start+r.toString().length;if(end>start)anchors.push(M.anchor(p.dataset.unit,Number(p.dataset.year),Number(p.dataset.lawBlock),start,end));
   }
   if(anchors.length){ui.selection=anchors;updateSelectionTools();}
 }
@@ -531,7 +648,7 @@ document.addEventListener('keydown',event=>{
 const swipe={dir:0,amount:0,last:0,fromEdge:false,lockUntil:0,touch:null,hide:0};
 const SWIPE_WHEEL=260,SWIPE_TOUCH=72,SWIPE_GAP=220;
 function swipeScope(target){
-  if(modal.open||ui.words||!['reader','practice'].includes(ui.view))return null;
+  if(modal.open||ui.words||!['reader','practice'].includes(ui.view)||typeof deviceSettings!=='undefined'&&!deviceSettings.continuous)return null;
   if(!target?.closest||!target.closest('main')||target.closest('input,textarea,select,[contenteditable],.topbar,.mobile-nav,#selection-tools,#swipe-cue'))return null;
   const rail=target.closest('.rail');if(rail&&getComputedStyle(rail).position==='sticky')return null;
   return ui.view==='reader'?'reader':'practice';

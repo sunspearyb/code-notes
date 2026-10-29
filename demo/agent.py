@@ -13,7 +13,7 @@ from edition import EDITION
 def main():
     parser = argparse.ArgumentParser(description='法典笔记本地助手入口。先启动书库，并在“智能辅助”允许接入。')
     parser.add_argument('--port', type=int, default=EDITION['port'])
-    parser.add_argument('--year', type=int, default=2018)
+    parser.add_argument('--year', type=int, help='文本年份；不填时使用该法典的最新文本')
     commands = parser.add_subparsers(dest='action', required=True)
     for name in ['status', 'catalogue', 'book', 'files']:
         commands.add_parser(name)
@@ -39,14 +39,17 @@ def main():
             return json.load(response)
     try:
         health = request('/__fadian_health')
-        if health.get('app') not in ('fadian-notes-local-v4', 'fadian-notes-clean-v1'):
+        # Codes other than the constitution add their name to the marker (fadian-notes-clean-v1-cyber-law).
+        if not str(health.get('app', '')).startswith(('fadian-notes-local-v4', 'fadian-notes-clean-v1')):
             raise RuntimeError('该端口不是法典笔记服务。')
         token = request('/api/session')['token']
         if args.action == 'status':
             status = request('/api/status', token=token)
             result = {'enabled': status['config'].get('agentEnabled', False), 'attachments': status['attachments'], 'pending': status['pending']}
         else:
-            body = {'action': args.action, 'year': args.year}
+            body = {'action': args.action}
+            if args.year is not None:
+                body['year'] = args.year
             for key in ['unitId', 'id', 'query']:
                 if hasattr(args, key):
                     body[key] = getattr(args, key)

@@ -28,6 +28,16 @@ class ServiceTests(unittest.TestCase):
     def configure(self):
         self.service.settings({'model':'test-model','apiKey':'test-secret','searchKey':'search-secret','backupDirectory':str(self.root/'cloud'),'backupMinutes':1})
 
+    def test_uploaded_file_can_be_removed(self):
+        record = self.service.upload({'name': '误传.txt', 'content': base64.b64encode('误传的材料。'.encode()).decode()})
+        self.assertEqual(self.service.remove_file(record['id'])['name'], '误传.txt')
+        self.assertEqual(self.service.index, [])
+        self.assertFalse((self.service.files / record['id']).exists())
+        self.assertTrue(any((self.root/'data'/'attachments-deleted').iterdir()))
+        self.assertEqual(LocalService(self.service.project, self.root/'data', export_dir=False).index, [])
+        with self.assertRaises(ServiceError):
+            self.service.remove_file(record['id'])
+
     def test_revision_conflict_is_non_destructive(self):
         self.service.save_snapshot({'revision':0,'state':self.snapshot})
         with self.assertRaises(ServiceError) as e:

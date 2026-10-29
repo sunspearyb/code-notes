@@ -14,7 +14,7 @@ function fullMarkdown(){
   const L=[],order=new Map(M.units.map((u,i)=>[u.id,i])),own=state.notes.filter(n=>!n.example);
   const unitTitle=(id,year)=>{const u=M.get(id);return u?`${label(u,year)}（${year} 年文本）`:id;};
   const relationsOf=key=>state.materialRelations.filter(r=>key===null?!r.category:r.category===key);
-  L.push('---',`title: 我的法典笔记`,`code: ${CODEX.name}`,`exported: ${now()}`,'format: fadian-notes-markdown 1',`notes: ${own.length}`,`relations: ${state.materialRelations.length}`,'---','',`# 我的法典笔记 · ${CODEX.name}`,'',`> 由法典笔记导出于 ${mdDate(now())}。这份文件便于阅读、交给助手或迁移到其他笔记软件；要在法典笔记中恢复或合并，请使用 JSON 备份。条文引自 ${M.years.join('、')} 年分年文本。`,'');
+  L.push('---',`title: 我的法典笔记`,`code: ${CODEX.name}`,`exported: ${now()}`,'format: fadian-notes-markdown 1',`notes: ${own.length}`,`relations: ${state.links.length+state.groupLinks.length+state.materialRelations.length}`,`article-links: ${state.links.length}`,`part-links: ${state.groupLinks.length}`,`material-relations: ${state.materialRelations.length}`,'---','',`# 我的法典笔记 · ${CODEX.name}`,'',`> 由法典笔记导出于 ${mdDate(now())}。这份文件便于阅读、交给助手或迁移到其他笔记软件；要在法典笔记中恢复或合并，请使用 JSON 备份。条文引自 ${M.years.join('、')} 年分年文本。`,'');
   L.push('## 一、条文笔记','');
   const notes=[...own].sort((a,b)=>(order.get(a.unitId)??0)-(order.get(b.unitId)??0)||a.year-b.year||a.createdAt.localeCompare(b.createdAt));
   let last='';
@@ -42,7 +42,7 @@ function fullMarkdown(){
       if(r.sourceText)L.push('摘录：','',mdQuote(r.sourceText.length>6000?r.sourceText.slice(0,6000)+'……（全文见 JSON 备份）':r.sourceText),'');
     }
   };
-  let section=2;const cn=n=>'一二三四五六七八九十'[n-1]||String(n);
+  let section=2;const cn=n=>cnNumber(n);
   for(const [key,c] of Object.entries(M.categories()))relationSection(`${cn(section++)}、${c.name}`,relationsOf(key));
   relationSection(`${cn(section++)}、其他材料关联`,relationsOf(null));
   L.push(`## ${cn(section++)}、词条`,'');
@@ -61,6 +61,7 @@ function fullMarkdown(){
   L.push('',`## ${cn(section++)}、记忆卡片关键词`,'');
   const cards=Object.values(state.memoryCards).filter(c=>c.keywords.length);
   L.push(...cards.map(c=>`- ${unitTitle(c.unitId,c.year)}：${c.keywords.join('、')}`));if(!cards.length)L.push('（暂无）');
+  if(state.marks.length){L.push('',`## ${cn(section++)}、标记的字句`,'');marksMarkdown(L);}
   if(state.discussions.length){L.push('',`## ${cn(section++)}、讨论（本地记录）`,'');for(const t of state.discussions){L.push(`### ${t.title}`,'',t.question,'',...t.comments.map(c=>`- ${c.authorId==='self'?'我':state.people.find(p=>p.id===c.authorId)?.name||'成员'}（${mdDate(c.createdAt)}）：${c.text}`),'');}}
   return L.join('\n').replace(/\n{3,}/g,'\n\n')+'\n';
 }
@@ -179,7 +180,7 @@ document.addEventListener('click',async event=>{
   const el=event.target.closest('[data-action]');if(!el)return;
   try{
     switch(el.dataset.action){
-      case 'export-json':case 'export-md':try{localStorage.setItem(KEY+'-exported',String(Date.now()));localStorage.removeItem(KEY+'-remind-after');}catch{}setTimeout(()=>{if(ui.view==='outline'&&!modal.open)render();},50);break;
+      case 'export-json':case 'export-json-files':case 'export-md':try{localStorage.setItem(KEY+'-exported',String(Date.now()));localStorage.removeItem(KEY+'-remind-after');}catch{}setTimeout(()=>{if(ui.view==='outline'&&!modal.open)render();},50);break;
       case 'backup-later':localStorage.setItem(KEY+'-remind-after',String(Date.now()+7*864e5));render();break;
       case 'folder-choose':{
         const handle=await window.showDirectoryPicker({id:'fadian-notes',mode:'readwrite'});
@@ -192,5 +193,5 @@ document.addEventListener('click',async event=>{
     }
   }catch(error){if(error.name!=='AbortError')toast(error.message);}
 });
-serviceStarted.finally(()=>{folderStart();checkServiceFiles();});
+serviceStarted.finally(()=>{folderStart();checkServiceFiles();loadLocalFiles().then(()=>{if(['updates','terms'].includes(ui.view)&&!modal.open)render();});});
 render();

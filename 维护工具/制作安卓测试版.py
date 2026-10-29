@@ -93,25 +93,29 @@ public class MainActivity extends Activity {
 
   @Override protected void onCreate(Bundle saved) {
     super.onCreate(saved);
-    getWindow().setStatusBarColor(Color.rgb(246, 244, 238));
+    getWindow().setStatusBarColor(Color.rgb(250, 248, 240));
     if (Build.VERSION.SDK_INT >= 23) getWindow().getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
     web = new WebView(this);
-    web.setBackgroundColor(Color.rgb(246, 244, 238));
+    web.setBackgroundColor(Color.rgb(250, 248, 240));
     WebSettings s = web.getSettings();
     s.setJavaScriptEnabled(true);
     s.setDomStorageEnabled(true);
     s.setAllowFileAccess(false);
-    s.setAllowContentAccess(false);
+    // The system file picker returns content:// URIs. Keep file:// access disabled,
+    // but allow reading the documents explicitly selected by the user.
+    s.setAllowContentAccess(true);
     s.setTextZoom(100);
     web.addJavascriptInterface(new Bridge(), "FadianAndroid");
     web.setWebViewClient(new WebViewClient() {
       @Override public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
         Uri u = r.getUrl();
         if (!HOST.equals(u.getHost())) return null;
+        // index.html is the default code; the other codes' pages (法典笔记-civil-code.html …) sit beside it.
         String path = u.getPath() == null || u.getPath().equals("/") ? "/index.html" : u.getPath();
-        if (!path.equals("/index.html")) return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
-        try { return new WebResourceResponse("text/html", "utf-8", getAssets().open("index.html")); }
-        catch (Exception e) { return null; }
+        String name = path.substring(1);
+        if (!name.endsWith(".html") || name.contains("/")) return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
+        try { return new WebResourceResponse("text/html", "utf-8", getAssets().open(name)); }
+        catch (Exception e) { return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null); }
       }
       @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
         Uri u = r.getUrl();
@@ -124,7 +128,12 @@ public class MainActivity extends Activity {
       @Override public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> callback, FileChooserParams params) {
         if (pending != null) pending.onReceiveValue(null);
         pending = callback;
-        try { startActivityForResult(params.createIntent(), PICK); }
+        // params.createIntent() turns accept=".pdf,.docx" into a MIME filter the file manager does not
+        // understand, which greys out every file. Offer all files; the page checks the type itself.
+        Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
+        pick.addCategory(Intent.CATEGORY_OPENABLE);
+        pick.setType("*/*");
+        try { startActivityForResult(Intent.createChooser(pick, "选择文件"), PICK); }
         catch (Exception e) { pending = null; return false; }
         return true;
       }
@@ -150,9 +159,15 @@ public class MainActivity extends Activity {
 
   class Bridge {
     @JavascriptInterface public String saveText(String name, String text, String type) {
+      return write(name, text.getBytes(StandardCharsets.UTF_8), type == null ? "text/plain" : type.split(";")[0]);
+    }
+    // Attachments from the page's file library arrive as base64.
+    @JavascriptInterface public String saveBytes(String name, String base64) {
+      try { return write(name, android.util.Base64.decode(base64, android.util.Base64.DEFAULT), "application/octet-stream"); }
+      catch (Exception e) { return "保存失败：" + e.getMessage(); }
+    }
+    String write(String name, byte[] bytes, String mime) {
       try {
-        byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
-        String mime = type == null ? "text/plain" : type.split(";")[0];
         if (Build.VERSION.SDK_INT >= 29) {
           ContentValues values = new ContentValues();
           values.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
@@ -236,6 +251,26 @@ def toolchain(tools):
     return jdk.resolve(), bt, next((tools / 'pf').glob('*/android.jar'))
 
 
+def append_dex(apk_path, dex_path):
+    """Preserve AAPT's UTF-8 asset names when adding bytecode with Python's ZIP writer.
+
+    AAPT can omit the UTF-8 flag. Appending with ZipFile then decodes Chinese names
+    as CP437 and rewrites a corrupted directory; zipalign propagates those names.
+    Rewrite the unsigned archive with explicit UTF-8 names before alignment/signing.
+    """
+    with zipfile.ZipFile(apk_path) as archive:
+        entries = [(info, archive.read(info)) for info in archive.infolist()]
+    with zipfile.ZipFile(apk_path, 'w') as archive:
+        for info, content in entries:
+            if not info.flag_bits & 0x800:
+                try:
+                    info.filename = info.filename.encode('cp437').decode('utf-8')
+                except UnicodeError:
+                    pass
+            archive.writestr(info, content)
+        archive.write(dex_path, 'classes.dex')
+
+
 def build(page, target, *, package, label, keystore, alias, password, icons=None, version_name=None, tools=None):
     """Build and sign one APK. icons is a folder holding android-foreground.png, android-background.png
     and android-legacy.png (维护工具/应用图标); without it the plain vector icon is used."""
@@ -269,7 +304,11 @@ def build(page, target, *, package, label, keystore, alias, password, icons=None
         source.parent.mkdir(parents=True)
         source.write_text(JAVA.replace('@PACKAGE@', package), encoding='utf-8')
         (work / 'assets').mkdir()
-        shutil.copy(page, work / 'assets/index.html')
+        # page is one page, or a list of every code's page (the first is the default): one app for all codes.
+        pages = page if isinstance(page, (list, tuple)) else [page]
+        shutil.copy(pages[0], work / 'assets/index.html')
+        for extra in pages:
+            shutil.copy(extra, work / 'assets' / Path(extra).name)
 
         print('编译资源与代码')
         run(bt / 'aapt2', 'compile', '--dir', work / 'res', '-o', work / 'res.zip')
@@ -280,8 +319,7 @@ def build(page, target, *, package, label, keystore, alias, password, icons=None
             '-bootclasspath', android_jar, '-d', work / 'classes', source, env=env)
         classes = [str(p) for p in (work / 'classes').rglob('*.class')]
         run(bt / 'd8', '--release', '--min-api', '24', '--lib', android_jar, '--output', work, *classes, env=env)
-        with zipfile.ZipFile(work / 'base.apk', 'a') as apk:
-            apk.write(work / 'classes.dex', 'classes.dex')
+        append_dex(work / 'base.apk', work / 'classes.dex')
         run(bt / 'zipalign', '-f', '-p', '4', work / 'base.apk', work / 'aligned.apk')
 
         if not keystore.exists():

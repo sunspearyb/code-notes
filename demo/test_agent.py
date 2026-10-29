@@ -28,6 +28,9 @@ class AgentTests(unittest.TestCase):
         with self.assertRaises(ServiceError):handle(self.s, {'action': 'read', 'unitId': 'a123', 'year': 1982})
         self.assertEqual(handle(self.s, {'action': 'read', 'unitId': 'a37'})['unitId'], 'a37')
 
+    def test_default_year_is_latest(self):
+        self.assertEqual(handle(self.s, {'action': 'catalogue'})['year'], self.s.years[-1])
+
     def test_pending_and_idempotence(self):
         before=copy.deepcopy(self.s.snapshot)
         result=handle(self.s, self.body)

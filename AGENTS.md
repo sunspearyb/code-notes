@@ -21,7 +21,7 @@
 | `demo/build.py` | 把以上内容合成为页面：默认数据包（宪法）生成 `demo/法典笔记.html`，其他数据包生成 `demo/法典笔记-<名称>.html` |
 | `demo/local_service.py`、`demo/serve.py` | PC&Mac 通用版的本机服务（Python 标准库）：附件、智能辅助、目录备份 |
 | `demo/数据格式.md` | 导出的 JSON 和 Markdown 的格式 |
-| `维护工具/` | 制作网页版、安卓版、Windows 版和应用图标的工具 |
+| `维护工具/` | 制作网页版、安卓版、Windows 版、Mac 版（一个应用含全部法典，`windows-app` 同时用于 Windows 和 Mac）和应用图标的工具 |
 
 `demo/src/` 中的脚本按 `build.py` 列出的顺序拼接：`model.js`、`notebook.js`、`learning-model.js` 是数据模型（不碰页面）；`app.js` 起是界面。后面的文件常常包装前面的函数（例如 `renderSearch=function(){…}`），新功能通常放进一个新文件，加到列表末尾之前，而不是改动已有函数的内部。
 
@@ -56,4 +56,5 @@ cd demo && python3 -m unittest test_service test_agent test_help
 - **新增一个功能页**：参考 `demo/src/readings.js`（比较阅读、备案审查、英文本）。
 - **新增一类材料**（如司法解释、指导性案例）：在数据包的 `codex.json` 中声明 `relationCategories`，不必改代码。
 - **扩展到其他法典**：按 `demo/codes/README.md` 新建数据包，未完成时文件夹名以 `_` 开头。正文取自国家法律法规数据库，逐条核对，用 `check_pack.py` 检查。用 `python3 demo/launch.py --open --codex <名称>` 连本机服务试用。每部法典的浏览器记录、端口和数据文件夹各自分开，不要合并。
+- **设置页、外观和字号**：见 `demo/src/settings.js`。这些是设备设置，存在 localStorage 的 `fadian-settings` 中，不进笔记和备份。高亮标记见 `marks.js`，专注模式见 `focus.js`。
 - **改变导出或同步**：见 `demo/src/storage.js` 和 `demo/数据格式.md`；两边内容不同时保留两个版本，不要覆盖。

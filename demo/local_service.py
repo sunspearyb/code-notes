@@ -380,6 +380,22 @@ class LocalService:
             raise ServiceError('附件不存在。', 404)
         return record, (self.files / identifier).read_bytes()
 
+    def remove_file(self, identifier):
+        """Take an uploaded file out of the library. The file is moved to attachments-deleted, not erased,
+        so a mistaken deletion can still be recovered by hand; notes that cited it keep their text."""
+        with self.lock:
+            record = next((x for x in self.index if x['id'] == identifier), None)
+            if not record:
+                raise ServiceError('附件不存在。', 404)
+            source = self.files / identifier
+            if source.exists():
+                trash = self.home / 'attachments-deleted'
+                trash.mkdir(exist_ok=True)
+                source.replace(trash / f"{identifier}-{Path(record['name']).name}")
+            self.index = [x for x in self.index if x['id'] != identifier]
+            write_json(self.home / 'attachments.json', self.index)
+            return {'id': identifier, 'name': record['name']}
+
     def validate_scope(self, scope):
         if not isinstance(scope, dict) or scope.get('kind') not in ('constitution', 'amendment', 'articles') or scope.get('year') not in self.years or not isinstance(scope.get('unitIds'), list):
             raise ServiceError('材料关联范围无效。')

@@ -29,6 +29,7 @@ jobs:
         run: |
           node demo/test-clean.cjs
           node demo/test-learning.cjs
+          node demo/test-marks.cjs
           node demo/test-reflection.cjs
           node demo/test-codex.cjs
       - name: 网页离线与只读预览
@@ -41,3 +42,5 @@ jobs:
       - name: 本机服务
         working-directory: demo
         run: python3 -m unittest test_service test_agent test_help
+      - name: 安卓资源路径与网页版切换
+        run: python3 维护工具/test-platforms.py .

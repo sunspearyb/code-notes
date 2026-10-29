@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Serve only the demo directory on localhost; never expose the project PDFs."""
 import argparse
+import os
+import signal
+import threading
+import time
 import functools
 import http.server
 import json
@@ -94,7 +98,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                       '/api/upload': lambda: service.upload(body), '/api/analyze': lambda: service.analyze(body),
                       '/api/resolve': lambda: service.resolve(body), '/api/search': service.search,
                       '/api/backup': service.backup, '/api/restore': lambda: service.restore(body.get('name')),
-                      '/api/conflict-done': lambda: service.conflict_done(body.get('name'))}
+                      '/api/conflict-done': lambda: service.conflict_done(body.get('name')),
+                      '/api/file-delete': lambda: service.remove_file(str(body.get('id', '')))}
             routes['/api/agent'] = lambda: handle_agent(service, body)
             if self.path not in routes:
                 raise ServiceError('接口不存在。', 404)
@@ -139,10 +144,26 @@ def main():
         raise SystemExit(f'端口 {args.port} 已被其他程序占用。请关闭占用程序，或使用 --port 指定其他端口。原浏览器笔记与端口有关，变更前请导出备份。')
     server.service = LocalService(ROOT.parent, args.data_dir)
     server.service.start_scheduler()
+    # The Mac app (维护工具/mac-app) passes its process id: if the app goes away without stopping the
+    # service (force quit), the service stops by itself instead of holding the port.
+    parent = os.environ.get('FADIAN_PARENT_PID', '')
+    if parent.isdigit():
+        def watch_parent():
+            while True:
+                time.sleep(2)
+                try:
+                    os.kill(int(parent), 0)
+                except OSError:
+                    server.shutdown()
+                    return
+        threading.Thread(target=watch_parent, daemon=True).start()
     print('法典笔记已启动：' + url, flush=True)
     print('关闭此终端或按 Control-C 可停止服务。服务仅供本机访问。', flush=True)
     if args.open:
         webbrowser.open(url)
+    def stop(*unused):
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM, stop)  # quitting the Mac app stops the service the same way as Control-C
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -3,12 +3,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>本地助手接入 · 法典笔记</title>
 <style>
-:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#f6f4ee;color:#1f2a26;font:16px/1.9 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif}
-main{max-width:820px;margin:48px auto;padding:40px 52px;background:#fffdf8;border:1px solid #e2ded2;border-radius:12px;box-shadow:0 1px 2px rgb(31 42 38/.04),0 6px 20px rgb(31 42 38/.05)}
-nav{font-size:14px;border-bottom:1px solid #e2ded2;padding-bottom:16px}a{color:#1f4a3d;text-underline-offset:3px}
-h1,h2,h3{font-family:"Songti SC","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;font-weight:600;letter-spacing:.04em}h1{font-size:28px;margin:28px 0 18px}h2{font-size:21px;margin-top:40px;padding-left:12px;border-left:3px solid #a33a2a;line-height:1.5}h3{font-size:18px}
-p{overflow-wrap:anywhere;color:#3a4741}code{background:#f1eee5;padding:2px 5px;border-radius:4px;font-size:.88em;color:#1f2a26}pre{overflow:auto;background:#f1eee5;border-radius:10px;padding:18px 20px;line-height:1.7;font-size:14px}pre code{padding:0}
-footer{margin-top:36px;padding-top:18px;border-top:1px solid #e2ded2;font-size:13px;color:#5f6963}
+:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#faf8f0;color:#2b2426;font:16px/1.9 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif}
+main{max-width:820px;margin:48px auto;padding:40px 52px;background:#fffefa;border:1px solid #ebe3d6;border-radius:12px;box-shadow:0 1px 2px rgb(31 42 38/.04),0 6px 20px rgb(31 42 38/.05)}
+nav{font-size:14px;border-bottom:1px solid #ebe3d6;padding-bottom:16px}a{color:#8b3652;text-underline-offset:3px}
+h1,h2,h3{font-family:"Songti SC","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;font-weight:600;letter-spacing:.04em}h1{font-size:28px;margin:28px 0 18px}h2{font-size:21px;margin-top:40px;padding-left:12px;border-left:3px solid #b5452f;line-height:1.5}h3{font-size:18px}
+p{overflow-wrap:anywhere;color:#4a3f42}code{background:#f4efe5;padding:2px 5px;border-radius:4px;font-size:.88em;color:#2b2426}pre{overflow:auto;background:#f4efe5;border-radius:10px;padding:18px 20px;line-height:1.7;font-size:14px}pre code{padding:0}
+footer{margin-top:36px;padding-top:18px;border-top:1px solid #ebe3d6;font-size:13px;color:#6b5f63}
 @media(max-width:640px){main{margin:0;padding:24px 18px;border:0;border-radius:0}h1{font-size:24px}}
 </style></head><body><main><nav><a href="./法典笔记.html">返回法典笔记</a></nav>
 <h1>本地助手接入</h1>
@@ -25,7 +25,7 @@ python3 demo/agent.py --port 8765 file MATERIAL_ID
 python3 demo/agent.py --port 8765 upload /absolute/path/source.txt
 python3 demo/agent.py --port 8765 book
 python3 demo/agent.py --port 8765 propose /absolute/path/proposals.json</code></pre>
-<p><code>a37</code> 是第三十七条，<code>p1</code> 是序言第一自然段；历史年份按稳定条目标识读取，以返回的条号与年份为准。<code>book</code> 返回整个当前书库，只在任务需要时使用。命令直接访问本机程序，不会自行调用模型。用户资料可能经助手传给其模型服务，须遵守用户对材料范围的要求。</p>
+<p><code>--year</code> 可以不写，不写时读取该法典的最新文本（宪法为 2018 年，网络法典为 2025 年）。民法典、网络法典的端口和条目标识不同，以页面任务中列出的为准。<code>a37</code> 是第三十七条，<code>p1</code> 是序言第一自然段；历史年份按稳定条目标识读取，以返回的条号与年份为准。<code>book</code> 返回整个当前书库，只在任务需要时使用。命令直接访问本机程序，不会自行调用模型。用户资料可能经助手传给其模型服务，须遵守用户对材料范围的要求。</p>
 <p>建议文件使用 UTF-8 JSON。下例仅说明格式，正文由助手根据实际阅读任务填写；不要把占位内容作为笔记提交。</p>
 <pre><code>{
   &quot;requestId&quot;: &quot;a-new-unique-request-id&quot;,

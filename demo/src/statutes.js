@@ -65,14 +65,15 @@ function addressOf(unitId,codeName=null){
 }
 // Where another code's page lives: next to this page in the PC&Mac folder, or in its own folder of the website.
 function codeHref(code){
-  const own=(DATA.codes||[]).find(c=>c.id===CODEX.id),here=location.href.split('#')[0];
-  if(serviceFreeEdition()==='网页版'){const root=here.replace(/[^/]*$/,'')+(own?.webFolder?'../':'');return root+(code.webFolder?code.webFolder+'/':'');}
-  return here.replace(/[^/]*$/,'')+encodeURIComponent(code.page);
+  const own=(DATA.codes||[]).find(c=>c.id===CODEX.id),routes=document.querySelector('meta[name="fadian-web-routes"]');
+  if(routes){const target=JSON.parse(routes.content)[code.id];if(target)return new URL(target,location.href).href;}
+  if(serviceFreeEdition()==='网页版'){const root=new URL(own?.webFolder?'../':'./',location.href);return new URL(code.webFolder?code.webFolder+'/':'./',root).href;}
+  return new URL(encodeURIComponent(code.page),location.href).href;
 }
 function findCode(name){const q=String(name||'').replace(/[《》\s]/g,'');return (DATA.codes||[]).find(c=>[c.short,c.fullName,...(c.aliases||[])].some(n=>n&&(q===n||q.includes(n)||n.includes(q))));}
 function crossButton(r){
   const code=findCode(r.details?.code),label=`${r.details?.code||''}${r.details?.article||''}`||r.title;
-  if(code&&code.id!==CODEX.id&&!SHELL)return `<a href="${esc(codeHref(code)+'#ref='+encodeURIComponent(r.details?.article||''))}">${esc(label)}</a>`;
+  if(code&&code.id!==CODEX.id&&!SHELL?.localService)return `<a href="${esc(codeHref(code)+'#ref='+encodeURIComponent(r.details?.article||''))}">${esc(label)}</a>`;
   if(code&&code.id===CODEX.id){const id=resolveReference(r.details?.article||'');if(id)return `<button class="text-btn" data-action="goto" data-unit="${id}">${esc(label)}</button>`;}
   return r.url?`<a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`:esc(label);
 }

@@ -2,7 +2,7 @@
 name = "fadian-notes"
 version = "1.0.0"
 edition = "2021"
-description = "法典笔记 Windows 应用：内嵌纯净版页面的 WebView2 外壳"
+description = "法典笔记应用（Windows、Mac）：内嵌全部法典页面的网页外壳"
 publish = false
 
 [dependencies]
@@ -12,6 +12,9 @@ png = "0.17"
 serde_json = "1"
 tao = "0.37"
 wry = "0.57"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+muda = "0.17"
 
 [build-dependencies]
 embed-resource = "3"

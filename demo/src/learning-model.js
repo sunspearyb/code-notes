@@ -1,6 +1,7 @@
 'use strict';
 function createLearningModel(data) {
   const base=createNotebookModel(data),copy=x=>JSON.parse(JSON.stringify(x));
+  const MARK_STYLES=['yellow','green','blue','underline','bold'];
   const revision=n=>({text:n.text,question:n.question||'',methods:copy(n.methods||[]),quote:n.quote||'',updatedAt:n.updatedAt,...(n.analysis?{analysis:copy(n.analysis)}:{})});
   const revisionText=n=>JSON.stringify([n.text,n.question||'',n.methods||[],n.quote||'',n.analysis||null]);
   function validateHistory(record){
@@ -9,7 +10,7 @@ function createLearningModel(data) {
     if(o&&(!['text','question','excerpt','title'].every(k=>typeof o[k]==='string'&&o[k].length<=200000)||!Array.isArray(o.methods)||o.methods.some(m=>typeof m!=='string'||m.length>100)||!Number.isFinite(Date.parse(o.createdAt))))throw Error('助手原建议无效。');
   }
   function normalize(input){
-    const s=copy(input);s.notebookVersion=4;s.subtitles||={};s.subtitleHistory||={};s.memoryCards||={};s.guideEdits||={};s.guideHistory||={};dropDefaultGuideEdits(s);s.materialRelations||=[];s.preferences={noteMode:'full',...(s.preferences||{})};
+    const s=copy(input);s.notebookVersion=4;s.subtitles||={};s.subtitleHistory||={};s.memoryCards||={};s.guideEdits||={};s.guideHistory||={};dropDefaultGuideEdits(s);s.materialRelations||=[];s.marks||=[];s.preferences={noteMode:'full',...(s.preferences||{})};
     for(const [unitId,r] of Object.entries(s.reviews)) {
       const key=unitId+'@2018';
       if(!s.memoryCards[key])s.memoryCards[key]={unitId,year:2018,keywords:[],mode:'whole',due:r.due,interval:r.rating==='again'?0:3,repetitions:0,rating:r.rating==='again'?'again':'good',updatedAt:'2026-10-01T00:00:00Z'};
@@ -32,6 +33,12 @@ function createLearningModel(data) {
     if(!object(s.guideEdits)||!object(s.guideHistory))throw Error('使用说明格式无效。');
     for(const [key,entry] of Object.entries(s.guideEdits))validateGuide(key,entry);
     for(const [key,entries] of Object.entries(s.guideHistory)){if(!Array.isArray(entries))throw Error('说明修订记录无效。');for(const entry of entries)validateGuide(key,entry);}
+    if(!Array.isArray(s.marks)||s.marks.length>30000)throw Error('标记记录无效。');
+    const markIds=new Set();
+    for(const m of s.marks){
+      if(!m||typeof m.id!=='string'||!/^[\w-]{1,120}$/.test(m.id)||markIds.has(m.id)||!MARK_STYLES.includes(m.style)||!base.anchorValid(m.anchor)||m.anchor.block===null||!Number.isFinite(Date.parse(m.createdAt)))throw Error('标记的样式或字句定位无效。');
+      markIds.add(m.id);
+    }
     if(!Array.isArray(s.materialRelations)||s.materialRelations.length>30000)throw Error('材料关联记录无效。');
     const relationIds=new Set();
     for(const r of s.materialRelations){
@@ -49,6 +56,44 @@ function createLearningModel(data) {
       if(r.details!==undefined&&(!object(r.details)||Object.keys(r.details).length>20||Object.entries(r.details).some(([k,v])=>!/^[a-zA-Z]{1,40}$/.test(k)||typeof v!=='string'||v.length>2000)))throw Error('材料关联的详细信息无效。');
     }
     return s;
+  }
+  // ---------- Marks: highlight, underline and bold on the text itself, with nothing to write ----------
+  // A mark is a style on one stretch of one paragraph of one year's text. Marks of one style never
+  // overlap: marking again what is already marked in that style takes the mark off.
+  const sameBlock=(m,a)=>m.anchor.unitId===a.unitId&&m.anchor.year===a.year&&m.anchor.block===a.block;
+  function covered(marks,a){let at=a.start;for(const m of marks.filter(m=>sameBlock(m,a)).sort((x,y)=>x.anchor.start-y.anchor.start)){if(m.anchor.start>at)break;at=Math.max(at,m.anchor.end);if(at>=a.end)return true;}return false;}
+  // Takes [a.start, a.end) out of the marks of the given styles, keeping what lies on either side.
+  function cut(s,a,styles){
+    const kept=[];
+    for(const m of s.marks){
+      if(!styles.includes(m.style)||!sameBlock(m,a)||m.anchor.end<=a.start||m.anchor.start>=a.end){kept.push(m);continue;}
+      if(m.anchor.start<a.start)kept.push({...m,id:base.id(),anchor:base.anchor(a.unitId,a.year,a.block,m.anchor.start,a.start)});
+      if(m.anchor.end>a.end)kept.push({...m,id:base.id(),anchor:base.anchor(a.unitId,a.year,a.block,a.end,m.anchor.end)});
+    }
+    s.marks=kept;
+  }
+  function markAnchors(anchors){const list=base.mergeAnchors(anchors).filter(a=>a.block!==null);if(!list.length)throw Error('请先在正文中选中要标记的字句。');return list;}
+  // Returns true when the marks were added, false when the selection was already marked and the marks came off.
+  function toggleMark(s,anchors,style){
+    if(!MARK_STYLES.includes(style))throw Error('标记样式无效。');
+    const list=markAnchors(anchors),own=s.marks.filter(m=>m.style===style),remove=list.every(a=>covered(own,a)),trial=copy(s);
+    for(const a of list){
+      cut(trial,a,[style]);if(remove)continue;
+      // Join with marks of the same style that touch the selection.
+      const touching=trial.marks.filter(m=>m.style===style&&sameBlock(m,a)&&(m.anchor.end===a.start||m.anchor.start===a.end));
+      const start=Math.min(a.start,...touching.map(m=>m.anchor.start)),end=Math.max(a.end,...touching.map(m=>m.anchor.end));
+      trial.marks=trial.marks.filter(m=>!touching.includes(m));
+      trial.marks.push({id:base.id(),style,anchor:base.anchor(a.unitId,a.year,a.block,start,end),createdAt:base.timestamp()});
+    }
+    validate(trial);s.marks=trial.marks;return !remove;
+  }
+  function clearMarks(s,anchors){const trial=copy(s),before=trial.marks.length;for(const a of markAnchors(anchors))cut(trial,a,MARK_STYLES);validate(trial);s.marks=trial.marks;return before!==trial.marks.length||JSON.stringify(trial.marks)!==JSON.stringify(s.marks);}
+  // The styles covering each stretch of a paragraph, for drawing: [{start,end,styles}].
+  function markedRanges(s,unitId,year,block){
+    const marks=s.marks.filter(m=>m.anchor.unitId===unitId&&m.anchor.year===year&&m.anchor.block===block);if(!marks.length)return [];
+    const cuts=[...new Set(marks.flatMap(m=>[m.anchor.start,m.anchor.end]))].sort((a,b)=>a-b),out=[];
+    for(let i=0;i<cuts.length-1;i++){const styles=MARK_STYLES.filter(st=>marks.some(m=>m.style===st&&m.anchor.start<=cuts[i]&&m.anchor.end>=cuts[i+1]));if(styles.length)out.push({start:cuts[i],end:cuts[i+1],styles});}
+    return out;
   }
   // A structured analysis stored on a note (法权分析 and other frameworks in frameworks/). Items are the
   // “权” found in the text; links join two items. The note text keeps the reader's prose, so exports
@@ -230,7 +275,12 @@ function createLearningModel(data) {
         s.materialRelations.push({...record,id:base.id(),conflictOf:record.id});result.conflicts++;
       }
     }
+    const markKey=m=>[m.style,base.anchorKey(m.anchor)].join('|');
+    for(const m of incoming.marks){
+      if(s.marks.some(x=>markKey(x)===markKey(m)))continue;
+      s.marks.push({...m,id:s.marks.some(x=>x.id===m.id)?base.id():m.id});result.added++;
+    }
     result.state=validate(s);return result;
   }
-  return {...base,validateAnalysis,relationType,normalize,validate,migrate,fresh,reconcileSnapshot,addNote,guideEntries,saveGuide,incorporateMaterial,validateScope,categories,addMaterialRelation,editMaterialRelation,acceptProposal,subtitle,setSubtitle,card,saveCard,rateCard,cloze,comparisonRows,merge};
+  return {MARK_STYLES,toggleMark,clearMarks,markedRanges,...base,validateAnalysis,relationType,normalize,validate,migrate,fresh,reconcileSnapshot,addNote,guideEntries,saveGuide,incorporateMaterial,validateScope,categories,addMaterialRelation,editMaterialRelation,acceptProposal,subtitle,setSubtitle,card,saveCard,rateCard,cloze,comparisonRows,merge};
 }

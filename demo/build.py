@@ -8,8 +8,10 @@ from edition import EDITION_FILE, CONTENT_CODEX, effective, load_codex, pack_nam
 from help_page import render_help
 
 root = Path(__file__).resolve().parent
-SCRIPTS = ['model.js', 'notebook.js', 'learning-model.js', 'app.js', 'workspace.js', 'learning.js',
-           'relations.js', 'readings.js', 'statutes.js', 'smart.js', 'storage.js', 'analysis.js']
+# marks.js, focus.js and settings.js come right after app.js: the first render (learning.js) may already
+# need them, for instance when the app reopens on 设置.
+SCRIPTS = ['model.js', 'notebook.js', 'learning-model.js', 'app.js', 'marks.js', 'focus.js', 'settings.js', 'local-files.js', 'workspace.js',
+           'learning.js', 'relations.js', 'readings.js', 'statutes.js', 'smart.js', 'storage.js', 'analysis.js']
 
 
 def load_data(name):
@@ -28,6 +30,20 @@ def load_data(name):
                       'page': page_name(other), 'webFolder': '' if other == CONTENT_CODEX else c.get('webFolder', other),
                       'aliases': c.get('citation', {}).get('aliases', [])} for other in pack_names()]
     return data
+
+
+def check_font(names):
+    """Characters of a data pack missing from the font subset show in the system serif (a heavier 宋体)."""
+    covered = root / 'src/fonts.chars'
+    if not covered.exists():
+        return
+    have = set(covered.read_text(encoding='utf-8'))
+    need = {c for name in names for path in (root / 'codes' / name).glob('*.json')
+            for c in path.read_text(encoding='utf-8') if '\u3400' <= c <= '\u9fff'}
+    missing = sorted(need - have)
+    if missing:
+        print(f'注意：字体子集缺少 {len(missing)} 个字（如 {"".join(missing[:12])}），这些字会显示为系统宋体。'
+              '请运行 build_font.py 重新生成 src/fonts.css。')
 
 
 def build_page(name):
@@ -55,11 +71,13 @@ def build_page(name):
 
 # Every data pack gets its own page (法典笔记.html for the default, 法典笔记-<名称>.html for the others);
 # FADIAN_CODEX=<名称> builds only that one.
-for name in [os.environ['FADIAN_CODEX']] if os.environ.get('FADIAN_CODEX') else pack_names():
+names = [os.environ['FADIAN_CODEX']] if os.environ.get('FADIAN_CODEX') else pack_names()
+check_font(names)
+for name in names:
     build_page(name)
 (root / '本地助手接入.html').write_text(render_help((root / '本地助手接入.md').read_text(encoding='utf-8')), encoding='utf-8')
 def entry(path, target):
-    path.write_text(f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url={target}"><title>打开法典笔记</title><style>body{{max-width:640px;margin:80px auto;padding:24px;background:#f6f4ee;color:#1f4a3d;font:18px/1.8 sans-serif}}a{{color:inherit}}</style><h1>法典笔记</h1><p><a href="{target}">点击进入个人法典笔记</a></p><p>如内置浏览器不支持直接打开本地文件，请双击 demo 文件夹中的「打开演示.command」，通过本机网址进入。</p></html>''', encoding='utf-8')
+    path.write_text(f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url={target}"><title>打开法典笔记</title><style>body{{max-width:640px;margin:80px auto;padding:24px;background:#faf8f0;color:#8b3652;font:18px/1.8 sans-serif}}a{{color:inherit}}</style><h1>法典笔记</h1><p><a href="{target}">点击进入个人法典笔记</a></p><p>如内置浏览器不支持直接打开本地文件，请双击 demo 文件夹中的「打开演示.command」，通过本机网址进入。</p></html>''', encoding='utf-8')
 entry(root / 'index.html', './法典笔记.html')
 entry(root / 'src/index.html', '../法典笔记.html')
 entry(root / 'src/template.html', '../法典笔记.html')
