@@ -1,0 +1,574 @@
+{
+  "id": "criminal-law",
+  "name": "刑法",
+  "about": "中华人民共和国刑法，由 make_pack.py 自 14_中华人民共和国刑法_现行全文_截至修正案十二.md 生成，文字待与原件核对。",
+  "years": [
+    1997,
+    1998,
+    1999,
+    2001,
+    2002,
+    2005,
+    2006,
+    2009,
+    2011,
+    2015,
+    2017,
+    2020,
+    2023
+  ],
+  "books": [
+    "user-criminal-law"
+  ],
+  "law": {
+    "name": "中华人民共和国刑法",
+    "short": "刑法",
+    "aliases": [],
+    "citation": {
+      "latest": "《中华人民共和国刑法》",
+      "original": "《中华人民共和国刑法》（{year} 年）",
+      "amended": "《中华人民共和国刑法》（{year} 年修正）",
+      "aliases": [
+        "中华人民共和国刑法",
+        "刑法"
+      ],
+      "note": "引用时注明文件全称、条款；引用以往文本时注明版本年份。"
+    }
+  },
+  "levels": {
+    "part": {
+      "name": "编",
+      "numbered": true
+    },
+    "chapter": {
+      "name": "章",
+      "numbered": true
+    },
+    "section": {
+      "name": "节",
+      "numbered": true
+    },
+    "plain": {
+      "name": "",
+      "numbered": false
+    }
+  },
+  "structure": [
+    {
+      "id": "xs-node-1",
+      "level": "part",
+      "name": "总则",
+      "title": "第一编　总则",
+      "from": "xs1",
+      "number": 1,
+      "children": [
+        {
+          "id": "xs-node-2",
+          "level": "chapter",
+          "name": "刑法的任务、基本原则和适用范围",
+          "title": "第一章　刑法的任务、基本原则和适用范围",
+          "from": "xs1",
+          "number": 1,
+          "to": "xs12"
+        },
+        {
+          "id": "xs-node-3",
+          "level": "chapter",
+          "name": "犯罪",
+          "title": "第二章　犯罪",
+          "from": "xs13",
+          "number": 2,
+          "children": [
+            {
+              "id": "xs-node-4",
+              "level": "section",
+              "name": "犯罪和刑事责任",
+              "title": "第一节　犯罪和刑事责任",
+              "from": "xs13",
+              "number": 1,
+              "to": "xs21"
+            },
+            {
+              "id": "xs-node-5",
+              "level": "section",
+              "name": "犯罪的预备、未遂和中止",
+              "title": "第二节　犯罪的预备、未遂和中止",
+              "from": "xs22",
+              "number": 2,
+              "to": "xs24"
+            },
+            {
+              "id": "xs-node-6",
+              "level": "section",
+              "name": "共同犯罪",
+              "title": "第三节　共同犯罪",
+              "from": "xs25",
+              "number": 3,
+              "to": "xs29"
+            },
+            {
+              "id": "xs-node-7",
+              "level": "section",
+              "name": "单位犯罪",
+              "title": "第四节　单位犯罪",
+              "from": "xs30",
+              "number": 4,
+              "to": "xs31"
+            }
+          ],
+          "to": "xs31"
+        },
+        {
+          "id": "xs-node-8",
+          "level": "chapter",
+          "name": "刑罚",
+          "title": "第三章　刑罚",
+          "from": "xs32",
+          "number": 3,
+          "children": [
+            {
+              "id": "xs-node-9",
+              "level": "section",
+              "name": "刑罚的种类",
+              "title": "第一节　刑罚的种类",
+              "from": "xs32",
+              "number": 1,
+              "to": "xs37-1"
+            },
+            {
+              "id": "xs-node-10",
+              "level": "section",
+              "name": "管制",
+              "title": "第二节　管制",
+              "from": "xs38",
+              "number": 2,
+              "to": "xs41"
+            },
+            {
+              "id": "xs-node-11",
+              "level": "section",
+              "name": "拘役",
+              "title": "第三节　拘役",
+              "from": "xs42",
+              "number": 3,
+              "to": "xs44"
+            },
+            {
+              "id": "xs-node-12",
+              "level": "section",
+              "name": "有期徒刑、无期徒刑",
+              "title": "第四节　有期徒刑、无期徒刑",
+              "from": "xs45",
+              "number": 4,
+              "to": "xs47"
+            },
+            {
+              "id": "xs-node-13",
+              "level": "section",
+              "name": "死刑",
+              "title": "第五节　死刑",
+              "from": "xs48",
+              "number": 5,
+              "to": "xs51"
+            },
+            {
+              "id": "xs-node-14",
+              "level": "section",
+              "name": "罚金",
+              "title": "第六节　罚金",
+              "from": "xs52",
+              "number": 6,
+              "to": "xs53"
+            },
+            {
+              "id": "xs-node-15",
+              "level": "section",
+              "name": "剥夺政治权利",
+              "title": "第七节　剥夺政治权利",
+              "from": "xs54",
+              "number": 7,
+              "to": "xs58"
+            },
+            {
+              "id": "xs-node-16",
+              "level": "section",
+              "name": "没收财产",
+              "title": "第八节　没收财产",
+              "from": "xs59",
+              "number": 8,
+              "to": "xs60"
+            }
+          ],
+          "to": "xs60"
+        },
+        {
+          "id": "xs-node-17",
+          "level": "chapter",
+          "name": "刑罚的具体运用",
+          "title": "第四章　刑罚的具体运用",
+          "from": "xs61",
+          "number": 4,
+          "children": [
+            {
+              "id": "xs-node-18",
+              "level": "section",
+              "name": "量刑",
+              "title": "第一节　量刑",
+              "from": "xs61",
+              "number": 1,
+              "to": "xs64"
+            },
+            {
+              "id": "xs-node-19",
+              "level": "section",
+              "name": "累犯",
+              "title": "第二节　累犯",
+              "from": "xs65",
+              "number": 2,
+              "to": "xs66"
+            },
+            {
+              "id": "xs-node-20",
+              "level": "section",
+              "name": "自首和立功",
+              "title": "第三节　自首和立功",
+              "from": "xs67",
+              "number": 3,
+              "to": "xs68"
+            },
+            {
+              "id": "xs-node-21",
+              "level": "section",
+              "name": "数罪并罚",
+              "title": "第四节　数罪并罚",
+              "from": "xs69",
+              "number": 4,
+              "to": "xs71"
+            },
+            {
+              "id": "xs-node-22",
+              "level": "section",
+              "name": "缓刑",
+              "title": "第五节　缓刑",
+              "from": "xs72",
+              "number": 5,
+              "to": "xs77"
+            },
+            {
+              "id": "xs-node-23",
+              "level": "section",
+              "name": "减刑",
+              "title": "第六节　减刑",
+              "from": "xs78",
+              "number": 6,
+              "to": "xs80"
+            },
+            {
+              "id": "xs-node-24",
+              "level": "section",
+              "name": "假释",
+              "title": "第七节　假释",
+              "from": "xs81",
+              "number": 7,
+              "to": "xs86"
+            },
+            {
+              "id": "xs-node-25",
+              "level": "section",
+              "name": "时效",
+              "title": "第八节　时效",
+              "from": "xs87",
+              "number": 8,
+              "to": "xs89"
+            }
+          ],
+          "to": "xs89"
+        },
+        {
+          "id": "xs-node-26",
+          "level": "chapter",
+          "name": "其他规定",
+          "title": "第五章　其他规定",
+          "from": "xs90",
+          "number": 5,
+          "to": "xs101"
+        }
+      ],
+      "to": "xs101"
+    },
+    {
+      "id": "xs-node-27",
+      "level": "part",
+      "name": "分则",
+      "title": "第二编　分则",
+      "from": "xs102",
+      "number": 2,
+      "children": [
+        {
+          "id": "xs-node-28",
+          "level": "chapter",
+          "name": "危害国家安全罪",
+          "title": "第一章　危害国家安全罪",
+          "from": "xs102",
+          "number": 1,
+          "to": "xs113"
+        },
+        {
+          "id": "xs-node-29",
+          "level": "chapter",
+          "name": "危害公共安全罪",
+          "title": "第二章　危害公共安全罪",
+          "from": "xs114",
+          "number": 2,
+          "to": "xs139-1"
+        },
+        {
+          "id": "xs-node-30",
+          "level": "chapter",
+          "name": "破坏社会主义市场经济秩序罪",
+          "title": "第三章　破坏社会主义市场经济秩序罪",
+          "from": "xs140",
+          "number": 3,
+          "children": [
+            {
+              "id": "xs-node-31",
+              "level": "section",
+              "name": "生产、销售伪劣商品罪",
+              "title": "第一节　生产、销售伪劣商品罪",
+              "from": "xs140",
+              "number": 1,
+              "to": "xs150"
+            },
+            {
+              "id": "xs-node-32",
+              "level": "section",
+              "name": "走私罪",
+              "title": "第二节　走私罪",
+              "from": "xs151",
+              "number": 2,
+              "to": "xs157"
+            },
+            {
+              "id": "xs-node-33",
+              "level": "section",
+              "name": "妨害对公司、企业的管理秩序罪",
+              "title": "第三节　妨害对公司、企业的管理秩序罪",
+              "from": "xs158",
+              "number": 3,
+              "to": "xs169-1"
+            },
+            {
+              "id": "xs-node-34",
+              "level": "section",
+              "name": "破坏金融管理秩序罪",
+              "title": "第四节　破坏金融管理秩序罪",
+              "from": "xs170",
+              "number": 4,
+              "to": "xs191"
+            },
+            {
+              "id": "xs-node-35",
+              "level": "section",
+              "name": "金融诈骗罪",
+              "title": "第五节　金融诈骗罪",
+              "from": "xs192",
+              "number": 5,
+              "to": "xs200"
+            },
+            {
+              "id": "xs-node-36",
+              "level": "section",
+              "name": "危害税收征管罪",
+              "title": "第六节　危害税收征管罪",
+              "from": "xs201",
+              "number": 6,
+              "to": "xs212"
+            },
+            {
+              "id": "xs-node-37",
+              "level": "section",
+              "name": "侵犯知识产权罪",
+              "title": "第七节　侵犯知识产权罪",
+              "from": "xs213",
+              "number": 7,
+              "to": "xs220"
+            },
+            {
+              "id": "xs-node-38",
+              "level": "section",
+              "name": "扰乱市场秩序罪",
+              "title": "第八节　扰乱市场秩序罪",
+              "from": "xs221",
+              "number": 8,
+              "to": "xs231"
+            }
+          ],
+          "to": "xs231"
+        },
+        {
+          "id": "xs-node-39",
+          "level": "chapter",
+          "name": "侵犯公民人身权利、民主权利罪",
+          "title": "第四章　侵犯公民人身权利、民主权利罪",
+          "from": "xs232",
+          "number": 4,
+          "to": "xs262-2"
+        },
+        {
+          "id": "xs-node-40",
+          "level": "chapter",
+          "name": "侵犯财产罪",
+          "title": "第五章　侵犯财产罪",
+          "from": "xs263",
+          "number": 5,
+          "to": "xs276-1"
+        },
+        {
+          "id": "xs-node-41",
+          "level": "chapter",
+          "name": "妨害社会管理秩序罪",
+          "title": "第六章　妨害社会管理秩序罪",
+          "from": "xs277",
+          "number": 6,
+          "children": [
+            {
+              "id": "xs-node-42",
+              "level": "section",
+              "name": "扰乱公共秩序罪",
+              "title": "第一节　扰乱公共秩序罪",
+              "from": "xs277",
+              "number": 1,
+              "to": "xs304"
+            },
+            {
+              "id": "xs-node-43",
+              "level": "section",
+              "name": "妨害司法罪",
+              "title": "第二节　妨害司法罪",
+              "from": "xs305",
+              "number": 2,
+              "to": "xs317"
+            },
+            {
+              "id": "xs-node-44",
+              "level": "section",
+              "name": "妨害国（边）境管理罪",
+              "title": "第三节　妨害国（边）境管理罪",
+              "from": "xs318",
+              "number": 3,
+              "to": "xs323"
+            },
+            {
+              "id": "xs-node-45",
+              "level": "section",
+              "name": "妨害文物管理罪",
+              "title": "第四节　妨害文物管理罪",
+              "from": "xs324",
+              "number": 4,
+              "to": "xs329"
+            },
+            {
+              "id": "xs-node-46",
+              "level": "section",
+              "name": "危害公共卫生罪",
+              "title": "第五节　危害公共卫生罪",
+              "from": "xs330",
+              "number": 5,
+              "to": "xs337"
+            },
+            {
+              "id": "xs-node-47",
+              "level": "section",
+              "name": "破坏环境资源保护罪",
+              "title": "第六节　破坏环境资源保护罪",
+              "from": "xs338",
+              "number": 6,
+              "to": "xs346"
+            },
+            {
+              "id": "xs-node-48",
+              "level": "section",
+              "name": "走私、贩卖、运输、制造毒品罪",
+              "title": "第七节　走私、贩卖、运输、制造毒品罪",
+              "from": "xs347",
+              "number": 7,
+              "to": "xs357"
+            },
+            {
+              "id": "xs-node-49",
+              "level": "section",
+              "name": "组织、强迫、引诱、容留、介绍卖淫罪",
+              "title": "第八节　组织、强迫、引诱、容留、介绍卖淫罪",
+              "from": "xs358",
+              "number": 8,
+              "to": "xs362"
+            },
+            {
+              "id": "xs-node-50",
+              "level": "section",
+              "name": "制作、贩卖、传播淫秽物品罪",
+              "title": "第九节　制作、贩卖、传播淫秽物品罪",
+              "from": "xs363",
+              "number": 9,
+              "to": "xs367"
+            }
+          ],
+          "to": "xs367"
+        },
+        {
+          "id": "xs-node-51",
+          "level": "chapter",
+          "name": "危害国防利益罪",
+          "title": "第七章　危害国防利益罪",
+          "from": "xs368",
+          "number": 7,
+          "to": "xs381"
+        },
+        {
+          "id": "xs-node-52",
+          "level": "chapter",
+          "name": "贪污贿赂罪",
+          "title": "第八章　贪污贿赂罪",
+          "from": "xs382",
+          "number": 8,
+          "to": "xs396"
+        },
+        {
+          "id": "xs-node-53",
+          "level": "chapter",
+          "name": "渎职罪",
+          "title": "第九章　渎职罪",
+          "from": "xs397",
+          "number": 9,
+          "to": "xs419"
+        },
+        {
+          "id": "xs-node-54",
+          "level": "chapter",
+          "name": "军人违反职责罪",
+          "title": "第十章　军人违反职责罪",
+          "from": "xs420",
+          "number": 10,
+          "to": "xs451"
+        }
+      ],
+      "to": "xs451"
+    },
+    {
+      "id": "xs-node-55",
+      "level": "plain",
+      "name": "附　　则",
+      "title": "附　　则",
+      "from": "xs452",
+      "to": "xs452"
+    },
+    {
+      "id": "xs-appendix",
+      "level": "plain",
+      "name": "附件",
+      "title": "附件",
+      "from": "xs-fj1",
+      "to": "xs-fj2"
+    }
+  ]
+}

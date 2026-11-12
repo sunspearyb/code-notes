@@ -40,6 +40,9 @@ def charset():
     # Every data pack under codes/ (law text, 条旨, guide, structure, official materials), never personal notes.
     for path in sorted((root / 'codes').glob('*/*.json')):
         text.extend(strings(json.loads(path.read_text(encoding='utf-8'))))
+    # Wording of the study games (games/<id>.json: card names and questions).
+    for path in sorted((root / 'games').glob('*.json')):
+        text.extend(strings(json.loads(path.read_text(encoding='utf-8'))))
     for path in sorted((root / 'src').glob('*.js')):
         text.extend(re.findall(r'[　-〿㐀-鿿＀-￯]+', path.read_text(encoding='utf-8')))
     text.append(''.join(chr(c) for c in range(0x20, 0x7f)))

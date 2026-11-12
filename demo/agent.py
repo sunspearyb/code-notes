@@ -18,6 +18,8 @@ def main():
     for name in ['status', 'catalogue', 'book', 'files']:
         commands.add_parser(name)
     commands.add_parser('read').add_argument('unitId')
+    for name in ['article', 'context', 'history', 'materials', 'notes']:  # one question per method; 条文如“第三十三条”
+        commands.add_parser(name).add_argument('ref')
     commands.add_parser('file').add_argument('id')
     commands.add_parser('search').add_argument('query')
     commands.add_parser('upload').add_argument('path')
@@ -50,7 +52,7 @@ def main():
             body = {'action': args.action}
             if args.year is not None:
                 body['year'] = args.year
-            for key in ['unitId', 'id', 'query']:
+            for key in ['unitId', 'id', 'query', 'ref']:
                 if hasattr(args, key):
                     body[key] = getattr(args, key)
             if args.action == 'upload':

@@ -19,7 +19,7 @@ import zipfile
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from xml.etree import ElementTree
-from edition import EDITION, CODEX, CODEX_NAME
+from edition import EDITION, EDITION_FILE, CODEX, CODEX_NAME
 
 MAX_FILE = 16 * 1024 * 1024
 MAX_BODY = 36 * 1024 * 1024
@@ -161,6 +161,8 @@ class LocalService:
     def __init__(self, project, data_dir=None, transport=request_json, export_dir=None):
         self.project = Path(project)
         self.home = Path(data_dir) if data_dir else self.project / EDITION['dataDirectory']
+        # Shared by the services of all codes; a test's own data folder keeps to itself.
+        self.shared_home = None if data_dir else self.project / EDITION_FILE['dataDirectory']
         self.files = self.home / 'attachments'
         self.files.mkdir(parents=True, exist_ok=True)
         self.lock = threading.RLock()
@@ -175,6 +177,11 @@ class LocalService:
             'searchHours': 0, 'backupMinutes': 0, 'backupDirectory': '', 'autoAnalyze': False})
         self.config.setdefault('autoAnalyzeUploads', False)
         self.config.setdefault('agentEnabled', False)
+        # What assistants may do with this code: 'vault' (nothing; the default), 'read' (law text, and
+        # the reader's notes only with aiReadNotes) or 'collab' (also submit suggestions for review).
+        # agentEnabled, the earlier on/off switch, is kept in step: on means read or collab.
+        self.config.setdefault('aiAccess', 'collab' if self.config['agentEnabled'] else 'vault')
+        self.config.setdefault('aiReadNotes', bool(self.config['agentEnabled']))
         self.index = read_json(self.home / 'attachments.json', [])
         self.proposals = read_json(self.home / 'proposals.json', [])
         self.snapshot = read_json(self.home / 'notebook.json', {'revision': 0, 'state': None})
@@ -199,6 +206,26 @@ class LocalService:
         self.last_backup_tick = time.time()
         self.stop_event = threading.Event()
 
+    # How the app looks and behaves on this computer (appearance, text size, the tarot switch…): one file
+    # for all codes, because each code's page has its own browser storage.
+    DEVICE_KEYS = {'appearance': str, 'lawScale': (int, float), 'focusLarger': bool, 'continuous': bool, 'tarot': bool}
+
+    def device_file(self):
+        return (self.home if self.shared_home is None else self.shared_home) / 'device-settings.json'
+
+    def device_settings(self):
+        try:
+            return read_json(self.device_file(), {})
+        except (OSError, ValueError):
+            return {}
+
+    def save_device_settings(self, values):
+        clean = {k: v for k, v in values.items() if k in self.DEVICE_KEYS and isinstance(v, self.DEVICE_KEYS[k]) and (not isinstance(v, str) or len(v) <= 40)}
+        with self.lock:
+            merged = {**self.device_settings(), **clean}
+            write_json(self.device_file(), merged)
+        return merged
+
     def status(self):
         with self.lock:
             return {'config': copy.deepcopy(self.config), 'aiConnected': bool(self.keys['ai']),
@@ -213,6 +240,11 @@ class LocalService:
     def settings(self, values):
         allowed = set(self.config)
         candidate = {**self.config, **{k: v for k, v in values.items() if k in allowed}}
+        if 'agentEnabled' in values and 'aiAccess' not in values and isinstance(values['agentEnabled'], bool):
+            candidate.update(aiAccess='collab' if values['agentEnabled'] else 'vault', aiReadNotes=values['agentEnabled'])
+        if candidate['aiAccess'] not in ('vault', 'read', 'collab') or not isinstance(candidate['aiReadNotes'], bool):
+            raise ServiceError('助手权限设置无效。')
+        candidate['agentEnabled'] = candidate['aiAccess'] != 'vault'
         for field in ('baseUrl', 'searchUrl', 'query', 'model', 'backupDirectory'):
             if not isinstance(candidate[field], str) or len(candidate[field]) > 2000:
                 raise ServiceError('设置内容无效。')

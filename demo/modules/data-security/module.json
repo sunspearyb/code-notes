@@ -1,0 +1,108 @@
+{
+  "id": "data-security",
+  "name": "数据安全法",
+  "about": "中华人民共和国数据安全法，取自国家法律法规数据库；来源和核对方法见 codes/cyber-law/来源.md。",
+  "years": [
+    2021
+  ],
+  "books": [
+    "cn-cyber-law"
+  ],
+  "law": {
+    "name": "中华人民共和国数据安全法",
+    "short": "数据安全法",
+    "aliases": [
+      "数安法"
+    ],
+    "citation": {
+      "latest": "《中华人民共和国数据安全法》",
+      "original": "《中华人民共和国数据安全法》（{year} 年）",
+      "amended": "《中华人民共和国数据安全法》（{year} 年修正）",
+      "aliases": [
+        "中华人民共和国数据安全法",
+        "数据安全法",
+        "数安法"
+      ],
+      "note": "引用时注明法律全称、条款；引用以往文本时注明版本年份。",
+      "byYear": {
+        "2021": "《中华人民共和国数据安全法》",
+        "2025": "《中华人民共和国数据安全法》"
+      }
+    }
+  },
+  "levels": {
+    "chapter": {
+      "name": "章",
+      "numbered": true
+    },
+    "section": {
+      "name": "节",
+      "numbered": true
+    }
+  },
+  "structure": [
+    {
+      "id": "ds-node-1",
+      "level": "chapter",
+      "name": "总　　则",
+      "title": "第一章　总　　则",
+      "from": "ds1",
+      "number": 1,
+      "to": "ds12"
+    },
+    {
+      "id": "ds-node-2",
+      "level": "chapter",
+      "name": "数据安全与发展",
+      "title": "第二章　数据安全与发展",
+      "from": "ds13",
+      "number": 2,
+      "to": "ds20"
+    },
+    {
+      "id": "ds-node-3",
+      "level": "chapter",
+      "name": "数据安全制度",
+      "title": "第三章　数据安全制度",
+      "from": "ds21",
+      "number": 3,
+      "to": "ds26"
+    },
+    {
+      "id": "ds-node-4",
+      "level": "chapter",
+      "name": "数据安全保护义务",
+      "title": "第四章　数据安全保护义务",
+      "from": "ds27",
+      "number": 4,
+      "to": "ds36"
+    },
+    {
+      "id": "ds-node-5",
+      "level": "chapter",
+      "name": "政务数据安全与开放",
+      "title": "第五章　政务数据安全与开放",
+      "from": "ds37",
+      "number": 5,
+      "to": "ds43"
+    },
+    {
+      "id": "ds-node-6",
+      "level": "chapter",
+      "name": "法律责任",
+      "title": "第六章　法律责任",
+      "from": "ds44",
+      "number": 6,
+      "to": "ds52"
+    },
+    {
+      "id": "ds-node-7",
+      "level": "chapter",
+      "name": "附　　则",
+      "title": "第七章　附　　则",
+      "from": "ds53",
+      "number": 7,
+      "to": "ds55"
+    }
+  ]
+}

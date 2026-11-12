@@ -1,0 +1,130 @@
+{
+  "id": "cybersecurity",
+  "name": "网络安全法",
+  "about": "中华人民共和国网络安全法，取自国家法律法规数据库；来源和核对方法见 codes/cyber-law/来源.md。",
+  "years": [
+    2016,
+    2025
+  ],
+  "books": [
+    "cn-cyber-law"
+  ],
+  "law": {
+    "name": "中华人民共和国网络安全法",
+    "short": "网络安全法",
+    "aliases": [
+      "网安法"
+    ],
+    "citation": {
+      "latest": "《中华人民共和国网络安全法》",
+      "original": "《中华人民共和国网络安全法》（{year} 年）",
+      "amended": "《中华人民共和国网络安全法》（{year} 年修正）",
+      "aliases": [
+        "中华人民共和国网络安全法",
+        "网络安全法",
+        "网安法"
+      ],
+      "note": "引用时注明法律全称、条款；引用以往文本时注明版本年份。",
+      "byYear": {
+        "2016": "《中华人民共和国网络安全法》（2016 年）",
+        "2021": "《中华人民共和国网络安全法》（2016 年）",
+        "2025": "《中华人民共和国网络安全法》"
+      }
+    }
+  },
+  "levels": {
+    "chapter": {
+      "name": "章",
+      "numbered": true
+    },
+    "section": {
+      "name": "节",
+      "numbered": true
+    }
+  },
+  "structure": [
+    {
+      "id": "cs-node-1",
+      "level": "chapter",
+      "name": "总　　则",
+      "title": "第一章　总　　则",
+      "from": "cs1",
+      "number": 1,
+      "to": "cs15"
+    },
+    {
+      "id": "cs-node-2",
+      "level": "chapter",
+      "name": "网络安全支持与促进",
+      "title": "第二章　网络安全支持与促进",
+      "from": "cs16",
+      "number": 2,
+      "to": "cs22"
+    },
+    {
+      "id": "cs-node-3",
+      "level": "chapter",
+      "name": "网络运行安全",
+      "title": "第三章　网络运行安全",
+      "from": "cs23",
+      "number": 3,
+      "children": [
+        {
+          "id": "cs-node-4",
+          "level": "section",
+          "name": "一般规定",
+          "title": "第一节　一般规定",
+          "from": "cs23",
+          "number": 1,
+          "to": "cs32"
+        },
+        {
+          "id": "cs-node-5",
+          "level": "section",
+          "name": "关键信息基础设施的运行安全",
+          "title": "第二节　关键信息基础设施的运行安全",
+          "from": "cs33",
+          "number": 2,
+          "to": "cs41"
+        }
+      ],
+      "to": "cs41"
+    },
+    {
+      "id": "cs-node-6",
+      "level": "chapter",
+      "name": "网络信息安全",
+      "title": "第四章　网络信息安全",
+      "from": "cs42",
+      "number": 4,
+      "to": "cs52"
+    },
+    {
+      "id": "cs-node-7",
+      "level": "chapter",
+      "name": "监测预警与应急处置",
+      "title": "第五章　监测预警与应急处置",
+      "from": "cs53",
+      "number": 5,
+      "to": "cs60"
+    },
+    {
+      "id": "cs-node-8",
+      "level": "chapter",
+      "name": "法律责任",
+      "title": "第六章　法律责任",
+      "from": "cs61",
+      "number": 6,
+      "to": "cs77"
+    },
+    {
+      "id": "cs-node-9",
+      "level": "chapter",
+      "name": "附　　则",
+      "title": "第七章　附　　则",
+      "from": "cs78",
+      "number": 7,
+      "to": "cs81"
+    }
+  ]
+}

@@ -17,6 +17,7 @@ import sys
 sys.dont_write_bytecode = True
 from local_service import LocalService, ServiceError, MAX_BODY
 from agent_bridge import handle as handle_agent
+from cross_code import handle as handle_cross
 from edition import EDITION, CODEX_NAME, page_name
 
 ROOT = Path(__file__).resolve().parent
@@ -60,7 +61,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             service = self.server.service
             routes = {'/api/status': service.status, '/api/snapshot': service.current_snapshot, '/api/conflicts': service.conflict_copies,
                       '/api/attachments': lambda: service.index, '/api/proposals': lambda: service.proposals,
-                      '/api/backups': service.backups}
+                      '/api/backups': service.backups, '/api/device-settings': service.device_settings}
             if self.path in routes:
                 return self.send_json(routes[self.path]())
             if self.path.startswith('/api/file/'):
@@ -101,6 +102,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                       '/api/conflict-done': lambda: service.conflict_done(body.get('name')),
                       '/api/file-delete': lambda: service.remove_file(str(body.get('id', '')))}
             routes['/api/agent'] = lambda: handle_agent(service, body)
+            routes['/api/cross'] = lambda: handle_cross(service, body)
+            routes['/api/device-settings'] = lambda: service.save_device_settings(body)
             if self.path not in routes:
                 raise ServiceError('接口不存在。', 404)
             self.send_json(routes[self.path]())

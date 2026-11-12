@@ -1174,15 +1174,17 @@ function buildNet(o={}){
   NET={nodes,links,maxStep,words,CEN};
 }
 function weave(t,t0,o={}){
+  // Behind a cover or an opener (__bg) the tree grows without its words.
+  const wt=window.__bg?()=>{}:text;
   if(!NET)buildNet(o);
   const V=TEXT.weave||{},fields=V.fields||[],tone=[JADE,SKY,CORAL],toneRGB=['79,209,176','125,183,245','255,138,101'];
   const gs=t0+(o.gs??2.2),growEnd=t0+(o.growEnd??16),g1=clamp((t-gs)/(growEnd-gs)),shown=Math.floor(Math.pow(g1,1.15)*NET.nodes.length);
   const N=NET.nodes,maxY=o.root?o.root[1]:H-150,minY=o.minY??60,TG=o.titleGap||(PORTRAIT?230:260),TY=o.titleY??(PORTRAIT?130:84);
   (V.title||'').split(' · ').forEach((w,k,all)=>{const x=W/2+(k-(all.length-1)/2)*TG;
-    text(w,x,TY,{size:o.titleSize||48,weight:o.titleWeight||400,align:'center',alpha:step(t,growEnd+3.6+k*.9,1),spacing:6});
-    if(k<all.length-1)text('·',x+TG/2,TY,{size:40,align:'center',color:GOLD,alpha:step(t,growEnd+4+k*.9,.8)});});
+    wt(w,x,TY,{size:o.titleSize||48,weight:o.titleWeight||400,align:'center',alpha:step(t,growEnd+3.6+k*.9,1),spacing:6});
+    if(k<all.length-1)wt('·',x+TG/2,TY,{size:40,align:'center',color:GOLD,alpha:step(t,growEnd+4+k*.9,.8)});});
   const fieldAt=o.fieldAt!=null?t0+o.fieldAt:growEnd+.6;
-  fields.forEach(([name],f)=>text(name,o.fieldX?o.fieldX[f]:NET.CEN[f][0],o.fieldY?o.fieldY(f):PORTRAIT?NET.CEN[f][1]-(f===1?360:420):160,{size:o.fieldSize||30,weight:o.fieldSize?600:400,align:'center',color:tone[f],alpha:step(t,fieldAt+f*.9,1),spacing:2}));
+  fields.forEach(([name],f)=>wt(name,o.fieldX?o.fieldX[f]:NET.CEN[f][0],o.fieldY?o.fieldY(f):PORTRAIT?NET.CEN[f][1]-(f===1?360:420):160,{size:o.fieldSize||30,weight:o.fieldSize?600:400,align:'center',color:tone[f],alpha:step(t,fieldAt+f*.9,1),spacing:2}));
   // Branches.
   g.save();g.lineCap='round';
   for(let k=1;k<Math.min(shown,N.length);k++){
@@ -1236,13 +1238,13 @@ function weave(t,t0,o={}){
     const sx=w.x-measure(w.text,WS,SANS)/2-16,sy=w.y-8,r=7*tw*WS/22;
     g.globalAlpha=a*tw;g.fillStyle=PAPER;g.beginPath();g.moveTo(sx,sy-r);g.lineTo(sx+1.6,sy-1.6);g.lineTo(sx+r,sy);g.lineTo(sx+1.6,sy+1.6);g.lineTo(sx,sy+r);g.lineTo(sx-1.6,sy+1.6);g.lineTo(sx-r,sy);g.lineTo(sx-1.6,sy-1.6);g.fill();
     g.restore();
-    text(w.text,w.x,w.y,{size:WS,font:SANS,weight:o.wordSize?600:400,align:'center',color:PAPER,alpha:a*(.75+.25*tw)});
+    wt(w.text,w.x,w.y,{size:WS,font:SANS,weight:o.wordSize?600:400,align:'center',color:PAPER,alpha:a*(.75+.25*tw)});
   });
   // The seed: a note, glowing, before anything grows.
   const sa=step(t,t0+.3,1.2),sx=W/2,sy=o.seedY??H-118;
   if(sa>0){const gr=g.createRadialGradient(sx,sy-10,0,sx,sy-10,90);gr.addColorStop(0,'rgba(242,181,68,'+(.35*sa*(.8+.2*Math.sin(t*2)))+')');gr.addColorStop(1,'rgba(242,181,68,0)');
     g.save();g.fillStyle=gr;g.beginPath();g.arc(sx,sy-10,90,0,Math.PI*2);g.fill();g.restore();}
-  text(V.seed,sx,sy+40,{size:o.seedSize||30,weight:o.seedSize?600:400,align:'center',color:GOLD,alpha:sa,spacing:4});
+  wt(V.seed,sx,sy+40,{size:o.seedSize||30,weight:o.seedSize?600:400,align:'center',color:GOLD,alpha:sa,spacing:4});
 }
 
 
@@ -1687,12 +1689,13 @@ function vLines(lines,x,y,t,start,o={}){
 }
 // Heading of a scene: a question or a name in heavy type, and a line under it.
 function vHeader(title,t,t0,{sub='',subColor=GOLD,keys=[],size=80,alpha=1,y=VS.head}={}){
+  if(window.__bg)return;
   if(title)vLine(title,W/2,y,t,t0,{size:fitSize(title,size,VS.w,SERIF,BLACK),weight:BLACK,per:.035,keys,alpha});
   if(sub)vLine(sub,W/2,y+78,t,t0+.25,{size:fitSize(sub,36,VS.w,SANS,500),font:SANS,weight:500,color:subColor,per:.018,alpha});
 }
 // Caption: one or two lines in the caption band, set like subtitles; a string is wrapped.
 function vCaption(lines,t,start,stop=1e9,{keys=[],size=54,y=VS.cap,color=PAPER,per=.03}={}){
-  if(t<start-.01)return;const a=1-step(t,stop-.3,.3);if(a<=0)return;
+  if(window.__bg||t<start-.01)return;const a=1-step(t,stop-.3,.3);if(a<=0)return;
   // A string a little too long for one line is set smaller rather than leaving a word alone on the second.
   const L=Array.isArray(lines)?lines:mw(lines,size,SANS,600)<=VS.w*1.22?[lines]:vWrap(lines,VS.w,size,SANS,600,keys.map(k=>k[0]));
   let at=start;
@@ -1700,6 +1703,7 @@ function vCaption(lines,t,start,stop=1e9,{keys=[],size=54,y=VS.cap,color=PAPER,p
     vLine(s,W/2,y+i*size*1.42,t,at,{size:sz,font:SANS,weight:600,color,keys:keys.filter(k=>s.includes(k[0])),per,alpha:a});at+=[...s].length*per;});
 }
 function vNote(s,t,start,{y=VS.note,size=28,alpha=1}={}){
+  if(window.__bg)return;
   vWrap(s,VS.w,size,SANS).forEach((l,i)=>text(l,W/2,y+i*size*1.5,{size,font:SANS,align:'center',color:'rgba(247,243,232,.55)',alpha:step(t,start,.6)*alpha}));
 }
 function vChip(name,cx,y,{alpha=1,size=40,color,dashed=false}={}){const w=measure(name,size,SANS)+size*1.4;chip(name,cx-w/2,y,{alpha,size,color:color||METHOD[name]||GOLD,dashed});return w;}
@@ -1741,6 +1745,64 @@ function vHook(t,t0){
   if(K.sub)vLine(K.sub,W/2,K.tag?1170:1040,t,at+.9,{size:fitSize(K.sub,46,VS.w,SANS,500),font:SANS,weight:500,color:DIM,per:.03});
 }
 
+
+// ---------- 短片 opener: the question, sharp from the first frame, over the best moment of the clip ----------
+// TEXT.chook: {lines, keys, tag, bg: [scene, second]}; the scene plays on behind, darkened, without its words.
+function vClipHook(t,t0){
+  const K=TEXT.chook||{},u=t-t0,fn=SCENE_FUNCTIONS[K.bg?.[0]];
+  if(fn){const k=1.1-.025*u;window.__bg=true;g.save();g.translate(W/2,H/2);g.scale(k,k);g.translate(-W/2,-H/2);
+    try{fn(t,t-(K.bg[1]+u));}finally{window.__bg=false;g.restore();}
+    const veil=g.createRadialGradient(W/2,H/2,200,W/2,H/2,1100);veil.addColorStop(0,'rgba(8,22,24,.5)');veil.addColorStop(1,'rgba(8,22,24,.78)');
+    g.save();g.fillStyle=veil;g.fillRect(0,0,W,H);g.restore();}
+  const lines=K.lines||[],size=Math.min(...lines.map(l=>fitSize(l,K.size||118,VS.w,SERIF,BLACK))),lh=size*1.32,y0=(K.y||900)-(lines.length-1)*lh/2;
+  const by=y0+(lines.length-1)*lh;
+  // A soft dark band behind the words, so the picture stays alive but never competes with them.
+  if(fn){const top=y0-size*1.6,bot=by+300,band=g.createLinearGradient(0,top,0,bot);
+    band.addColorStop(0,'rgba(6,18,20,0)');band.addColorStop(.25,'rgba(6,18,20,.72)');band.addColorStop(.75,'rgba(6,18,20,.72)');band.addColorStop(1,'rgba(6,18,20,0)');
+    g.save();g.fillStyle=band;g.fillRect(0,top,W,bot-top);g.restore();}
+  lines.forEach((l,i)=>vBlock(l,W/2,y0+i*lh,1e5,t,t0-9,{size,weight:BLACK,align:'center',keys:(K.keys||[]).filter(k=>l.includes(k[0])),keyAt:t0+.3+i*.25}));
+  if(K.tag)vChip(K.tag,W/2,by+130,{alpha:step(u,.45,.3),size:44,color:K.tagColor?TONE[K.tagColor]:undefined});
+  text('法典笔记',W/2,by+250,{size:36,font:SANS,weight:600,align:'center',color:DIM,alpha:step(u,.7,.3),spacing:12});
+}
+
+
+// ---------- 短片 opener in the words of a meme (A2): TEXT.cmeme ----------
+// The first line is there from the first frame; 不可以 lands hard (big to size, a short shake); the
+// answer comes in slowly, character by character; then two red strokes strike out one word, in turn.
+function vMeme(t,t0){
+  const M=TEXT.cmeme||{},u=t-t0,fn=SCENE_FUNCTIONS[M.bg?.[0]];
+  if(fn){window.__bg=true;g.save();const k=1.08-.012*u;g.translate(W/2,H/2);g.scale(k,k);g.translate(-W/2,-H/2);
+    try{fn(t,t-(M.bg[1]+u));}finally{window.__bg=false;g.restore();}
+    g.save();g.fillStyle='rgba(8,20,22,.74)';g.fillRect(0,0,W,H);g.restore();}
+  const [l1,l2,l3]=M.lines||[],slam=M.slam??1.1,slow=M.slow??2.3,strikes=M.strikes||[5.3,5.9];
+  // Shake of the whole frame for a moment after 不可以 lands.
+  const sh=u>slam+.18&&u<slam+.5?(1-(u-slam-.18)/.32)*10:0;
+  g.save();g.translate(Math.sin(u*90)*sh,Math.cos(u*70)*sh*.6);
+  const s1=fitSize(l1.text,l1.size,VS.w,SERIF,BLACK);
+  vBlock(l1.text,W/2,l1.y,1e5,t,t0-9,{size:s1,weight:BLACK,align:'center'});
+  // 不可以: from twice the size and transparent to its size in a quarter second.
+  const p=clamp((u-slam)/.24);
+  if(p>0){const s2=fitSize(l2.text,l2.size,VS.w,SERIF,BLACK),k=1+1.3*(1-ease(p));
+    g.save();g.translate(W/2,l2.y-s2*.35);g.scale(k,k);g.translate(-W/2,-(l2.y-s2*.35));
+    g.font=fontOf(s2,SERIF,BLACK);g.textAlign='center';g.globalAlpha=Math.min(1,p*1.6);g.fillStyle=TONE[l2.color]||GOLD;
+    g.shadowColor=TONE[l2.color]||GOLD;g.shadowBlur=50+60*(1-p);g.fillText(l2.text,W/2,l2.y);g.restore();
+    // A ring of light goes out from where it lands.
+    const r=step(u,slam+.2,.6);if(r>0&&r<1){g.save();g.globalAlpha=.5*(1-r);g.strokeStyle=GOLD;g.lineWidth=6*(1-r)+1;g.beginPath();g.ellipse(W/2,l2.y-s2*.35,300+400*r,140+220*r,0,0,Math.PI*2);g.stroke();g.restore();}}
+  // The answer, slowly.
+  const s3=fitSize(l3.text,l3.size,VS.w,SERIF,BLACK);
+  vBlock(l3.text,W/2,l3.y,1e5,t,t0+slow,{size:s3,weight:BLACK,align:'center',per:.2,span:.9});
+  // The strike: two red strokes over the word, drawn one after the other, like a pen.
+  if(l3.strike){g.save();g.font=fontOf(s3,SERIF,BLACK);
+    const w=g.measureText(l3.text).width,x0=W/2-w/2,i=l3.text.indexOf(l3.strike),a=x0+g.measureText(l3.text.slice(0,i)).width,c=a+g.measureText(l3.strike).width,y=l3.y,sz=s3;
+    const pen=[[a-sz*.12,y-sz*.22,c+sz*.12,y-sz*.5,sz*.11],[a-sz*.08,y-sz*.06,c+sz*.1,y-sz*.34,sz*.07]];
+    pen.forEach(([x1,y1,x2,y2,lw],k)=>{const q=ease(clamp((u-strikes[k])/.28));if(q<=0)return;
+      g.strokeStyle=SEAL;g.shadowColor=SEAL;g.shadowBlur=18;g.lineCap='round';g.lineWidth=lw;
+      g.beginPath();g.moveTo(x1,y1);g.lineTo(x1+(x2-x1)*q,y1+(y2-y1)*q);g.stroke();});
+    g.restore();}
+  g.restore();
+  text('法典笔记',W/2,560,{size:60,weight:600,align:'center',color:GOLD,spacing:18,alpha:step(u,strikes[1]+.5,.5)});
+}
+
 // ---------- the end: the name, the idea, a question for the comments ----------
 function vEnd(t,t0){
   const E=TEXT.vend||{},u=t-t0,y=E.y||760;
@@ -1752,6 +1814,11 @@ function vEnd(t,t0){
   if(E.chips){const size=36,rows=[E.chips.slice(0,3),E.chips.slice(3)];
     rows.forEach((names,r)=>{const ws=names.map(n=>measure(n,size,SANS)+size*1.4),tot=ws.reduce((a,b)=>a+b,0)+22*(names.length-1);let x=W/2-tot/2;
       names.forEach((n,i)=>{chip(n,x,y+(E.lines?.length||1)*87+150+r*84,{alpha:step(u,1.6+(r*3+i)*.12,.4),size});x+=ws[i]+22;});});}
+  if(E.stamp){const q=clamp((u-1.9)/.22),sy=y+(E.lines?.length||1)*87+250,sz=64;
+    if(q>0){const w=mw(E.stamp,sz,SERIF,BLACK)+70,k=1+.8*(1-ease(q));
+      g.save();g.translate(W/2,sy);g.rotate(-.07);g.scale(k,k);g.globalAlpha=Math.min(1,q*1.5);
+      g.strokeStyle=SEAL;g.lineWidth=5;g.shadowColor=SEAL;g.shadowBlur=16;rounded(-w/2,-sz*.95,w,sz*1.5,14);g.stroke();
+      g.font=fontOf(sz,SERIF,BLACK);g.textAlign='center';g.fillStyle=SEAL;g.fillText(E.stamp,0,sz*.08);g.restore();}}
   if(E.ask)vCaption(E.ask,t,t0+2.4,1e9,{keys:E.askKeys||[],size:50});
   text(E.platforms,W/2,VS.note,{size:32,font:SANS,align:'center',color:DIM,alpha:step(u,3,.6),spacing:2});
 }
@@ -1772,8 +1839,9 @@ function vA13(t,t0){
 }
 // The system around Article 13, ring by ring; then one thread lit at a time, with its own caption.
 function vWeb(t,t0){
-  const web=TEXT.web||{},C=TEXT.vweb||{},u=t-t0,cx=W/2,cy=950;
-  const RX=[200,315,420],RY=[225,340,428];
+  const web=TEXT.web||{},C=TEXT.vweb||{},u=t-t0,cx=W/2,cy=912;
+  // The outer ring ends near y 1300, so its labels and notes keep clear of the captions below.
+  const RX=[200,315,420],RY=[205,308,386],CY=1520;
   const rings=(web.rings||[]).map((r,i)=>({...r,rx:RX[i],ry:RY[i]}));
   const nodes=(web.nodes||[]).map(n=>({...n,angle:(C.angles||{})[n.id]??n.angle,name:(C.names||{})[n.id]||n.name}));
   const threads=web.threads||[],byId=Object.fromEntries(nodes.map(n=>[n.id,n]));byId.c={id:'c'};
@@ -1825,8 +1893,8 @@ function vWeb(t,t0){
     (C.centre||[]).forEach((l,i)=>text(l,cx,cy+46+i*34,{size:26,font:SANS,align:'center',color:'#FFD2C4',alpha:core}));
   }
   threads.forEach((th,i)=>{const s=tStart+i*tSpan,[a,b]=th.caption.split('：');
-    vCaption([a+'：',b],t,t0+s+.1,t0+s+tSpan,{size:50,keys:[[a,th.tone]]});});
-  vCaption(web.closing,t,t0+tStart+threads.length*tSpan+.1,1e9,{keys:[['连成体系','gold']]});
+    vCaption([a+'：',b],t,t0+s+.1,t0+s+tSpan,{size:50,y:CY,keys:[[a,th.tone]]});});
+  vCaption(web.closing,t,t0+tStart+threads.length*tSpan+.1,1e9,{y:CY,keys:[['连成体系','gold']]});
 }
 // 143 articles inside, 56 laws outside; the count runs up in the middle.
 function vA56(t,t0){
@@ -2164,7 +2232,7 @@ function vShell(t,t0){
     g.save();g.globalAlpha=sa*fade;g.fillStyle=GOLD;g.shadowColor=GOLD;g.shadowBlur=20;g.fillRect(cx-bw/2,cy-bh/2,14,bh);g.restore();
     text(shells[k],cx,cy-bh/2+74,{size:56,weight:BLACK,align:'center',color:GOLD,alpha:sa*fade,spacing:8});
     text(tools[k],cx,cy+bh/2-40,{size:34,font:'Menlo,monospace',align:'center',color:SKY,alpha:ta*fade});}
-  vCaption(C.caption,t,t0+3.6,1e9,{keys:[['更换','gold'],['更新','sky']]});
+  vCaption(C.caption,t,t0+3.6,1e9,{keys:[['一部部地换','gold'],['一版版地升','sky'],['一直在生长','jade']]});
 }
 // Kinetic lines; a key word moves as it means: 更换 turns over, 更新 ticks forward, 理性技艺 grows, 灵魂 glows.
 function vKinetic(str,keys,y,size,t,start,{weight=BLACK,dim=0,per=.07}={}){
@@ -2305,7 +2373,7 @@ function vModel(t,t0){
 
 // ---------- films: [start, end, scene] ----------
 const SCENE_FUNCTIONS={open,a13,a56,book,motto1,motto2,weave,faquan,faquan37,balance37,end,bOpen,bLiteral,bHistory,bPurpose,bCompare,bWorld,bMethods,bFeatures,bEnd,cOpen,cCategories,cCriterion,cSteps,cAssist,cEnd,dOpen,dTime,dPersonal,dExtend,dLocal,dSmart,dEnd,d2Open,dShell,dSoul,dOutsource,dCurve,dYou,dModel,d2End,
-  vHook,vEnd,vA13,vWeb,vA56,vBook,vWeave,vMotto,vFaquan,vBalance,vLiteral,vHistory,vPurpose,vCompare,vWorld,vMethods,vFeatures,vShell,vSoul,vOutsource,vCurve,vYou,vLocal,vModel};
+  vHook,vClipHook,vMeme,vEnd,vA13,vWeb,vA56,vBook,vWeave,vMotto,vFaquan,vBalance,vLiteral,vHistory,vPurpose,vCompare,vWorld,vMethods,vFeatures,vShell,vSoul,vOutsource,vCurve,vYou,vLocal,vModel};
 const FILMS={};{let at=0;FILMS[window.FILM_ID||'A']=(window.SCENES||[]).map(([name,len])=>{const r=[at,at+len,SCENE_FUNCTIONS[name]];at+=len;return r;});}
 
 // ---------- portrait cameras ----------
@@ -2370,7 +2438,22 @@ window.renderCover=function(time){
 };
 // 竖屏短视频 cover: the title large, in two lines, for a grid of thumbnails.
 if(window.SHORT)window.renderCover=function(time){
-  window.renderFrame(time);const K=TEXT.vcover||{};
+  const K=TEXT.vcover||{};
+  // A cover in the words of a meme (vcover.meme): lines in heavy type; a word in a line may be struck
+  // out by hand, in red (the one place a strike is used, because the joke is the correction).
+  if(K.meme){window.__bg=true;try{window.renderFrame(time);}finally{window.__bg=false;}
+    g.save();g.fillStyle='rgba(8,20,22,.72)';g.fillRect(0,0,W,H);g.restore();
+    text('法典笔记',W/2,560,{size:60,weight:600,align:'center',color:GOLD,spacing:18});
+    K.meme.forEach(l=>{const size=fitSize(l.text,l.size,VS.w,SERIF,BLACK),y=l.y;
+      g.save();g.font=fontOf(size,SERIF,BLACK);const w=g.measureText(l.text).width,x0=W/2-w/2;
+      g.fillStyle=l.color?TONE[l.color]:PAPER;g.shadowColor=l.color?TONE[l.color]:'rgba(0,0,0,.6)';g.shadowBlur=l.color?50:40;g.fillText(l.text,x0,y);
+      if(l.strike){const i=l.text.indexOf(l.strike),a=x0+g.measureText(l.text.slice(0,i)).width,c=a+g.measureText(l.strike).width;
+        g.shadowColor=SEAL;g.shadowBlur=18;g.strokeStyle=SEAL;g.lineCap='round';
+        g.lineWidth=size*.11;g.beginPath();g.moveTo(a-size*.12,y-size*.22);g.lineTo(c+size*.12,y-size*.5);g.stroke();
+        g.lineWidth=size*.07;g.beginPath();g.moveTo(a-size*.08,y-size*.06);g.lineTo(c+size*.1,y-size*.34);g.stroke();}
+      g.restore();});
+    text(K.sub,W/2,1330,{size:fitSize(K.sub||'',40,VS.w,SANS,600),font:SANS,weight:600,align:'center',color:JADE});return;}
+  window.renderFrame(time);
   g.save();g.fillStyle='rgba(10,24,26,.66)';g.fillRect(0,0,W,H);g.restore();
   text('法典笔记',W/2,600,{size:60,weight:600,align:'center',color:GOLD,spacing:18});
   (K.lines||[]).forEach((l,i)=>{g.save();g.font=fontOf(fitSize(l,190,VS.w,SERIF,BLACK),SERIF,BLACK);g.textAlign='center';g.fillStyle=PAPER;g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=40;g.fillText(l,W/2,860+i*220);g.restore();});

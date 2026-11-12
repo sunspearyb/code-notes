@@ -1,5 +1,7 @@
 # 每次推送和改进请求都运行全部检查。
 name: 检查
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
 on:
   push:
   pull_request:
@@ -32,9 +34,15 @@ jobs:
           node demo/test-marks.cjs
           node demo/test-reflection.cjs
           node demo/test-codex.cjs
+          node demo/test-games.cjs
+          node demo/test-cross.cjs
+          node demo/test-modules.cjs
+          node demo/codes/civil-code/test_pack.cjs
+          node demo/codes/cyber-law/test_pack.cjs
+          python3 demo/test_compose.py
       - name: 网页离线与只读预览
         run: |
-          for pack in constitution civil-code cyber-law; do
+          for pack in $(python3 -c "import sys; sys.path.insert(0, 'demo'); from edition import pack_names; print(' '.join(pack_names()))"); do
             python3 维护工具/制作各终端版本.py --only web --source . --codex "$pack" --tag test --web-dir /tmp/fadian-web-test
           done
           python3 维护工具/制作只读预览.py --source . --site /tmp/fadian-web-test

@@ -2,6 +2,41 @@
 function createLearningModel(data) {
   const base=createNotebookModel(data),copy=x=>JSON.parse(JSON.stringify(x));
   const MARK_STYLES=['yellow','green','blue','underline','bold'];
+  // ---------- What travels between devices, and what was deleted ----------
+  // The place being read and the reading preferences belong to each device: a change in them alone
+  // is not written to the shared file, so turning pages never makes a cloud drive see a new version.
+  const contentOf=s=>{const {current,year,preferences,...rest}=s;return JSON.stringify(rest);};
+  // s.deleted records what the reader removed: [{id,kind,deletedAt}]. A merge then leaves the record
+  // out instead of bringing it back from the other device; a record changed after it was deleted stays.
+  const DELETED_KINDS=['notes','links','materials','groups','groupLinks','materialRelations','marks'];
+  function bury(s,kind,ids){
+    if(!ids.length)return;const deletedAt=base.timestamp();
+    s.deleted=[...(s.deleted||[]).filter(d=>d.kind!==kind||!ids.includes(d.id)),...ids.map(id=>({id,kind,deletedAt}))];
+  }
+  function remove(s,kind,id){
+    if(!DELETED_KINDS.includes(kind)||kind==='groups')throw Error('不能这样删除这类记录。');
+    if(!s[kind].some(x=>x.id===id))return false;
+    s[kind]=s[kind].filter(x=>x.id!==id);bury(s,kind,[id]);return true;
+  }
+  function deleteGroup(s,id){
+    const links=s.groupLinks.map(l=>l.id),result=base.deleteGroup(s,id);
+    bury(s,'groups',[id]);bury(s,'groupLinks',links.filter(x=>!s.groupLinks.some(l=>l.id===x)));return result;
+  }
+  // Before two notebooks are merged: join their deletion records, drop a deletion when either side changed
+  // the record afterwards, and take the deleted records out of both sides. Returns the deletions still in force.
+  function settleDeletions(a,b){
+    const tombs=new Map(),changedAt=x=>Date.parse(x.updatedAt||x.createdAt)||0;
+    for(const d of [...a.deleted,...b.deleted]){const key=d.kind+':'+d.id,old=tombs.get(key);if(!old||Date.parse(d.deletedAt)>Date.parse(old.deletedAt))tombs.set(key,d);}
+    for(const [key,d] of [...tombs])if([a,b].some(s=>s[d.kind].some(x=>x.id===d.id&&changedAt(x)>Date.parse(d.deletedAt))))tombs.delete(key);
+    const gone=kind=>new Set([...tombs.values()].filter(d=>d.kind===kind).map(d=>d.id));
+    for(const s of [a,b]){
+      for(const kind of DELETED_KINDS){const ids=gone(kind);if(ids.size)s[kind]=s[kind].filter(x=>!ids.has(x.id));}
+      // As when a part is deleted by hand: its sub-parts become independent and its links go with it.
+      const groups=gone('groups');
+      if(groups.size){s.groups=s.groups.map(g=>groups.has(g.parentId)?{...g,parentId:null}:g);s.groupLinks=s.groupLinks.filter(l=>!groups.has(l.fromId)&&!groups.has(l.toId));}
+    }
+    return [...tombs.values()].map(d=>({id:d.id,kind:d.kind,deletedAt:d.deletedAt})).sort((x,y)=>x.kind.localeCompare(y.kind)||(x.id<y.id?-1:x.id>y.id?1:0));
+  }
   const revision=n=>({text:n.text,question:n.question||'',methods:copy(n.methods||[]),quote:n.quote||'',updatedAt:n.updatedAt,...(n.analysis?{analysis:copy(n.analysis)}:{})});
   const revisionText=n=>JSON.stringify([n.text,n.question||'',n.methods||[],n.quote||'',n.analysis||null]);
   function validateHistory(record){
@@ -10,7 +45,7 @@ function createLearningModel(data) {
     if(o&&(!['text','question','excerpt','title'].every(k=>typeof o[k]==='string'&&o[k].length<=200000)||!Array.isArray(o.methods)||o.methods.some(m=>typeof m!=='string'||m.length>100)||!Number.isFinite(Date.parse(o.createdAt))))throw Error('助手原建议无效。');
   }
   function normalize(input){
-    const s=copy(input);s.notebookVersion=4;s.subtitles||={};s.subtitleHistory||={};s.memoryCards||={};s.guideEdits||={};s.guideHistory||={};dropDefaultGuideEdits(s);s.materialRelations||=[];s.marks||=[];s.preferences={noteMode:'full',...(s.preferences||{})};
+    const s=copy(input);s.notebookVersion=4;s.subtitles||={};s.subtitleHistory||={};s.memoryCards||={};s.guideEdits||={};s.guideHistory||={};dropDefaultGuideEdits(s);s.materialRelations||=[];s.marks||=[];s.deleted||=[];s.parked||=[];s.preferences={noteMode:'full',...(s.preferences||{})};
     for(const [unitId,r] of Object.entries(s.reviews)) {
       const key=unitId+'@2018';
       if(!s.memoryCards[key])s.memoryCards[key]={unitId,year:2018,keywords:[],mode:'whole',due:r.due,interval:r.rating==='again'?0:3,repetitions:0,rating:r.rating==='again'?'again':'good',updatedAt:'2026-10-01T00:00:00Z'};
@@ -33,6 +68,8 @@ function createLearningModel(data) {
     if(!object(s.guideEdits)||!object(s.guideHistory))throw Error('使用说明格式无效。');
     for(const [key,entry] of Object.entries(s.guideEdits))validateGuide(key,entry);
     for(const [key,entries] of Object.entries(s.guideHistory)){if(!Array.isArray(entries))throw Error('说明修订记录无效。');for(const entry of entries)validateGuide(key,entry);}
+    if(!Array.isArray(s.deleted)||s.deleted.length>200000||s.deleted.some(d=>!d||typeof d.id!=='string'||!/^[\w-]{1,120}$/.test(d.id)||!DELETED_KINDS.includes(d.kind)||!Number.isFinite(Date.parse(d.deletedAt))))throw Error('删除记录无效。');
+    if(!Array.isArray(s.parked)||s.parked.length>200000||s.parked.some(p=>!p||!PARKED_KINDS.includes(p.kind)||p.record===undefined||p.record===null))throw Error('暂存记录无效。');
     if(!Array.isArray(s.marks)||s.marks.length>30000)throw Error('标记记录无效。');
     const markIds=new Set();
     for(const m of s.marks){
@@ -85,9 +122,11 @@ function createLearningModel(data) {
       trial.marks=trial.marks.filter(m=>!touching.includes(m));
       trial.marks.push({id:base.id(),style,anchor:base.anchor(a.unitId,a.year,a.block,start,end),createdAt:base.timestamp()});
     }
-    validate(trial);s.marks=trial.marks;return !remove;
+    validate(trial);replaceMarks(s,trial.marks);return !remove;
   }
-  function clearMarks(s,anchors){const trial=copy(s),before=trial.marks.length;for(const a of markAnchors(anchors))cut(trial,a,MARK_STYLES);validate(trial);s.marks=trial.marks;return before!==trial.marks.length||JSON.stringify(trial.marks)!==JSON.stringify(s.marks);}
+  // Marks that came off are recorded as deleted, so they do not return from another device.
+  function replaceMarks(s,marks){const gone=s.marks.map(m=>m.id).filter(id=>!marks.some(m=>m.id===id));s.marks=marks;bury(s,'marks',gone);}
+  function clearMarks(s,anchors){const trial=copy(s),before=JSON.stringify(s.marks);for(const a of markAnchors(anchors))cut(trial,a,MARK_STYLES);validate(trial);replaceMarks(s,trial.marks);return before!==JSON.stringify(s.marks);}
   // The styles covering each stretch of a paragraph, for drawing: [{start,end,styles}].
   function markedRanges(s,unitId,year,block){
     const marks=s.marks.filter(m=>m.anchor.unitId===unitId&&m.anchor.year===year&&m.anchor.block===block);if(!marks.length)return [];
@@ -112,7 +151,42 @@ function createLearningModel(data) {
   }
   // 权利—权力 etc., from the categories at the two ends; '' when either end is not 权利 or 权力.
   function relationType(a,b){const name=c=>({quanli:'权利',quanli2:'权力'})[c];return name(a?.category)&&name(b?.category)?`${name(a.category)}—${name(b.category)}`:'';}
-  const migrate=x=>validate(normalize(base.migrate(x))),fresh=()=>validate(normalize(base.fresh()));
+  // ---------- Records whose article is not in this code ----------
+  // A code is put together from modules (compose.py), and a module can be taken out again. Records on
+  // its articles are then set aside in s.parked instead of making the whole notebook unreadable. They
+  // travel with backups and return by themselves when the article is back. The same happens to a record
+  // whose quoted words no longer match the text.
+  const PARKED_KINDS=['notes','materials','links','marks','groups','groupLinks','materialRelations','termAnchors','bookmarks','read','drafts','memoryCards','reviews','subtitles','subtitleHistory'];
+  function park(input){
+    if(!input||typeof input!=='object'||input.schemaVersion!==2||input.bookId!==base.fresh().bookId)return input;
+    const s=copy(input),list=k=>Array.isArray(s[k])?s[k]:(s[k]=[]),map=k=>s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])?s[k]:(s[k]={});
+    const unitOK=(u,y)=>!!base.get(u)&&(y===undefined||base.years.includes(y)&&!!base.version(u,y)?.exists);
+    const all=xs=>Array.isArray(xs)&&xs.every(a=>base.anchorValid(a)),split=k=>{const [u,y]=String(k).split('@');return unitOK(u,Number(y));};
+    const records={notes:n=>unitOK(n.unitId,n.year)&&all(n.anchors||[]),materials:m=>unitOK(m.unitId,m.year),links:l=>all(l.from)&&all(l.to),marks:m=>base.anchorValid(m.anchor),groups:g=>all(g.anchors),
+      materialRelations:r=>r.scope?.kind!=='articles'||Array.isArray(r.scope.unitIds)&&r.scope.unitIds.every(u=>unitOK(u,r.scope.year))};
+    const keyed={drafts:(k,d)=>split(k)&&all(d?.anchors||[]),memoryCards:k=>split(k),reviews:k=>unitOK(k),subtitles:k=>unitOK(k),subtitleHistory:k=>unitOK(k)};
+    // Everything set aside earlier goes back first; what still has no article is set aside again below.
+    for(const p of Array.isArray(s.parked)?s.parked:[]){
+      if(!p||!PARKED_KINDS.includes(p.kind))continue;
+      if(p.kind in keyed){if(!(p.key in map(p.kind)))s[p.kind][p.key]=p.record;}
+      else if(p.kind==='termAnchors'){const t=list('terms').find(t=>t.id===p.key);if(t&&!t.anchors.some(a=>base.anchorKey(a)===base.anchorKey(p.record)))t.anchors.push(p.record);}
+      else if(['bookmarks','read'].includes(p.kind)){if(!list(p.kind).includes(p.record))s[p.kind].push(p.record);}
+      else if(!list(p.kind).some(x=>x.id===p.record.id))s[p.kind].push(p.record);
+    }
+    const parked=[],aside=(kind,record,key)=>parked.push(key===undefined?{kind,record}:{kind,key,record});
+    for(const [kind,ok] of Object.entries(records))s[kind]=list(kind).filter(x=>{const fine=!!x&&ok(x);if(!fine&&x)aside(kind,x);return fine;});
+    const groups=new Set(s.groups.map(g=>g.id));
+    for(const g of s.groups)if(g.parentId&&!groups.has(g.parentId))g.parentId=null;
+    s.groupLinks=list('groupLinks').filter(l=>{const fine=groups.has(l.fromId)&&groups.has(l.toId);if(!fine)aside('groupLinks',l);return fine;});
+    for(const t of list('discussions'))if(Array.isArray(t?.notes))t.notes=t.notes.filter(n=>unitOK(n.unitId,n.year)&&all(n.anchors||[]));
+    for(const t of list('terms'))if(Array.isArray(t.anchors))t.anchors=t.anchors.filter(a=>{const fine=base.anchorValid(a);if(!fine)aside('termAnchors',a,t.id);return fine;});
+    for(const kind of ['bookmarks','read'])s[kind]=list(kind).filter(id=>{const fine=unitOK(id);if(!fine)aside(kind,id);return fine;});
+    for(const [kind,ok] of Object.entries(keyed))for(const [key,value] of Object.entries(map(kind)))if(!ok(key,value)){aside(kind,value,key);delete s[kind][key];}
+    if(!base.years.includes(s.year))s.year=base.years.at(-1);
+    if(!unitOK(s.current,s.year))s.current=base.sequence(s.year).find(id=>base.get(id).kind==='article')||base.sequence(s.year)[0];
+    s.parked=parked;return s;
+  }
+  const migrate=x=>validate(normalize(base.migrate(park(x)))),fresh=()=>validate(normalize(base.fresh()));
   function reconcileSnapshot(local,remote,{hasLocal,clean,revision}){
     if(!remote.state)return local;
     if(!hasLocal||clean&&revision<=remote.revision)return migrate(remote.state);
@@ -173,7 +247,7 @@ function createLearningModel(data) {
   // Categories of linked material declared by the data pack, e.g. 比较阅读 and 备案审查 for the constitution;
   // details holds the category's own fields (比较对象、国家或地区…). Records without a category are ordinary materials.
   // 跨法典关联 is built in: any code can link an article to an article of another code.
-  const BUILTIN={crosscode:{name:'跨法典关联',materialType:'跨法典关联',fields:[['code','法典'],['article','条文']],intro:'把本条与其他法典、其他法律的条文联系起来，写明关系和理由。装有对方的数据包时，可以直接打开那一条。',newLabel:'关联其他法典的条文',reasonLabel:'关联理由',titlePlaceholder:'如：民法典第一千一百六十五条',emptyTitle:'还没有跨法典关联。',empty:'在法条精读中，可以把本条与民法典、刑法等其他法典的条文联系起来。'}};
+  const BUILTIN={crosscode:{name:'跨法典关联',materialType:'跨法典关联',fields:[['code','法典'],['article','条文'],['quote','字句或概念']],intro:'把本条与其他法典、其他法律的条文联系起来，写明关系和理由。装有对方的数据包时，可以直接打开那一条。',newLabel:'关联其他法典的条文',reasonLabel:'关联理由',titlePlaceholder:'如：民法典第一千一百六十五条',emptyTitle:'还没有跨法典关联。',empty:'在法条精读中，可以把本条与民法典、刑法等其他法典的条文联系起来。'}};
   const categories=()=>({...(data.codex?.relationCategories||{}),...BUILTIN});
   function cleanDetails(category,details){
     if(!category)return undefined;
@@ -247,7 +321,10 @@ function createLearningModel(data) {
     return base.years.indexOf(year)>0?base.version(unitId,year)?.rows||[]:[];
   }
   function merge(current,incoming){
-    current=migrate(current);incoming=migrate(incoming);const result=base.merge(current,incoming),s=normalize(result.state);
+    current=migrate(current);incoming=migrate(incoming);
+    const deleted=settleDeletions(current,incoming),result=base.merge(current,incoming),s=normalize(result.state);
+    s.deleted=deleted;
+    s.parked=[...new Map([...current.parked,...incoming.parked].map(p=>[JSON.stringify(p),p])).values()];
     for(const [id,t] of Object.entries(incoming.subtitles)){
       const old=s.subtitles[id];
       if(!old){s.subtitles[id]=t;result.added++;}else if(old.title!==t.title){s.subtitleHistory[id]=[...new Set([...(s.subtitleHistory[id]||[]),old.title,t.title])];if(t.updatedAt>old.updatedAt)s.subtitles[id]=t;result.conflicts++;}
@@ -271,8 +348,11 @@ function createLearningModel(data) {
     for(const record of incoming.materialRelations){
       const existing=s.materialRelations.find(r=>r.id===record.id);
       if(!existing){s.materialRelations.push(record);result.added++;}
+      // The same relation changed on two devices: the later one stands, the earlier wording goes to its history.
+      // (Earlier versions kept a second copy marked conflictOf; such copies stay as they are.)
       else if(JSON.stringify(existing)!==JSON.stringify(record)&&!s.materialRelations.some(r=>r.conflictOf===record.id&&relationSignature(r)===relationSignature(record))){
-        s.materialRelations.push({...record,id:base.id(),conflictOf:record.id});result.conflicts++;
+        const settled=base.settle(existing,record);
+        if(JSON.stringify(settled.record)!==JSON.stringify(existing)){s.materialRelations[s.materialRelations.indexOf(existing)]=settled.record;settled.clash?result.conflicts++:result.updated++;}
       }
     }
     const markKey=m=>[m.style,base.anchorKey(m.anchor)].join('|');
@@ -282,5 +362,5 @@ function createLearningModel(data) {
     }
     result.state=validate(s);return result;
   }
-  return {MARK_STYLES,toggleMark,clearMarks,markedRanges,...base,validateAnalysis,relationType,normalize,validate,migrate,fresh,reconcileSnapshot,addNote,guideEntries,saveGuide,incorporateMaterial,validateScope,categories,addMaterialRelation,editMaterialRelation,acceptProposal,subtitle,setSubtitle,card,saveCard,rateCard,cloze,comparisonRows,merge};
+  return {park,MARK_STYLES,toggleMark,clearMarks,markedRanges,...base,contentOf,remove,deleteGroup,validateAnalysis,relationType,normalize,validate,migrate,fresh,reconcileSnapshot,addNote,guideEntries,saveGuide,incorporateMaterial,validateScope,categories,addMaterialRelation,editMaterialRelation,acceptProposal,subtitle,setSubtitle,card,saveCard,rateCard,cloze,comparisonRows,merge};
 }

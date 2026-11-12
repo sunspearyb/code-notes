@@ -80,7 +80,7 @@ def main():
             if v.get('exists'):
                 if not v.get('paragraphs') or any(not isinstance(p, str) or not p.strip() or p != p.strip() for p in v['paragraphs']):
                     problems.append(f'{u["id"]} {year} 年：段落为空，或段首段尾有空白')
-                if u.get('kind') == 'article' and v.get('label') != f'第{cn_number(u.get("number", 0))}条' and u.get('number') and str(year) == str(years[-1]):
+                if u.get('kind') == 'article' and u.get('number') and v.get('label') != f'第{cn_number(u["number"])}条' and str(year) == str(years[-1]):
                     problems.append(f'{u["id"]}：{years[-1]} 年条号 {v.get("label")} 与 number {u.get("number")} 不一致')
                 for p in v['paragraphs']:
                     if re.search(r'[　 ]{2,}|\t', p):

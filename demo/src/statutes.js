@@ -28,14 +28,15 @@ function lawStatus(unit){
 }
 function lawLink(l){return l.url?`<a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener noreferrer">${esc(l.short||l.title)}</a>`:esc(l.short||l.title);}
 function relatedBlock(unit){
-  const laws=officialLaws(unit.id),own=ownRelated(unit.id),cross=ownRelated(unit.id,'crosscode'),d=delegationsOf(unit,state.year);
-  const tools=`<button class="text-btn" data-action="crosscode-new" data-unit="${unit.id}">关联其他法典的条文</button><button class="text-btn" data-action="copy-address" data-unit="${unit.id}">复制本条网址</button>`;
-  if(!laws.length&&!own.length&&!cross.length&&!d.length)return `<p class="address-line">${tools}</p>`;
+  const laws=officialLaws(unit.id),own=ownRelated(unit.id),cross=[],back=[],d=delegationsOf(unit,state.year);  // cross-code links: 法条精读 → 关联
+  const tools=`<button class="text-btn" data-action="copy-address" data-unit="${unit.id}">复制本条网址</button>${DATA.history.revisionDocs?.length?'<button class="text-btn" data-action="revision-docs">历次修正案</button>':''}`;
+  if(!laws.length&&!own.length&&!cross.length&&!back.length&&!d.length)return `<p class="address-line">${tools}</p>`;
   const strict=d.filter(x=>x.strict).length;
-  return `<details class="revision-source related-source" ${laws.length+own.length?'':'open'}><summary><span class="pill">${esc(M.categories()[RELATED_KEY]?.name||'相关条文')}</span>${laws.length+own.length?`关联 ${laws.length+own.length} 部法律`:RELATED_KEY?'尚未关联法律':`${cross.length} 项跨法典关联`}${d.length?` · ${strict?`${strict} 处“由法律规定”`:`${d.length} 处依照法律`}`:''}</summary>
+  return `<details class="revision-source related-source" ${laws.length+own.length?'':'open'}><summary><span class="pill">${esc(M.categories()[RELATED_KEY]?.name||'相关条文')}</span>${laws.length+own.length?`关联 ${laws.length+own.length} 部法律`:RELATED_KEY?'尚未关联法律':`${cross.length+back.length} 项跨法典关联`}${d.length?` · ${strict?`${strict} 处“由法律规定”`:`${d.length} 处依照法律`}`:''}</summary>
   ${laws.length?`<p class="related-laws">${laws.map(lawLink).join('、')}</p><p class="note-source">据法工委《现行有效法律目录》“宪法相关法”，与本条的对应由 Claude 拟定${laws.every(l=>l.status==='已核对')?'，已核对':'，待核'}；只到法律为止。</p>`:''}
   ${own.length?`<p class="related-laws">${own.map(r=>r.url?`<a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a>`:esc(r.title)).join('、')}</p><p class="note-source">自己记录的相关法律。</p>`:''}
   ${cross.length?`<p class="related-laws">${cross.map(r=>crossButton(r)).join('、')}</p><p class="note-source">跨法典关联。</p>`:''}
+  ${back.length?`<ul class="cross-back">${back.map(r=>`<li><button class="text-btn" data-action="cross-open" data-code="${esc(r.codeName)}" data-ref="${esc(r.from[0]?.unitId||'')}" data-unit-id="1">${esc(r.code+(r.from.map(f=>f.label).join('、')||''))}</button>${r.text?`<span>${esc(r.text)}</span>`:''}</li>`).join('')}</ul><p class="note-source">其他法典的笔记中关联到本条的记录；在那部法典中修改。</p>`:''}
   ${d.length?`<p class="note-source">条文中带下划线的字句，${strict?'“由法律规定”是宪法要求以法律规定的事项，':''}点开可以查看、查找或记录相关法律。</p>`:''}
   <div class="row wrap">${RELATED_KEY?`<button class="text-btn" data-action="related-new" data-unit="${unit.id}">记录相关法律</button>`:''}${tools}</div></details>`;
 }
@@ -70,10 +71,111 @@ function codeHref(code){
   if(serviceFreeEdition()==='网页版'){const root=new URL(own?.webFolder?'../':'./',location.href);return new URL(code.webFolder?code.webFolder+'/':'./',root).href;}
   return new URL(encodeURIComponent(code.page),location.href).href;
 }
+// The native and web editions share an origin across their code pages. Cache only the published
+// text; read localStorage again each time so edits and deletions in another code stay visible.
+const crossBooks=new Map();
+function crossNames(codex){return [codex.name,codex.short,...(codex.citation?.aliases||[]),...(codex.structure||[]).filter(n=>n.law).flatMap(n=>[n.law.name,n.law.short,...(n.law.aliases||[])])].filter(Boolean);}
+function crossMatches(codex,text){const q=String(text||'').replace(/[《》]/g,'').trim();return !!q&&crossNames(codex).some(n=>q===n||q.includes(n)||n.includes(q));}
+async function crossBook(code){
+  if(code.id===CODEX.id)return {...DATA,name:code.name};
+  if(!crossBooks.has(code.id))crossBooks.set(code.id,(async()=>{
+    try{
+      const url=codeHref(code);let response;
+      try{response=await fetch(url);}catch(error){
+        // Each web code has its own service-worker scope. A request from another code may bypass
+        // that worker, but its previously downloaded page is still in this origin's CacheStorage.
+        response=await globalThis.caches?.match(url);if(!response)throw error;
+      }
+      if(!response.ok)throw Error('HTTP '+response.status);
+      const page=new DOMParser().parseFromString(await response.text(),'text/html');
+      const data=JSON.parse(page.querySelector('script#content-data[type="application/json"]')?.textContent||'null');
+      if(data?.codex?.id!==code.id||!data.history?.units||!data.edition?.storageKey)throw Error('页面数据不完整');
+      return {...data,name:code.name};
+    }catch{
+      crossBooks.delete(code.id);
+      throw Error(`无法读取${code.short}的页面。请从应用或网站入口打开，并确认这部法典已经下载；直接打开单个 HTML 文件时，浏览器可能不允许读取其他页面。`);
+    }
+  })());
+  return crossBooks.get(code.id);
+}
+function crossNotebook(book){
+  if(book.codex.id===CODEX.id)return state;
+  const saved=localStorage.getItem(book.edition.storageKey);
+  try{return JSON.parse(saved)||{};}catch{return {};}
+}
+function crossLaw(book,unit){
+  const order=new Map(book.history.units.map((u,i)=>[u.id,i]));
+  return (book.codex.structure||[]).find(n=>n.law&&order.get(n.from)<=order.get(unit.id)&&order.get(unit.id)<=order.get(n.to))?.law;
+}
+function crossDescribe(book,unit,year){
+  const law=crossLaw(book,unit),label=unit.versions[year].label,citation=(law||book.codex).citation;
+  return {unitId:unit.id,label:(law?.short||'')+label,year,citation:(citation?.latest||'')+label+(year!==book.history.years.at(-1)?`（${year} 年文本）`:'')};
+}
+function crossLocate(book,code,article){
+  const year=book.history.years.at(-1),units=book.history.units.filter(u=>u.versions[year]?.exists);
+  let ref=(String(code||'')+String(article||'')).replace(/[\s《》]/g,'');
+  const strip=names=>{const hit=names.filter(Boolean).sort((a,b)=>b.length-a.length).find(n=>ref.startsWith(n));if(hit)ref=ref.slice(hit.length);return hit;};
+  strip([book.codex.name,book.codex.short,...(book.codex.citation?.aliases||[])]);
+  const laws=(book.codex.structure||[]).filter(n=>n.law);let pool=units,named=false;
+  for(const node of [...laws].sort((a,b)=>b.law.name.length-a.law.name.length)){
+    if(strip([node.law.name,node.law.short,...(node.law.aliases||[])])){
+      const start=book.history.units.findIndex(u=>u.id===node.from),end=book.history.units.findIndex(u=>u.id===node.to);
+      pool=book.history.units.slice(start,end+1).filter(u=>u.versions[year]?.exists);named=true;break;
+    }
+  }
+  const n='[\\d零〇一二三四五六七八九十百千两]+',value=s=>cnValue(s.replace(/〇/g,'零'));
+  const preamble=ref.match(new RegExp(`^序言第?(${n})(?:自然段|段)?$`));
+  const articleRef=ref.match(new RegExp(`^第?(${n})条?(?:之(${n}))?(?:第${n}[款项])*$`));
+  if(!preamble&&!articleRef)throw Error('没有读懂这个条文的写法。请写成“第三十三条”“33”或“个人信息保护法第十三条”。');
+  const found=pool.filter(u=>{
+    if(preamble)return u.kind==='preamble'&&u.number===value(preamble[1]);
+    const label=u.versions[year].label.match(new RegExp(`^第(${n})条(?:之(${n}))?$`));
+    return u.kind==='article'&&label&&value(label[1])===value(articleRef[1])&&(label[2]?value(label[2]):0)===(articleRef[2]?value(articleRef[2]):0);
+  });
+  if(!found.length)throw Error(`${year} 年文本中没有这一条。`);
+  if(found.length>1&&!named)throw Error('这部法典由几部法律组成，请写明是哪一部：'+laws.map(n=>n.law.short).join('、'));
+  return found[0];
+}
+async function crossApi(action,body={}){
+  if(service.connected)return api('cross',{...body,action});
+  const codes=DATA.codes||[];
+  if(action==='back'){
+    const records=[];
+    for(const code of codes){
+      if(code.id===CODEX.id)continue;
+      // An offline web reader may have downloaded only some of the codes. An unavailable page
+      // must not hide the incoming links of the codes that are available.
+      let other;try{other=await crossBook(code);}catch{continue;}
+      const saved=crossNotebook(other);
+      for(const r of saved.materialRelations||[]){
+        const details=r.details||{};if(r.category!=='crosscode'||!crossMatches(CODEX,details.code))continue;
+        let unitId=null;try{unitId=crossLocate(DATA,details.code,details.article).id;}catch{}
+        const scope=r.scope||{},year=other.history.years.includes(scope.year)?scope.year:other.history.years.at(-1);
+        const sources=other.history.units.filter(u=>(scope.unitIds||[]).includes(u.id)&&u.versions[year]?.exists).map(u=>crossDescribe(other,u,year));
+        records.push({code:other.codex.short,codeName:code.name,unitId,article:details.article||'',quote:details.quote||'',from:sources.map(s=>({label:s.label,unitId:s.unitId})),text:r.text||'',question:r.question||'',updatedAt:r.updatedAt??null});
+      }
+    }
+    return {records};
+  }
+  const code=codes.find(c=>c.name===body.code||c.id===body.code)||(action==='text'?findCode(body.code):null);
+  if(!code)throw Error('法典笔记中没有装这部法典。');
+  const book=await crossBook(code),year=book.history.years.at(-1),units=book.history.units.filter(u=>u.versions[year]?.exists);
+  if(action==='units'){
+    const multiple=(book.codex.structure||[]).filter(n=>n.law).length>1;
+    return {code:book.codex.short,codeId:book.codex.id,name:code.name,year,units:units.map(u=>({id:u.id,label:u.versions[year].label,law:multiple?crossLaw(book,u)?.short||'':'',gist:typeof book.subtitles?.[u.id]==='string'?book.subtitles[u.id]:''}))};
+  }
+  if(action==='text'){
+    const unit=body.unitId?units.find(u=>u.id===body.unitId):crossLocate(book,body.code,body.ref);
+    if(!unit)throw Error('那部法典的现行文本中没有这一条。');
+    const notes=(crossNotebook(book).notes||[]).filter(n=>n.unitId===unit.id).slice(0,20).map(n=>({question:n.question||'',text:n.text||''}));
+    return {...crossDescribe(book,unit,year),code:book.codex.short,codeId:book.codex.id,here:code.id===CODEX.id,paragraphs:unit.versions[year].paragraphs,notes,name:code.name,version:unit.versions[year].label};
+  }
+  throw Error('可用操作：units、text、back。');
+}
 function findCode(name){const q=String(name||'').replace(/[《》\s]/g,'');return (DATA.codes||[]).find(c=>[c.short,c.fullName,...(c.aliases||[])].some(n=>n&&(q===n||q.includes(n)||n.includes(q))));}
 function crossButton(r){
   const code=findCode(r.details?.code),label=`${r.details?.code||''}${r.details?.article||''}`||r.title;
-  if(code&&code.id!==CODEX.id&&!SHELL?.localService)return `<a href="${esc(codeHref(code)+'#ref='+encodeURIComponent(r.details?.article||''))}">${esc(label)}</a>`;
+  if(code&&code.id!==CODEX.id)return `<button class="text-btn" data-action="cross-open" data-code="${esc(r.details?.code||'')}" data-ref="${esc(r.details?.article||'')}">${esc(label)}</button>`;
   if(code&&code.id===CODEX.id){const id=resolveReference(r.details?.article||'');if(id)return `<button class="text-btn" data-action="goto" data-unit="${id}">${esc(label)}</button>`;}
   return r.url?`<a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`:esc(label);
 }
@@ -123,3 +225,132 @@ document.addEventListener('click',async event=>{
 document.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target.matches?.('.delegation'))event.target.click();});
 openFromAddress();
 render();
+
+// ---------- Between codes: read the other article here; see what points to this one ----------
+service.crossBack=[];
+function crossBackOf(unitId){return (service.crossBack||[]).filter(r=>r.unitId===unitId);}
+async function loadCrossBack(){
+  try{const before=JSON.stringify(service.crossBack);service.crossBack=(await crossApi('back')).records;
+    if(before!==JSON.stringify(service.crossBack)&&ui.view==='reader'&&!modal.open&&!document.activeElement?.matches('input,textarea,select'))render();}catch{}
+}
+addEventListener('storage',()=>loadCrossBack());
+document.addEventListener('click',async event=>{
+  const el=event.target.closest('[data-action="cross-open"]');if(!el)return;
+  try{
+    const r=await crossApi('text',{code:el.dataset.code,...(el.dataset.unitId?{unitId:el.dataset.ref}:{ref:el.dataset.ref})});
+    showModal(r.label.startsWith(r.code)?r.label:r.code+r.label,`<p class="note-source">${esc(r.citation)}</p>${paraList(r.paragraphs,'law-text cross-text')}${r.notes.length?`<h4 class="cross-notes-title">我在这一条下的笔记（${r.notes.length}）</h4><ul class="cross-notes">${r.notes.map(n=>`<li>${n.question?`<strong>${esc(n.question)}</strong>`:''}${esc(n.text)}</li>`).join('')}</ul>`:''}<div class="modal-actions">${r.here?`<button class="btn" data-action="goto" data-unit="${esc(r.unitId)}">到这一条</button>`:`<button class="btn" data-action="switch-code" data-id="${esc(r.codeId)}">切换到${esc(r.code)}</button>`}<button class="btn primary" data-action="close">关闭</button></div>`);
+  }catch(error){toast(error.message);}
+});
+
+// ---------- Amendments on the article itself ----------
+// A code with many amendments (刑法: twelve, and two decisions) would drown in a list of years. Instead each
+// article carries small marks for the amendments that touched it (unit.revisions → history.revisionDocs,
+// written by add_code.py); most articles have none. A mark opens that item of the amendment.
+function revisionDoc(id){return (DATA.history.revisionDocs||[]).find(d=>d.id===id);}
+function isRepealed(unit){const v=unit.versions[state.year];return !!v?.exists&&v.paragraphs.length===1&&/^[（(]删去[）)]$/.test(v.paragraphs[0]);}
+function revisionChips(unit){
+  const list=(unit.revisions||[]).map(([id,item])=>({doc:revisionDoc(id),item})).filter(r=>r.doc);
+  if(!list.length)return '';
+  return `<div class="rev-chips" aria-label="修改过本条的修正案">${list.map(r=>`<button class="rev-chip" data-action="revision-item" data-doc="${esc(r.doc.id)}" data-item="${r.item}" title="${esc(r.doc.title)}${r.doc.date?' · '+r.doc.date:''}">${esc(r.doc.short)}<small>${r.doc.year||''}</small></button>`).join('')}${isRepealed(unit)?'<span class="pill">已删去</span>':''}</div>`;
+}
+function revisionItemHtml(doc,index,withTargets){
+  const item=doc.items[index],targets=withTargets?(item.unitIds||[]).map(M.get).filter(Boolean):[];
+  return `<div class="rev-item"><strong>${esc(item.label)}</strong>${item.paragraphs.map(p=>`<p>${esc(p)}</p>`).join('')}${targets.length?`<p class="rev-targets">${targets.map(u=>`<button class="text-btn" data-action="goto" data-unit="${u.id}">${esc(u.versions[LATEST].exists?u.versions[LATEST].label:u.label)}</button>`).join('')}</p>`:''}</div>`;
+}
+function showRevisionItem(docId,index){
+  const doc=revisionDoc(docId);if(!doc)return;
+  showModal(`${doc.short} · ${doc.items[index].label}`,`<p class="note-source">${esc(doc.title)}${doc.date?`，${esc(doc.date)} 通过`:''}</p>${revisionItemHtml(doc,index,false)}<p class="note-source">这是修正案的原文。修改前后的文字，在本条的“修正对照”中查看。</p><div class="modal-actions"><button class="btn" data-action="revision-docs" data-open="${esc(doc.id)}">这个修正案的全部内容</button><button class="btn primary" data-action="close">关闭</button></div>`);
+}
+function showRevisionDocs(open){
+  const docs=DATA.history.revisionDocs||[];
+  showModal('历次修正案',`<p class="note-source">共 ${docs.length} 件。点开一件，逐项列出原文和它修改的条文。</p><div class="rev-docs">${docs.map(d=>`<details ${d.id===open?'open':''}><summary><span class="rev-chip static">${esc(d.short)}<small>${d.year||''}</small></span>${esc(d.title)}<small>${d.items.length} 项</small></summary>${d.items.map((x,i)=>revisionItemHtml(d,i,true)).join('')}</details>`).join('')}</div>`);
+}
+document.addEventListener('click',event=>{
+  const el=event.target.closest('[data-action="revision-item"],[data-action="revision-docs"]');if(!el)return;
+  if(el.dataset.action==='revision-item')showRevisionItem(el.dataset.doc,Number(el.dataset.item));else showRevisionDocs(el.dataset.open);
+});
+
+// ---------- A fixed colour for each year of amendment ----------
+// The constitution's five years have their colours in the style sheets. Other codes get theirs here, in
+// order of the years, so that amended years stand out in 修正对照 and 历次修正 the same way.
+(function(){
+  const fixed=[1988,1993,1999,2004,2018],years=M.years.slice(1);
+  if(!years.length||years.every(y=>fixed.includes(y)))return;
+  const light=[['#d9e2f3','#8eaadb'],['#fbe4d5','#f4b183'],['#fff2cc','#e6c560'],['#e2efd9','#9cc480'],['#e8dcf2','#b497d6'],['#d5eef0','#7fc2c8'],['#f9dbe3','#e391a8'],['#e6e9c8','#b3ba6a'],['#dcdff5','#9aa0e0'],['#f6e0c6','#d9a55c'],['#d3ecdf','#7dc0a0'],['#efd9ee','#cf93cb']];
+  const dark=[['#26304a','#7f9bd0'],['#47301f','#d9976a'],['#45391a','#cdae4a'],['#26391f','#86b06a'],['#372a47','#a98bd0'],['#1f3b3e','#6fb3ba'],['#472a33','#d28098'],['#393c1e','#a6ad5c'],['#2a2d4a','#8d93d6'],['#45331c','#cf9a52'],['#1f3a2e','#6eb392'],['#42293f','#c184bd']];
+  const rule=(set,prefix)=>years.map((y,i)=>`${prefix}.yr-${y},${prefix}.year-${y}{--yc:${set[i%set.length][0]};--ye:${set[i%set.length][1]}}`).join('\n');
+  const style=document.createElement('style');style.textContent=rule(light,'')+'\n'+rule(dark,':root[data-theme="dark"] ');document.head.appendChild(style);
+})();
+
+// ---------- 建立关联 in 法条精读, to an article (or words) of another code ----------
+// The dialog lists the codes of this edition; choosing another one reads its articles through crossApi.
+// The link is kept as a 跨法典关联 record (materialRelations, category crosscode) on this
+// article: details.code, details.article and, when words were chosen, details.quote. The other code
+// lists it under that article as a record pointing there (cross_code.back).
+const crossCache={};
+async function chooseLinkCode(codeId){
+  const d=ui.linkDraft;if(!d)return;
+  d.code=codeId;d.to=[];d.crossTo=[];d.crossText=null;
+  if(codeId===CODEX.id){d.target=M.sequence(d.year).find(id=>id!==state.current)||state.current;showLink(true);return;}
+  try{
+    const code=(DATA.codes||[]).find(c=>c.id===codeId);
+    crossCache[codeId]||=await crossApi('units',{code:code.name});
+    if(ui.linkDraft!==d||d.code!==codeId)return;
+    d.target=crossCache[codeId].units.find(u=>/^第.+条/.test(u.label))?.id||crossCache[codeId].units[0]?.id;
+    showLink(true);
+  }catch(error){if(ui.linkDraft!==d||d.code!==codeId)return;toast(error.message);d.code=CODEX.id;showLink(true);}
+}
+function findCrossTarget(q){
+  const d=ui.linkDraft,list=crossCache[d.code]?.units||[];if(!q)return;
+  const flat=q.replace(/\s/g,'');
+  const hit=/\d/.test(flat)?null:list.find(u=>(u.law+u.label)===flat||u.label===flat||u.label===`第${flat}条`)||list.find(u=>u.gist&&u.gist.includes(flat));
+  if(hit){d.target=hit.id;d.crossTo=[];d.crossText=null;const sel=document.getElementById('link-unit');if(sel)sel.value=hit.id;renderLinkPreview();}
+  else {const codeId=d.code;crossApi('text',{code:(DATA.codes||[]).find(c=>c.id===codeId).short,ref:flat}).then(r=>{if(ui.linkDraft!==d||d.code!==codeId||document.getElementById('link-find')?.value.trim()!==q)return;d.target=r.unitId;d.crossTo=[];d.crossText=r;const sel=document.getElementById('link-unit');if(sel)sel.value=r.unitId;renderLinkPreview();}).catch(()=>{});}
+}
+async function renderCrossPreview(el){
+  const d=ui.linkDraft,code=(DATA.codes||[]).find(c=>c.id===d.code);
+  if(!d.crossText||d.crossText.unitId!==d.target){
+    el.innerHTML='<p class="small muted">正在读取……</p>';
+    const target=d.target;
+    try{const result=await crossApi('text',{code:code.name,unitId:target});if(ui.linkDraft!==d||d.code!==code.id||d.target!==target)return;d.crossText=result;}catch(error){if(ui.linkDraft===d&&d.code===code.id&&d.target===target)el.innerHTML=`<p class="service-error">${esc(error.message)}</p>`;return;}
+  }
+  const r=d.crossText,picked=d.crossTo||[];
+  const on=(b,s,e)=>picked.some(x=>x.block===b&&x.start<e&&x.end>s);
+  el.innerHTML=`<div class="small muted" style="margin-bottom:12px">${picked.length?`已选：${esc(picked.map(x=>x.quote).join('…'))}`:'当前关联到整条；点选字句或概念可缩小范围。'}</div><p class="note-source">${esc(r.citation)}</p><div class="law-text">${r.paragraphs.map((p,b)=>`<p>${M.tokenize(p).map(t=>t.word?`<button type="button" class="word ${on(b,t.start,t.end)?'selected':''}" data-action="cross-word" data-block="${b}" data-start="${t.start}" data-end="${t.end}">${esc(t.text)}</button>`:esc(t.text)).join('')}</p>`).join('')}</div>`;
+}
+function toggleCrossWord(el){
+  const d=ui.linkDraft;if(!d?.crossText)return;
+  const block=Number(el.dataset.block),start=Number(el.dataset.start),end=Number(el.dataset.end),list=d.crossTo||[];
+  const at=list.findIndex(x=>x.block===block&&x.start===start);
+  let next=at>=0?list.filter((_,i)=>i!==at):[...list,{block,start,end}];
+  // Touching words of one paragraph join into one phrase.
+  next.sort((a,b)=>a.block-b.block||a.start-b.start);
+  const joined=[];for(const x of next){const last=joined.at(-1);if(last&&last.block===x.block&&x.start<=last.end)last.end=Math.max(last.end,x.end);else joined.push({...x});}
+  for(const x of joined)x.quote=d.crossText.paragraphs[x.block].slice(x.start,x.end);
+  d.crossTo=joined;renderLinkPreview();
+}
+function saveCrossLink(){
+  const d=ui.linkDraft,r=d.crossText,code=(DATA.codes||[]).find(c=>c.id===d.code);
+  if(!r){toast('请先选择对方的条文。');return;}
+  const info=(crossCache[d.code]?.units||[]).find(u=>u.id===r.unitId)||{law:'',label:r.version||r.label};
+  const article=info.label,codeName=info.law||code.short,quote=(d.crossTo||[]).map(x=>x.quote).join('；');
+  const reason=(document.getElementById('link-reason')?.value||d.reason||'').trim()||`与${codeName}${article}相关`;
+  // Only the relation record: no copy in 材料 (addMaterialRelation would add one).
+  const at=now(),record={id:uid(),scope:{kind:'articles',year:state.year,unitIds:[state.current]},title:`${codeName}${article}${quote?'：'+quote:''}`,text:reason,sourceText:'',question:'',methods:[],destination:'material',method:'manual',createdAt:at,updatedAt:at,url:'',category:'crosscode',details:{code:codeName,article,...(quote?{quote}:{})}};
+  const trial=JSON.parse(JSON.stringify(state));trial.materialRelations.push(record);M.validate(trial);state.materialRelations.push(record);
+  ui.selection=[];persist();closeModal();ui.rail='links';render();toast(`已关联到${codeName}${article}。${code.short}的这一条下也会显示这项关联。`);
+}
+// In the 关联 rail: links to other codes made here, and links other codes made to this article.
+function crossLinksOf(unitId){
+  const mine=ownRelated(unitId,'crosscode').map(r=>({mine:true,r}));
+  return [...mine,...crossBackOf(unitId).map(b=>({mine:false,b}))];
+}
+function crossLinkCard(x){
+  if(x.mine){const r=x.r,d=r.details||{};return `<div class="material-card link-card cross"><p class="anchor-caption">跨法典</p><button class="text-btn" data-action="cross-open" data-code="${esc(d.code||'')}" data-ref="${esc(d.article||'')}">${esc((d.code||'')+(d.article||''))}</button>${d.quote?`<p class="cross-quote">“${esc(d.quote)}”</p>`:''}${r.text?`<p>${esc(r.text)}</p>`:''}<button class="text-btn danger" data-action="delete-relation" data-id="${r.id}">移除关联</button></div>`;}
+  const b=x.b;return `<div class="material-card link-card cross"><p class="anchor-caption">来自${esc(b.code)}</p><button class="text-btn" data-action="cross-open" data-code="${esc(b.codeName)}" data-ref="${esc(b.from[0]?.unitId||'')}" data-unit-id="1">${esc(b.code+(b.from.map(f=>f.label).join('、')||''))}</button>${b.quote?`<p class="cross-quote">“${esc(b.quote)}”</p>`:''}${b.text?`<p>${esc(b.text)}</p>`:''}<p class="rail-hint">在${esc(b.code)}中修改或移除。</p></div>`;
+}
+document.addEventListener('click',event=>{
+  const el=event.target.closest('[data-action="delete-relation"]');if(!el)return;
+  if(!confirm('移除这项跨法典关联？'))return;
+  M.remove(state,'materialRelations',el.dataset.id);persist();render();toast('已移除。');
+});

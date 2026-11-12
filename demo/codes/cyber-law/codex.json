@@ -22,6 +22,11 @@
     "guide": "guide.json",
     "english": "english.json"
   },
+  "modules": [
+    "cybersecurity",
+    "data-security",
+    "personal-information"
+  ],
   "levels": {
     "law": {
       "name": "",

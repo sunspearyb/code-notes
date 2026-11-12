@@ -69,6 +69,9 @@ exportMarkdown=function(){download(`${DATA.edition.markdownName||'法典笔记'}
 
 // ---------- Small helpers ----------
 function hashText(text){let h=0x811c9dc5;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,0x01000193);}return (h>>>0).toString(16)+':'+text.length;}
+// The file is compared by its notes alone (see contentOf in learning-model.js): turning pages does not rewrite it.
+// A file written by an earlier version lacks the fields added since; migrate fills them in before comparing.
+function contentHash(s){try{return hashText(M.contentOf(M.migrate(s)));}catch{return hashText(M.contentOf(s));}}
 function stripEnvelope(raw){const s={...raw};delete s.exportedAt;delete s.device;return s;}
 function deviceName(){let d=localStorage.getItem(KEY+'-device');if(!d){d=(navigator.userAgentData?.platform||navigator.platform||'设备').replace(/\s+/g,'')+'-'+Math.random().toString(36).slice(2,6);try{localStorage.setItem(KEY+'-device',d);}catch{}}return d;}
 function lastExport(){return Number(localStorage.getItem(KEY+'-exported')||0);}
@@ -93,28 +96,29 @@ async function folderSync(){
   folder.busy=true;
   try{
     let fileState=null,fileHash='';
-    try{const text=await (await (await folder.handle.getFileHandle(FOLDER_DATA)).getFile()).text();if(text.trim()){fileState=stripEnvelope(JSON.parse(text));fileHash=hashText(JSON.stringify(fileState));}}
+    try{const text=await (await (await folder.handle.getFileHandle(FOLDER_DATA)).getFile()).text();if(text.trim()){fileState=stripEnvelope(JSON.parse(text));fileHash=contentHash(fileState);}}
     catch(error){if(error.name!=='NotFoundError')throw error;}
     const lastFile=localStorage.getItem(KEY+'-folder-file')||'',lastLocal=localStorage.getItem(KEY+'-folder-local')||'';
     let changed=false,conflicts=0;
     if(fileState&&fileHash!==lastFile){
-      if(lastLocal&&hashText(JSON.stringify(state))===lastLocal)state=M.migrate(fileState);
+      // Notes unchanged here since the last sync: take the file's, keeping this browser's own place and preferences.
+      if(lastLocal&&contentHash(state)===lastLocal)state=Object.assign(M.migrate(fileState),{current:state.current,year:state.year,preferences:state.preferences});
       else{const result=M.merge(state,fileState);state=result.state;conflicts+=result.conflicts;}
       changed=true;
     }
     folder.conflicts=[];
     for await (const [name,entry] of folder.handle.entries()){
       if(entry.kind!=='file'||name===FOLDER_DATA||!name.startsWith(FOLDER_DATA.slice(0,-5))||!name.endsWith('.json'))continue;
-      try{const result=M.merge(state,stripEnvelope(JSON.parse(await (await entry.getFile()).text())));if(result.added||result.conflicts){state=result.state;changed=true;conflicts+=result.conflicts;}folder.conflicts.push(name);}catch{}
+      try{const result=M.merge(state,stripEnvelope(JSON.parse(await (await entry.getFile()).text())));if(result.added||result.conflicts||result.updated||M.contentOf(result.state)!==M.contentOf(state)){state=result.state;changed=true;conflicts+=result.conflicts;}folder.conflicts.push(name);}catch{}
     }
-    const text=JSON.stringify(state),hash=hashText(text);
+    const hash=contentHash(state);
     if(hash!==fileHash){
       await writeFolderText(FOLDER_DATA,JSON.stringify({...state,exportedAt:now(),device:deviceName()},null,2));
       await writeFolderText(FOLDER_MD,fullMarkdown());
     }
     localStorage.setItem(KEY+'-folder-file',hash);localStorage.setItem(KEY+'-folder-local',hash);
     if(changed){folder.applying=true;try{persist();}finally{folder.applying=false;}render();}
-    if(conflicts)toast('另一台设备也改了笔记，有差异的记录都已保留，请在笔记中核对。');
+    if(conflicts)toast('另一台设备也改了同一处笔记，已采用较新的一版，较早的一版在修改记录中，请核对。');
     folder.status='on';folder.error='';folder.syncedAt=Date.now();
   }catch(error){
     folder.status=error.name==='NotAllowedError'?'permission':'error';folder.error=error.message;
@@ -141,7 +145,7 @@ async function checkServiceFiles(){
     for(const copy of await api('conflicts')){
       const result=M.merge(state,copy.state);state=result.state;persist();changed=true;
       await api('conflict-done',{name:copy.name});
-      toast(`已合并网盘生成的冲突副本 ${copy.name}，有差异的记录都已保留。`);
+      toast(`已合并网盘生成的冲突副本 ${copy.name}。`);
     }
     if(changed&&!modal.open&&!document.activeElement?.matches('input,textarea,select'))render();
   }catch(error){service.error=error.message;}
@@ -165,16 +169,23 @@ renderOutline=function(){return backupNotice()+outlineBeforeStorage();};
 // ---------- 导出同步: say plainly where this device keeps the notes ----------
 function storagePanel(){
   const exported=lastExport()?`上次导出：${mdDate(lastExport())}`:'还没有导出过备份。';
-  if(service.connected)return `<section class="storage-panel"><h3>这台电脑的笔记保存在哪里</h3><p>保存在本文件夹的 <code>${esc(DATA.edition.dataDirectory)}</code> 中${DATA.edition.exportFolder?`，并在文件夹中写出便于阅读和迁移的 <code>${FOLDER_DATA}</code> 和 <code>${FOLDER_MD}</code>`:''}（浏览器里另有一份）。把整个法典笔记文件夹放进 Dropbox、百度网盘或阿里云盘的同步文件夹，另一台电脑打开同一个文件夹，就能接着写。</p><ul><li>不要在两台电脑上同时打开；在一台上写完，等网盘同步好，再到另一台打开。</li><li>两台电脑都改过时，有差异的记录都会保留；网盘生成的冲突副本会自动合并。</li></ul><p class="note-source">${exported}</p></section>`;
+  if(service.connected)return `<section class="storage-panel"><h3>这台电脑的笔记保存在哪里</h3><p>保存在本文件夹的 <code>${esc(DATA.edition.dataDirectory)}</code> 中${DATA.edition.exportFolder?`，并在文件夹中写出便于阅读和迁移的 <code>${FOLDER_DATA}</code> 和 <code>${FOLDER_MD}</code>`:''}（浏览器里另有一份）。把整个法典笔记文件夹放进 Dropbox、百度网盘或阿里云盘的同步文件夹，另一台电脑打开同一个文件夹，就能接着写。</p><ul><li>不要在两台电脑上同时打开；在一台上写完，等网盘同步好，再到另一台打开。</li><li>两台电脑都改过时，同一则笔记采用较新的一版，较早的一版留在它的修改记录里；一台上删除的，另一台也随之删除。网盘生成的冲突副本会自动合并。</li></ul><p class="note-source">${exported}</p></section>`;
   if(folderSupported()){
     const state_=folder.status,name=esc(folder.handle?.name||'');
-    return `<section class="storage-panel"><h3>保存到网盘文件夹</h3><p>选择 Dropbox、百度网盘或阿里云盘同步文件夹里的一个文件夹，例如把法典笔记文件夹放进网盘后选它。每次修改都会写入其中的 <code>${FOLDER_DATA}</code>，并更新 <code>${FOLDER_MD}</code>。另一台电脑用 Chrome 或 Edge 打开法典笔记、选择同一个文件夹，笔记就会合并过来。</p>${state_==='on'?`<p class="storage-status on">已连接“${name}”${folder.syncedAt?` · 最近同步 ${mdDate(folder.syncedAt)}`:''}</p>`:state_==='permission'?`<p class="storage-status">“${name}”需要重新允许读写。</p>`:state_==='error'?`<p class="service-error">同步未完成：${esc(folder.error)}</p>`:'<p class="storage-status">尚未选择文件夹，笔记只保存在这个浏览器中。</p>'}${folder.conflicts.length?`<p class="note-source">已合并网盘生成的冲突副本：${folder.conflicts.map(esc).join('、')}。确认笔记无误后，可以在网盘中删除这些副本。</p>`:''}<div class="row wrap">${state_==='permission'?'<button class="btn primary" data-action="folder-resume">继续同步</button>':`<button class="btn ${state_==='on'?'':'primary'}" data-action="folder-choose">${state_==='on'?'改选文件夹':'选择文件夹'}</button>`}${state_==='on'?'<button class="btn" data-action="folder-sync">立即同步</button><button class="text-btn" data-action="folder-stop">停止使用</button>':''}</div><ul><li>不要在两台电脑上同时打开；在一台上写完，等网盘同步好，再到另一台打开。</li><li>两台设备都改过时，有差异的记录都会保留，不会互相覆盖。</li></ul><p class="note-source">${exported}</p></section>`;
+    return `<section class="storage-panel"><h3>保存到网盘文件夹</h3><p>选择 Dropbox、百度网盘或阿里云盘同步文件夹里的一个文件夹，例如把法典笔记文件夹放进网盘后选它。每次修改都会写入其中的 <code>${FOLDER_DATA}</code>，并更新 <code>${FOLDER_MD}</code>。另一台电脑用 Chrome 或 Edge 打开法典笔记、选择同一个文件夹，笔记就会合并过来。</p>${state_==='on'?`<p class="storage-status on">已连接“${name}”${folder.syncedAt?` · 最近同步 ${mdDate(folder.syncedAt)}`:''}</p>`:state_==='permission'?`<p class="storage-status">“${name}”需要重新允许读写。</p>`:state_==='error'?`<p class="service-error">同步未完成：${esc(folder.error)}</p>`:'<p class="storage-status">尚未选择文件夹，笔记只保存在这个浏览器中。</p>'}${folder.conflicts.length?`<p class="note-source">已合并网盘生成的冲突副本：${folder.conflicts.map(esc).join('、')}。确认笔记无误后，可以在网盘中删除这些副本。</p>`:''}<div class="row wrap">${state_==='permission'?'<button class="btn primary" data-action="folder-resume">继续同步</button>':`<button class="btn ${state_==='on'?'':'primary'}" data-action="folder-choose">${state_==='on'?'改选文件夹':'选择文件夹'}</button>`}${state_==='on'?'<button class="btn" data-action="folder-sync">立即同步</button><button class="text-btn" data-action="folder-stop">停止使用</button>':''}</div><ul><li>不要在两台电脑上同时打开；在一台上写完，等网盘同步好，再到另一台打开。</li><li>两台设备都改过时，同一则笔记采用较新的一版，较早的一版留在它的修改记录里；一台上删除的，另一台也随之删除。</li></ul><p class="note-source">${exported}</p></section>`;
   }
   const edition=serviceFreeEdition()||'这个浏览器';
   return `<section class="storage-panel"><h3>这台设备的笔记保存在哪里</h3><p>${esc(edition)}的笔记只保存在这台设备上，不会自动同步。请定期导出 JSON，放进网盘或发给自己；换设备时，在新设备的“导入与合并”中导入。</p>${/Safari/.test(navigator.userAgent)&&!/Chrome|Chromium|Edg/.test(navigator.userAgent)&&!SHELL?'<p class="note-source">苹果设备请从主屏幕或程序坞上的图标打开，不要直接在 Safari 中使用，以免浏览器清理网站数据。</p>':''}<p class="note-source">${exported}</p></section>`;
 }
+// Records whose article is not in this code (a module was taken out, or the text changed): kept, not shown.
+function parkedPanel(){
+  if(!state.parked?.length)return '';
+  const names={notes:'笔记',materials:'材料',links:'条文关联',marks:'标记',groups:'部分',groupLinks:'部分之间的关联',materialRelations:'材料关联',termAnchors:'词条定位',bookmarks:'收藏',read:'已读',drafts:'草稿',memoryCards:'记忆卡片',reviews:'复习安排',subtitles:'条旨',subtitleHistory:'条旨修改记录'},count={};
+  for(const p of state.parked)count[p.kind]=(count[p.kind]||0)+1;
+  return `<section class="storage-panel"><h3>暂存的记录</h3><p>有 ${state.parked.length} 条记录所在的条文不在这部法典现在的文本中（模块被取出，或文字有改动）：${Object.entries(count).map(([k,n])=>`${names[k]||k} ${n}`).join('、')}。它们没有丢失，随 JSON 备份一起保存；把模块放回来，这些记录会自动回到原处。</p></section>`;
+}
 const settingsBeforeStorage=renderSettings;
-renderSettings=function(){const html=settingsBeforeStorage(),at=html.indexOf('</section>')+'</section>'.length;return html.slice(0,at)+storagePanel()+html.slice(at);};
+renderSettings=function(){const html=settingsBeforeStorage(),at=html.indexOf('</section>')+'</section>'.length;return html.slice(0,at)+storagePanel()+parkedPanel()+html.slice(at);};
 
 document.addEventListener('click',async event=>{
   const el=event.target.closest('[data-action]');if(!el)return;
@@ -195,3 +206,20 @@ document.addEventListener('click',async event=>{
 });
 serviceStarted.finally(()=>{folderStart();checkServiceFiles();loadLocalFiles().then(()=>{if(['updates','terms'].includes(ui.view)&&!modal.open)render();});});
 render();
+
+// ---------- 设置 for all codes: each code's page has its own browser storage, so the local service keeps one copy ----------
+async function syncDeviceSettings(){
+  if(!service.connected)return;
+  try{
+    const remote=await api('device-settings');
+    if(!Object.keys(remote).length){await api('device-settings',deviceSettings);return;}
+    const before=JSON.stringify(deviceSettings);Object.assign(deviceSettings,remote);
+    if(JSON.stringify(deviceSettings)===before)return;
+    try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(deviceSettings));}catch{}
+    applyDeviceSettings();if(!modal.open&&!document.activeElement?.matches('input,textarea,select'))render();
+  }catch{}
+}
+const saveDeviceSettingsHere=saveDeviceSettings;
+saveDeviceSettings=function(){saveDeviceSettingsHere();if(service.connected)api('device-settings',deviceSettings).catch(()=>{});};
+serviceStarted.finally(()=>{syncDeviceSettings();loadCrossBack();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncDeviceSettings();loadCrossBack();}});

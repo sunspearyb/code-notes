@@ -1,6 +1,22 @@
 'use strict';
 
 // Pure data functions. Version-specific character anchors never depend on DOM position.
+
+// A backup of another code whose text is a module of this code (codex.accepts, written by compose.py):
+// its article ids get the module's prefix (a33 → xfa33), so the notes can be merged into this notebook.
+// Edits of that code's own guide and reading preferences stay behind.
+function rebaseBackup(input,prefix,bookId){
+  const s=JSON.parse(JSON.stringify(input)),keys=o=>Object.fromEntries(Object.entries(o||{}).map(([k,v])=>[prefix+k,v]));
+  (function walk(o){
+    if(Array.isArray(o))o.forEach(walk);
+    else if(o&&typeof o==='object'){if(typeof o.unitId==='string')o.unitId=prefix+o.unitId;if(Array.isArray(o.unitIds))o.unitIds=o.unitIds.map(x=>prefix+x);Object.values(o).forEach(walk);}
+  })(s);
+  s.bookId=bookId;if(typeof s.current==='string')s.current=prefix+s.current;
+  for(const k of ['bookmarks','read'])if(Array.isArray(s[k]))s[k]=s[k].map(x=>prefix+x);
+  for(const k of ['drafts','reviews','subtitles','subtitleHistory','memoryCards'])if(s[k])s[k]=keys(s[k]);
+  delete s.guideEdits;delete s.guideHistory;delete s.preferences;
+  return s;
+}
 function createCoreNotebookModel(data) {
   refineRevisions(data.history);
   const years = data.history.years;
@@ -122,11 +138,30 @@ function createCoreNotebookModel(data) {
   }
   function backlinks(s,unitId) {return s.links.filter(l=>[...l.from,...l.to].some(a=>a.unitId===unitId));}
   function termReferences(s,termId){const term=s.terms.find(t=>t.id===termId);return {anchors:term?.anchors||[],notes:s.notes.filter(n=>n.termIds.includes(termId))};}
+  const stable=o=>{if(Array.isArray(o))return o.map(stable);if(o&&typeof o==='object')return Object.fromEntries(Object.entries(o).filter(([k])=>k!=='id').sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,stable(v)]));return o;};
+  const same=(a,b)=>JSON.stringify(stable(a))===JSON.stringify(stable(b));
+  // Two versions of the record with one id (a note, a material relation): the one changed later stands,
+  // and the earlier wording goes into its history (修改记录), so nothing written is lost and no second
+  // copy appears. clash: both sides had changed it, and the earlier wording was not yet in the history.
+  const wording=r=>JSON.stringify([r.text,r.question||'',r.methods||[],r.quote||'',r.analysis||null]);
+  const pastVersion=r=>JSON.parse(JSON.stringify({text:r.text,question:r.question||'',methods:r.methods||[],quote:r.quote||'',updatedAt:r.updatedAt||r.createdAt,...(r.analysis?{analysis:r.analysis}:{})}));
+  const changedAt=r=>Date.parse(r.updatedAt||r.createdAt)||0;
+  // Changed at the same moment: a fixed order decides (not counting the history), so merging A into B and B into A agree.
+  const tieKey=r=>JSON.stringify(stable({...r,history:undefined}));
+  const later=(a,b)=>changedAt(a)>changedAt(b)||changedAt(a)===changedAt(b)&&tieKey(a)>=tieKey(b);
+  function settle(a,b) {
+    const [win,lose]=later(a,b)?[a,b]:[b,a],differs=wording(win)!==wording(lose);
+    const clash=differs&&!(win.history||[]).some(h=>wording(h)===wording(lose));
+    const seen=new Set(),history=[];
+    const all=[...(a.history||[]),...(b.history||[]),...(differs?[pastVersion(lose)]:[])].map(h=>[h,wording(h)+'@'+h.updatedAt]);
+    all.sort((x,y)=>(Date.parse(x[0].updatedAt)||0)-(Date.parse(y[0].updatedAt)||0)||(x[1]<y[1]?-1:x[1]>y[1]?1:0));
+    for(const [h,key] of all)if(!seen.has(key)){seen.add(key);history.push(h);}
+    const record=JSON.parse(JSON.stringify(win));if(history.length)record.history=JSON.parse(JSON.stringify(history));else delete record.history;
+    return {record,clash};
+  }
   function merge(current,incoming) {
     incoming=migrate(incoming);validate(current);
-    const next=JSON.parse(JSON.stringify(current)),remap=new Map(),materialMap=new Map();let added=0,conflicts=0;
-    const stable=o=>{if(Array.isArray(o))return o.map(stable);if(o&&typeof o==='object')return Object.fromEntries(Object.entries(o).filter(([k])=>k!=='id').sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,stable(v)]));return o;};
-    const same=(a,b)=>JSON.stringify(stable(a))===JSON.stringify(stable(b));
+    const next=JSON.parse(JSON.stringify(current)),remap=new Map(),materialMap=new Map();let added=0,conflicts=0,updated=0;
     for(const term of incoming.terms){
       const exact=next.terms.find(t=>t.id===term.id&&same(t,term));
       if(exact){remap.set(term.id,exact.id);continue;}
@@ -141,26 +176,34 @@ function createCoreNotebookModel(data) {
       const record=key==='notes'?{...item,termIds:item.termIds.map(t=>remap.get(t)||t),evidenceIds:(item.evidenceIds||[]).map(t=>materialMap.get(t)||t)}:item;
       const exact=next[key].find(x=>same(x,record));
       if(exact){if(key==='materials')materialMap.set(item.id,exact.id);continue;}
+      const mine=key==='notes'?next.notes.findIndex(x=>x.id===record.id):-1;
+      if(mine>=0){
+        const settled=settle(next.notes[mine],record);
+        if(JSON.stringify(settled.record)!==JSON.stringify(next.notes[mine])){next.notes[mine]=settled.record;settled.clash?conflicts++:updated++;}
+        continue;
+      }
       const collision=next[key].some(x=>x.id===record.id),recordId=collision?id():record.id;next[key].push({...record,id:recordId});if(key==='materials')materialMap.set(item.id,recordId);collision?conflicts++:added++;
     }
     for(const key of ['bookmarks','read'])next[key]=[...new Set([...next[key],...incoming[key]])];
     for(const [unitId,r] of Object.entries(incoming.reviews))if(!next.reviews[unitId])next.reviews[unitId]=r;
     for(const [key,draft] of Object.entries(incoming.drafts)){
       const imported={...draft,editId:undefined,evidenceIds:(draft.evidenceIds||[]).map(t=>materialMap.get(t)||t)};
+      // Compare the two drafts filled in the same way; a draft with neither text nor question is not worth a note.
+      const filled=d=>({...d,editId:undefined,evidenceIds:d.evidenceIds||[]});
       const meaningful=d=>d&&(d.text||d.question||d.quote||d.anchors?.length||d.methods?.length||d.evidenceIds?.length);
       if(!meaningful(next.drafts[key]))next.drafts[key]=imported;
-      else if(meaningful(imported)&&!same({...next.drafts[key],editId:undefined},imported)){
+      else if(meaningful(imported)&&(draft.text||draft.question)&&!same(filled(next.drafts[key]),filled(imported))){
         const [unitId,year]=key.split('@'),text=`[从备份恢复的草稿]\n${draft.text||'[尚未填写正文]'}`;
         if(!next.notes.some(n=>n.unitId===unitId&&n.year===Number(year)&&n.text===text&&n.question===(draft.question||'')&&JSON.stringify(n.methods||[])===JSON.stringify(draft.methods||[])&&JSON.stringify(n.evidenceIds||[])===JSON.stringify(imported.evidenceIds))){addNote(next,{unitId,year:Number(year),text,anchors:draft.anchors||[],quote:draft.quote||'',question:draft.question||'',methods:draft.methods||[],evidenceIds:imported.evidenceIds});conflicts++;}
       }
     }
-    validate(next);return {state:next,added,conflicts};
+    validate(next);return {state:next,added,conflicts,updated};
   }
   function tokenize(text) {
     if(typeof Intl.Segmenter==='function')return [...new Intl.Segmenter('zh-CN',{granularity:'word'}).segment(text)].map(t=>({text:t.segment,start:t.index,end:t.index+t.segment.length,word:t.isWordLike}));
     let offset=0;return Array.from(text).map(t=>{const token={text:t,start:offset,end:offset+t.length,word:!/[\s\p{P}]/u.test(t)};offset+=t.length;return token;});
   }
-  return {units,years,get,version,sequence,whole,anchor,anchorKey,anchorValid,mergeAnchors,fresh,migrate,validate,addNote,addTerm,addLink,backlinks,termReferences,merge,tokenize,id,timestamp};
+  return {units,years,get,version,sequence,whole,anchor,anchorKey,anchorValid,mergeAnchors,fresh,migrate,validate,addNote,addTerm,addLink,backlinks,termReferences,merge,settle,later,tokenize,id,timestamp};
 }
 
 // Revision display: align paragraphs (allowing merges and splits), then diff each pair by character.

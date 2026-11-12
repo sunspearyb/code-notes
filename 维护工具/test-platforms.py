@@ -16,6 +16,10 @@ import zipfile
 
 sys.dont_write_bytecode = True
 ROOT = Path(sys.argv.pop(1)).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent
+edition_spec = importlib.util.spec_from_file_location('package_edition', ROOT / 'demo/edition.py')
+edition = importlib.util.module_from_spec(edition_spec)
+edition_spec.loader.exec_module(edition)
+PACKS = edition.pack_names()
 spec = importlib.util.spec_from_file_location('editions', Path(__file__).with_name('制作各终端版本.py'))
 editions = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(editions)
@@ -25,8 +29,8 @@ class PlatformTests(unittest.TestCase):
     def test_android_aapt_utf8_names_survive_dex(self):
         with tempfile.TemporaryDirectory() as tmp:
             apk, dex = Path(tmp) / 'base.apk', Path(tmp) / 'classes.dex'
-            expected = {'assets/index.html': b'home', 'assets/法典笔记.html': b'home',
-                        'assets/法典笔记-civil-code.html': b'civil', 'assets/法典笔记-cyber-law.html': b'cyber'}
+            expected = {'assets/index.html': b'home', **{
+                'assets/' + edition.page_name(name): name.encode('utf-8') for name in PACKS}}
             with zipfile.ZipFile(apk, 'w', zipfile.ZIP_DEFLATED) as archive:
                 for name, data in expected.items():
                     archive.writestr(name, data)
@@ -52,11 +56,11 @@ class PlatformTests(unittest.TestCase):
 
     def check_routes(self, folder):
         pages = list(folder.rglob('index.html'))
-        self.assertEqual(len(pages), 3)
+        self.assertEqual(len(pages), len(PACKS))
         for page in pages:
             html = page.read_text(encoding='utf-8')
             routes = json.loads(unescape(re.search(r'<meta name="fadian-web-routes" content="(.*?)">', html)[1]))
-            self.assertEqual(len(routes), 3)
+            self.assertEqual(set(routes), {edition.load_codex(name)['id'] for name in PACKS})
             for code_id, href in routes.items():
                 target = (page.parent / href).resolve()
                 self.assertTrue(target.is_relative_to(folder.resolve()))
@@ -68,7 +72,7 @@ class PlatformTests(unittest.TestCase):
             original = editions.DIST
             try:
                 editions.DIST = Path(tmp)
-                for name in ['constitution', 'civil-code', 'cyber-law']:
+                for name in PACKS:
                     pack = editions.Pack(ROOT, name)
                     folder, archive = editions.make_web(pack.page, 'regression', pack)
                     self.check_routes(folder)
@@ -82,10 +86,10 @@ class PlatformTests(unittest.TestCase):
     def test_hosted_urls_remain_unchanged(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
-            for name in ['constitution', 'civil-code', 'cyber-law']:
+            for name in PACKS:
                 pack = editions.Pack(ROOT, name)
                 editions.make_web(pack.page, 'regression', pack, folder)
-            for path in ['index.html', 'civil-code/index.html', 'cyber-law/index.html']:
+            for path in [str(Path(editions.Pack(ROOT, name).web) / 'index.html') for name in PACKS]:
                 self.assertTrue((folder / path).is_file())
             self.check_routes(folder)
 

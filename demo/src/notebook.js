@@ -201,6 +201,9 @@ function createNotebookModel(data) {
       const mapping=new Map();
       for(const item of records) {
         const exact=s[key].find(x=>same(x,item)); if(exact){mapping.set(item.id,exact.id);continue;}
+        // A part changed on both sides: the later one stands (parts keep no history of earlier versions).
+        const mine=key==='groups'?s.groups.findIndex(x=>x.id===item.id):-1;
+        if(mine>=0){if(!base.later(s.groups[mine],item)){s.groups[mine]=copy(item);result.updated++;}mapping.set(item.id,item.id);continue;}
         const collision=s[key].some(x=>x.id===item.id), record={...copy(item),id:collision?base.id():item.id};
         s[key].push(record);mapping.set(item.id,record.id);collision?result.conflicts++:result.added++;
       }

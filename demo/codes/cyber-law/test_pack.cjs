@@ -11,10 +11,11 @@ const M=vm.runInContext('createLearningModel(data)',context);
 const same=(a,b)=>assert.equal(JSON.stringify(a),JSON.stringify(b));
 assert.equal(M.fresh().bookId,codex.id);
 for(const field of ['notes','materials','links','terms','read','bookmarks','installedExamples'])assert.equal(M.fresh()[field].length,0,field);
-const draft=json(path.join(__dirname,'subtitles-draft.json'));
-same(data.subtitles,draft);
-same(Object.keys(draft).sort(),M.units.map(u=>u.id).sort());
-assert(Object.values(draft).every(s=>[...s].length>=4&&[...s].length<=10));
+// The separate review draft is not shipped in public packages; validate the loaded headings.
+const draftPath=path.join(__dirname,'subtitles-draft.json');
+if(fs.existsSync(draftPath))same(data.subtitles,json(draftPath));
+same(Object.keys(data.subtitles).sort(),M.units.map(u=>u.id).sort());
+assert(Object.values(data.subtitles).every(s=>[...s].length>=4&&[...s].length<=10));
 assert(!Object.values(codex.files).includes('subtitles-draft.json'));
 for(const year of M.years){
  const live=M.units.filter(u=>u.versions[year].exists).map(u=>u.id);
@@ -65,4 +66,4 @@ for(const year of Object.keys(data.english.texts))for(const [id,ps] of Object.en
 const fresh=M.fresh();M.addNote(fresh,{unitId:M.units[0].id,year:M.years.at(-1),text:'data-pack-roundtrip-test'});
 assert.equal(M.migrate(JSON.parse(JSON.stringify(fresh))).notes[0].text,'data-pack-roundtrip-test');
 const foreign=JSON.parse(JSON.stringify(fresh));foreign.bookId='cn-constitution';assert.throws(()=>M.migrate(foreign));
-console.log(`PASS ${codex.id}: real text snapshots, full comparison reconstruction, structure, citations, search, empty initial notes, loaded subtitle drafts, English coverage, backup isolation.`);
+console.log(`PASS ${codex.id}: real text snapshots, full comparison reconstruction, structure, citations, search, empty initial notes, loaded subtitles, English coverage, backup isolation.`);

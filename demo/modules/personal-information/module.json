@@ -1,0 +1,146 @@
+{
+  "id": "personal-information",
+  "name": "个人信息保护法",
+  "about": "中华人民共和国个人信息保护法，取自国家法律法规数据库；来源和核对方法见 codes/cyber-law/来源.md。",
+  "years": [
+    2021
+  ],
+  "books": [
+    "cn-cyber-law"
+  ],
+  "law": {
+    "name": "中华人民共和国个人信息保护法",
+    "short": "个人信息保护法",
+    "aliases": [
+      "个保法"
+    ],
+    "citation": {
+      "latest": "《中华人民共和国个人信息保护法》",
+      "original": "《中华人民共和国个人信息保护法》（{year} 年）",
+      "amended": "《中华人民共和国个人信息保护法》（{year} 年修正）",
+      "aliases": [
+        "中华人民共和国个人信息保护法",
+        "个人信息保护法",
+        "个保法"
+      ],
+      "note": "引用时注明法律全称、条款；引用以往文本时注明版本年份。",
+      "byYear": {
+        "2021": "《中华人民共和国个人信息保护法》",
+        "2025": "《中华人民共和国个人信息保护法》"
+      }
+    }
+  },
+  "levels": {
+    "chapter": {
+      "name": "章",
+      "numbered": true
+    },
+    "section": {
+      "name": "节",
+      "numbered": true
+    }
+  },
+  "structure": [
+    {
+      "id": "pi-node-1",
+      "level": "chapter",
+      "name": "总　　则",
+      "title": "第一章　总　　则",
+      "from": "pi1",
+      "number": 1,
+      "to": "pi12"
+    },
+    {
+      "id": "pi-node-2",
+      "level": "chapter",
+      "name": "个人信息处理规则",
+      "title": "第二章　个人信息处理规则",
+      "from": "pi13",
+      "number": 2,
+      "children": [
+        {
+          "id": "pi-node-3",
+          "level": "section",
+          "name": "一般规定",
+          "title": "第一节　一般规定",
+          "from": "pi13",
+          "number": 1,
+          "to": "pi27"
+        },
+        {
+          "id": "pi-node-4",
+          "level": "section",
+          "name": "敏感个人信息的处理规则",
+          "title": "第二节　敏感个人信息的处理规则",
+          "from": "pi28",
+          "number": 2,
+          "to": "pi32"
+        },
+        {
+          "id": "pi-node-5",
+          "level": "section",
+          "name": "国家机关处理个人信息的特别规定",
+          "title": "第三节　国家机关处理个人信息的特别规定",
+          "from": "pi33",
+          "number": 3,
+          "to": "pi37"
+        }
+      ],
+      "to": "pi37"
+    },
+    {
+      "id": "pi-node-6",
+      "level": "chapter",
+      "name": "个人信息跨境提供的规则",
+      "title": "第三章　个人信息跨境提供的规则",
+      "from": "pi38",
+      "number": 3,
+      "to": "pi43"
+    },
+    {
+      "id": "pi-node-7",
+      "level": "chapter",
+      "name": "个人在个人信息处理活动中的权利",
+      "title": "第四章　个人在个人信息处理活动中的权利",
+      "from": "pi44",
+      "number": 4,
+      "to": "pi50"
+    },
+    {
+      "id": "pi-node-8",
+      "level": "chapter",
+      "name": "个人信息处理者的义务",
+      "title": "第五章　个人信息处理者的义务",
+      "from": "pi51",
+      "number": 5,
+      "to": "pi59"
+    },
+    {
+      "id": "pi-node-9",
+      "level": "chapter",
+      "name": "履行个人信息保护职责的部门",
+      "title": "第六章　履行个人信息保护职责的部门",
+      "from": "pi60",
+      "number": 6,
+      "to": "pi65"
+    },
+    {
+      "id": "pi-node-10",
+      "level": "chapter",
+      "name": "法律责任",
+      "title": "第七章　法律责任",
+      "from": "pi66",
+      "number": 7,
+      "to": "pi71"
+    },
+    {
+      "id": "pi-node-11",
+      "level": "chapter",
+      "name": "附　　则",
+      "title": "第八章　附　　则",
+      "from": "pi72",
+      "number": 8,
+      "to": "pi74"
+    }
+  ]
+}

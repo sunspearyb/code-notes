@@ -3,6 +3,7 @@
   "title": "法典笔记",
   "storageKey": "fadian-notes-clean-v1",
   "legacyStorageKey": null,
+  "tarotDeck": false,
   "serviceMarker": "fadian-notes-clean-v1",
   "port": 8766,
   "dataDirectory": ".fadian-clean-local",

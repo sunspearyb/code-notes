@@ -1,0 +1,282 @@
+{
+  "about": "中华人民共和国立法法，由模块拼装（见 codex.json 的 modules）。",
+  "id": "user-legislation-law",
+  "name": "中华人民共和国立法法",
+  "short": "立法法",
+  "whole": "立法法",
+  "amendment": "修正",
+  "portOffset": 7,
+  "webFolder": "legislation-law",
+  "citation": {
+    "latest": "《中华人民共和国立法法》",
+    "original": "《中华人民共和国立法法》（{year} 年）",
+    "amended": "《中华人民共和国立法法》（{year} 年修正）",
+    "aliases": [
+      "中华人民共和国立法法",
+      "立法法"
+    ],
+    "note": "引用时注明文件全称、条款；引用以往文本时注明版本年份。"
+  },
+  "files": {
+    "history": "versions.json",
+    "subtitles": "subtitles.json",
+    "guide": "guide.json"
+  },
+  "modules": [
+    "legislation-law"
+  ],
+  "levels": {
+    "law": {
+      "name": "",
+      "numbered": false
+    },
+    "chapter": {
+      "name": "章",
+      "numbered": true
+    },
+    "section": {
+      "name": "节",
+      "numbered": true
+    }
+  },
+  "structure": [
+    {
+      "id": "legislation-law",
+      "level": "law",
+      "name": "立法法",
+      "from": "lf1",
+      "to": "lf120",
+      "law": {
+        "name": "中华人民共和国立法法",
+        "short": "立法法",
+        "aliases": [],
+        "citation": {
+          "latest": "《中华人民共和国立法法》",
+          "original": "《中华人民共和国立法法》（{year} 年）",
+          "amended": "《中华人民共和国立法法》（{year} 年修正）",
+          "aliases": [
+            "中华人民共和国立法法",
+            "立法法"
+          ],
+          "note": "引用时注明文件全称、条款；引用以往文本时注明版本年份。"
+        }
+      },
+      "children": [
+        {
+          "id": "lf-node-1",
+          "level": "chapter",
+          "name": "总则",
+          "title": "第一章　总则",
+          "from": "lf1",
+          "number": 1,
+          "to": "lf9"
+        },
+        {
+          "id": "lf-node-2",
+          "level": "chapter",
+          "name": "法律",
+          "title": "第二章　法律",
+          "from": "lf10",
+          "number": 2,
+          "children": [
+            {
+              "id": "lf-node-3",
+              "level": "section",
+              "name": "立法权限",
+              "title": "第一节　立法权限",
+              "from": "lf10",
+              "number": 1,
+              "to": "lf16"
+            },
+            {
+              "id": "lf-node-4",
+              "level": "section",
+              "name": "全国人民代表大会立法程序",
+              "title": "第二节　全国人民代表大会立法程序",
+              "from": "lf17",
+              "number": 2,
+              "to": "lf28"
+            },
+            {
+              "id": "lf-node-5",
+              "level": "section",
+              "name": "全国人民代表大会常务委员会立法程序",
+              "title": "第三节　全国人民代表大会常务委员会立法程序",
+              "from": "lf29",
+              "number": 3,
+              "to": "lf47"
+            },
+            {
+              "id": "lf-node-6",
+              "level": "section",
+              "name": "法律解释",
+              "title": "第四节　法律解释",
+              "from": "lf48",
+              "number": 4,
+              "to": "lf53"
+            },
+            {
+              "id": "lf-node-7",
+              "level": "section",
+              "name": "其他规定",
+              "title": "第五节　其他规定",
+              "from": "lf54",
+              "number": 5,
+              "to": "lf71"
+            }
+          ],
+          "to": "lf71"
+        },
+        {
+          "id": "lf-node-8",
+          "level": "chapter",
+          "name": "行政法规",
+          "title": "第三章　行政法规",
+          "from": "lf72",
+          "number": 3,
+          "to": "lf79"
+        },
+        {
+          "id": "lf-node-9",
+          "level": "chapter",
+          "name": "地方性法规、自治条例和单行条例、规章",
+          "title": "第四章　地方性法规、自治条例和单行条例、规章",
+          "from": "lf80",
+          "number": 4,
+          "children": [
+            {
+              "id": "lf-node-10",
+              "level": "section",
+              "name": "地方性法规、自治条例和单行条例",
+              "title": "第一节　地方性法规、自治条例和单行条例",
+              "from": "lf80",
+              "number": 1,
+              "to": "lf90"
+            },
+            {
+              "id": "lf-node-11",
+              "level": "section",
+              "name": "规章",
+              "title": "第二节　规章",
+              "from": "lf91",
+              "number": 2,
+              "to": "lf97"
+            }
+          ],
+          "to": "lf97"
+        },
+        {
+          "id": "lf-node-12",
+          "level": "chapter",
+          "name": "适用与备案审查",
+          "title": "第五章　适用与备案审查",
+          "from": "lf98",
+          "number": 5,
+          "to": "lf116"
+        },
+        {
+          "id": "lf-node-13",
+          "level": "chapter",
+          "name": "附则",
+          "title": "第六章　附则",
+          "from": "lf117",
+          "number": 6,
+          "to": "lf120"
+        }
+      ]
+    }
+  ],
+  "welcome": {
+    "body": "阅读立法法，在条文下写笔记，记录条文之间、条文与材料之间的联系。",
+    "start": "lf1",
+    "startLabel": "从第一条读起"
+  },
+  "searchQuery": "中华人民共和国立法法",
+  "features": {
+    "amendments": true
+  },
+  "relationCategories": {
+    "supporting": {
+      "name": "配套规定",
+      "materialType": "配套规定",
+      "fields": [
+        [
+          "document",
+          "名称"
+        ],
+        [
+          "type",
+          "类别",
+          [
+            "行政法规",
+            "部门规章",
+            "国家标准"
+          ]
+        ],
+        [
+          "issuer",
+          "发布机关"
+        ],
+        [
+          "number",
+          "文号或标准号"
+        ],
+        [
+          "status",
+          "效力",
+          [
+            "有效",
+            "已修改",
+            "已废止"
+          ]
+        ]
+      ]
+    },
+    "case": {
+      "name": "典型案例",
+      "materialType": "案例",
+      "fields": [
+        [
+          "document",
+          "案例名称"
+        ],
+        [
+          "issuer",
+          "发布机关"
+        ],
+        [
+          "number",
+          "案号或编号"
+        ],
+        [
+          "holding",
+          "处理要点"
+        ]
+      ]
+    },
+    "comparative": {
+      "name": "比较阅读",
+      "method": "比较法解释",
+      "materialType": "比较法",
+      "fields": [
+        [
+          "subject",
+          "比较对象"
+        ],
+        [
+          "jurisdiction",
+          "国家或地区"
+        ],
+        [
+          "provision",
+          "条款或出处"
+        ]
+      ],
+      "intro": "填写比较对象及出处，将其与本数据包的法律条文建立关联。",
+      "newLabel": "新建比较笔记",
+      "titlePlaceholder": "如：欧盟《通用数据保护条例》第六条",
+      "reasonLabel": "我的比较",
+      "reasonTemplate": "相同点：\n不同点：\n制度背景：\n对理解本国条文的帮助："
+    }
+  }
+}

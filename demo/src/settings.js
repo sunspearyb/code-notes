@@ -8,7 +8,7 @@ const SETTINGS_KEY='fadian-settings';
 const APPEARANCES=[['auto','跟随系统'],['light','日光华政'],['dark','暗夜华政'],['green','墨绿']];
 const LAW_SCALES=[[0.9,'小'],[1,'标准'],[1.15,'大'],[1.3,'特大']];
 const deviceSettings=(()=>{
-  const defaults={appearance:'auto',lawScale:1,focusLarger:true,continuous:true};
+  const defaults={appearance:'auto',lawScale:1,focusLarger:true,continuous:true,tarot:false};
   let saved={};try{saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')||{};}catch{}
   // Earlier versions kept only the palette, per code.
   try{if(!saved.appearance&&localStorage.getItem(KEY+'-theme')==='green')saved.appearance='green';}catch{}
@@ -31,14 +31,14 @@ darkQuery?.addEventListener?.('change',()=>{if(deviceSettings.appearance==='auto
 function choiceGroup(name,options,current,action){return `<div class="segmented settings-choices" role="radiogroup" aria-label="${name}">${options.map(([value,text,title])=>`<button role="radio" data-action="${action}" data-value="${esc(value)}" class="${String(current)===String(value)?'active':''}" aria-checked="${String(current)===String(value)}" ${title?`title="${esc(title)}"`:''}>${action==='set-appearance'?`<span class="theme-swatch ${value}" aria-hidden="true"></span>`:''}${esc(text)}</button>`).join('')}</div>`;}
 function switchRow(key,title,hint){return `<label class="settings-switch"><span><strong>${title}</strong><small>${hint}</small></span><input type="checkbox" role="switch" data-device-setting="${key}" ${deviceSettings[key]?'checked':''}></label>`;}
 function editionName(){return SHELL?.edition||serviceFreeEdition()||(service.connected?'PC&Mac 通用版（本机服务）':'PC&Mac 通用版（直接打开）');}
-const SHORTCUTS=[['← →','法条精读中翻到上一条、下一条'],['\\','进入或退出专注模式（电脑）'],['Esc','取消所选字句'],['⌘ + / ⌘ − / ⌘ 0','放大、缩小、恢复整个页面（Windows 用 Ctrl）'],['⌘ 1、2、3','Mac 教师版中切换宪法、民法典、网络法典']];
+const SHORTCUTS=[['← →','法条精读中翻到上一条、下一条'],['\\','进入或退出专注模式（电脑）'],['Esc','取消所选字句'],['⌘ + / ⌘ − / ⌘ 0','放大、缩小、恢复整个页面（Windows 用 Ctrl）'],['⌘ + 数字','Mac 教师版中按“法典”菜单所列快捷键切换法典']];
 function renderPrefs(){
   const card=(title,body)=>`<section class="settings-card prefs-card"><h3>${title}</h3>${body}</section>`;
   const sample=ver(M.get(CODEX.welcome?.start)||current(),LATEST)?.paragraphs?.[0]||'';
   return `${pageHead('设置','这些设置只影响这台设备上的显示，不改变笔记，也不随备份带走。')}<div class="prefs-grid">
   ${card('外观',choiceGroup('外观',APPEARANCES,deviceSettings.appearance,'set-appearance'))}
   ${card('法条字号',`${choiceGroup('法条字号',LAW_SCALES.map(([v,t])=>[v,t]),deviceSettings.lawScale,'set-law-scale')}<p class="prefs-sample law-text">${esc(sample.slice(0,60))}</p><p class="note-source">只放大法条和笔记正文。要放大整个页面，按 ⌘ +（Windows 为 Ctrl +）。</p>`)}
-  ${card('阅读',`${switchRow('continuous','页尾继续滚动，翻到下一条','关闭后只能用 ← → 键或页尾按钮翻条')}${focusAvailable?switchRow('focusLarger','专注模式中放大正文','上课投屏时更清楚'):''}<div class="settings-row"><span><strong>笔记默认显示</strong><small>法条下方的随文笔记</small></span>${noteDisplayControl()}</div>${focusAvailable?`<div class="settings-row"><span><strong>专注模式</strong><small>隐藏两侧导航，鼠标移到屏幕边缘时打开</small></span><button class="btn small" data-action="focus">${focus.on?'退出专注模式':'进入专注模式'}</button></div>`:''}`)}
+  ${card('阅读',`${switchRow('continuous','页尾继续滚动，翻到下一条','关闭后只能用 ← → 键或页尾按钮翻条')}${DATA.games?.tarot?switchRow('tarot','记忆卡片配一张塔罗牌','每张卡片随机抽一张牌，牌上是一个研读这一条的问题；这是提问工具，不是占卜'):''}${focusAvailable?switchRow('focusLarger','专注模式中放大正文','上课投屏时更清楚'):''}<div class="settings-row"><span><strong>笔记默认显示</strong><small>法条下方的随文笔记</small></span>${noteDisplayControl()}</div>${focusAvailable?`<div class="settings-row"><span><strong>专注模式</strong><small>隐藏两侧导航，鼠标移到屏幕边缘时打开</small></span><button class="btn small" data-action="focus">${focus.on?'退出专注模式':'进入专注模式'}</button></div>`:''}`)}
   ${card('引用',`<p>点“引用”时默认使用的格式，也可以在引用窗口中随时切换。</p>${choiceGroup('引用格式',CITE_FORMATS,citeFormat(),'set-cite-format')}`)}
   ${card('数据与备份',`<p>笔记保存在这台设备上。导出、导入和网盘同步在“导出同步”中。</p><div class="row wrap"><button class="btn" data-action="nav" data-view="settings">${icon('download')}导出同步</button><button class="btn" data-action="export-json">导出数据（JSON）</button><button class="text-btn danger" data-action="reset">清空这台设备上的记录…</button></div>`)}
   ${card('帮助',`<div class="row wrap"><button class="btn" data-action="nav" data-view="guide">${icon('help')}使用说明</button>${DATA.edition.name==='debug'?'':'<a class="btn" href="https://github.com/sunspearyb/code-notes/issues" target="_blank" rel="noopener">问题反馈 ↗</a>'}</div><h4 class="prefs-sub">快捷键</h4><dl class="shortcut-list">${SHORTCUTS.map(([k,t])=>`<div><dt><kbd>${esc(k)}</kbd></dt><dd>${esc(t)}</dd></div>`).join('')}</dl>`)}

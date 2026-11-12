@@ -725,3 +725,102 @@ kbd{display:inline-block;padding:1px 7px;border:1px solid var(--line-strong);bor
 .code-choice strong{font:600 17px/1.4 var(--serif)}
 .code-choice small{grid-column:1;color:var(--muted);font-size:12px}
 .code-choice .pill{grid-row:1/3;grid-column:2}
+
+/* ---------- 塔罗研读 (games.js): a typeset card, the article, the card's question and the answer ---------- */
+.tarot-panel{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;align-items:center;margin-top:18px;padding:18px 24px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.tarot-card.picture{display:block;width:100%;margin:0;padding:0;border:0;outline:0;background:none;box-shadow:none;aspect-ratio:auto}
+.tarot-card.picture img{width:100%;border-radius:10px;box-shadow:var(--shadow);display:block}
+.tarot-card.picture.reversed img{transform:rotate(180deg)}
+.tarot-card.picture figcaption{margin-top:8px;white-space:nowrap;font-size:12px;letter-spacing:.04em;color:var(--muted);text-align:center}
+.tarot-ask{margin:8px 0 14px;font:600 17px/1.7 var(--serif)}
+.tarot-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:space-between;aspect-ratio:5/8;padding:18px 14px;border:1px solid var(--gold-line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow);outline:1px solid var(--gold-line);outline-offset:-7px;color:var(--brand);animation:tarot-turn .45s ease-out}
+.tarot-card strong{font:600 22px/1.3 var(--serif);letter-spacing:.14em;text-indent:.14em}
+.tarot-numeral{font:500 15px/1 var(--serif);letter-spacing:.12em;color:var(--gold)}
+.tarot-side{font-size:12px;letter-spacing:.2em;color:var(--muted)}
+.tarot-glyph{width:74px;height:74px;border:1px solid var(--gold-line);transform:rotate(45deg);display:grid;place-items:center}
+.tarot-glyph::before{content:"";width:46px;height:46px;border:1px solid var(--brand-line);border-radius:50%;background:radial-gradient(circle,var(--brand) 0 3px,transparent 4px)}
+.tarot-card.reversed .tarot-glyph{transform:rotate(45deg) scale(.82);border-style:dashed}
+.tarot-card.reversed .tarot-numeral{transform:rotate(180deg)}
+.tarot-card.reversed{background:var(--sunken)}
+@keyframes tarot-turn{from{transform:rotateY(90deg);opacity:.2}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.tarot-card{animation:none}}
+.tarot-reading{display:grid;gap:14px;min-width:0}
+.tarot-question{padding:14px 16px;border:1px solid var(--gold-line);border-radius:var(--radius-sm);background:var(--gold-soft)}
+.tarot-question p{margin-top:6px;font:600 18px/1.7 var(--serif);color:var(--ink)}
+.tarot-reading textarea{width:100%}
+.tarot-deck{display:grid;gap:10px}
+.tarot-deck article{padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm)}
+.tarot-deck header{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.tarot-deck header span:first-child{min-width:3em;color:var(--gold);font-family:var(--serif)}
+.tarot-deck p{font-size:14px;line-height:1.7}
+.tarot-deck b{margin-right:8px;font-weight:500;color:var(--muted);font-size:12px}
+@media(max-width:760px){
+  .tarot-panel{grid-template-columns:1fr;gap:16px;padding:16px}
+  .tarot-card{width:150px;margin:0 auto;padding:12px 10px}
+  .tarot-card strong{font-size:20px}
+  .tarot-glyph{width:50px;height:50px}.tarot-glyph::before{width:30px;height:30px}
+}
+@media(max-width:760px){.tarot-card.picture{width:180px;margin:0 auto;padding:0}}
+.tarot-panel.cover{margin:0;padding:0;border:0;background:none;grid-template-columns:220px minmax(0,1fr);text-align:left}
+.tarot-recall{font-size:13px;color:var(--muted)}
+.tarot-meaning{margin-top:10px;padding-top:10px;border-top:1px solid var(--gold-line);font:400 14px/1.8 var(--sans);color:var(--ink-2)}
+.tarot-question .tarot-meaning{font-weight:400;font-size:14px}
+.tarot-deck .tarot-meaning{border-top:0;padding-top:0;margin-top:4px;color:var(--muted)}
+@media(max-width:760px){.tarot-panel.cover{grid-template-columns:1fr}}
+.ai-access{display:grid;gap:8px;margin:14px 0;padding:14px 16px;border:1px solid var(--line);border-radius:var(--radius-sm)}
+.ai-access legend{padding:0 6px;font-size:13px;color:var(--muted)}
+.ai-level{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);cursor:pointer}
+.ai-level.active{border-color:var(--brand);background:var(--brand-soft)}
+.ai-level input{margin-top:5px}
+.ai-level strong{display:block;font-size:15px}
+.ai-level small{color:var(--muted);font-size:13px;line-height:1.6}
+.ai-notes{margin-top:4px}
+.cross-back{list-style:none;display:grid;gap:6px;margin:6px 0}
+.cross-back li{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:14px}
+.cross-back span{color:var(--ink-2)}
+.cross-text{font-size:calc(17px * var(--law-scale));line-height:1.9}
+.cross-notes-title{margin:16px 0 6px;font-size:14px;color:var(--muted)}
+.cross-notes{display:grid;gap:8px;padding-left:1.2em;font-size:14px;line-height:1.7}
+.cross-notes strong{display:block}
+.rev-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px}
+.rev-chip{display:inline-flex;align-items:baseline;gap:5px;padding:1px 9px;border:1px solid var(--gold-line);border-radius:999px;background:var(--gold-soft);color:var(--gold-ink);font-size:12px;line-height:1.7;cursor:pointer}
+.rev-chip small{font-size:11px;opacity:.75}
+.rev-chip:hover{border-color:var(--brand);color:var(--brand)}
+.rev-chip.static{cursor:default;margin-right:8px}
+.reading-paper.repealed .law-text{color:var(--muted)}
+.article-title{flex-wrap:wrap}
+.article-title .rev-chips{order:5;flex-basis:100%;margin:6px 0 0}
+.toc-grid button.inserted{padding-left:1.4em;font-size:.94em}
+.toc-grid button.repealed{color:var(--muted);text-decoration:line-through}
+.rev-item{padding:10px 0;border-top:1px solid var(--line)}
+.rev-item p{margin-top:6px;font:15px/1.85 var(--serif)}
+.rev-targets{display:flex;flex-wrap:wrap;gap:4px 12px}
+.rev-docs{display:grid;gap:8px}
+.rev-docs details{border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 12px}
+.rev-docs summary{cursor:pointer;font-size:15px}
+.rev-docs summary>small{margin-left:8px;color:var(--muted)}
+/* 体系阅读: one line of choices that stays in reach while reading down the code. */
+.outline-toolbar{position:sticky;top:calc(var(--top-h) + 8px);z-index:6;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;height:48px;padding:0 10px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;border-radius:var(--radius-sm);box-shadow:0 4px 14px rgb(var(--shadow-rgb)/.07)}
+.outline-toolbar::-webkit-scrollbar{display:none}
+.outline-toolbar>*{flex:0 0 auto}
+.outline-toolbar select{display:block;height:32px;margin:0;min-width:0;padding:0 26px 0 10px;font-size:13px;border-color:var(--line);background-color:var(--sunken)}
+.outline-toolbar #outline-scope{flex:0 1 200px;max-width:200px}
+.outline-toolbar #outline-year{flex:0 1 150px;max-width:150px}
+.outline-toolbar .btn.small{height:32px;min-height:32px;padding:0 12px;font-size:13px}
+.outline-toolbar [data-action="outline-select"]{margin-left:auto}
+@media(max-width:760px){
+  .outline-toolbar{top:var(--top-h);margin-inline:-6px;border-radius:0 0 var(--radius-sm) var(--radius-sm)}
+  .outline-toolbar [data-action="outline-select"]{margin-left:0}
+}
+/* The side panel begins below that line, so its tabs are never covered. */
+@media(min-width:961px){.structure-sidebar{top:calc(var(--top-h) + 68px);max-height:calc(100vh - var(--top-h) - 84px)}}
+/* 体系阅读's side panel: its tabs and the search box stay at the top while the list scrolls. */
+.structure-sidebar .outline-side-tabs{position:sticky;top:0;z-index:2;margin-bottom:0;padding-bottom:10px;background:var(--bg)}
+.structure-sidebar .outline-toc>input{position:sticky;top:44px;z-index:2;background:var(--surface)}
+@media(max-width:960px){.structure-sidebar .outline-side-tabs,.structure-sidebar .outline-toc>input{position:static;background:none}}
+.gist-source{align-self:center;margin-left:6px;padding:0 7px;border:1px solid var(--brand-line);border-radius:4px;background:var(--brand-soft);color:var(--brand);font:500 11px/1.7 var(--sans);letter-spacing:.08em;cursor:pointer}
+.gist-source:hover{border-color:var(--brand)}
+.gist-dot{display:inline-block;margin-left:4px;padding:0 3px;border:1px solid var(--brand-line);border-radius:3px;color:var(--brand);font:500 10px/1.5 var(--sans);vertical-align:1px}
+.outline-title .gist-source{margin-left:4px}
+.link-card.cross{border-left:3px solid var(--gold-line)}
+.cross-quote{font:15px/1.7 var(--serif);color:var(--ink-2)}

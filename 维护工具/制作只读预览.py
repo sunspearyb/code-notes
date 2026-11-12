@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build script-free read-only previews from the clean compiled pages."""
-import argparse, json, re
+import argparse, importlib.util, json, re
 from pathlib import Path
 from html import escape as e
 
@@ -8,18 +8,20 @@ def build(source, site):
     preview = site / 'preview'
     preview.mkdir(parents=True, exist_ok=True)
     links = []
-    for page in sorted((source / 'demo').glob('法典笔记*.html')):
+    spec = importlib.util.spec_from_file_location('preview_edition', source / 'demo/edition.py')
+    edition = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(edition)
+    for name in edition.pack_names():
+        page = source / 'demo' / edition.page_name(name)
         match = re.search(r'<script id="content-data" type="application/json">(.*?)</script>', page.read_text(), re.S)
         if not match:
             continue
         data = json.loads(match.group(1))
         codex = data['codex']
-        folder = codex.get('webFolder', 'constitution')
-        if not folder:
-            folder = 'constitution'
+        folder = codex.get('webFolder') or name
         target = preview / folder
         target.mkdir(parents=True, exist_ok=True)
-        formal = '../../' if folder == 'constitution' else '../../' + folder + '/'
+        formal = '../../' if name == edition.CONTENT_CODEX else '../../' + folder + '/'
         latest = str(max(data['history']['years']))
         articles = []
         for unit in data['history']['units']:
@@ -36,7 +38,7 @@ def build(source, site):
             body = ''.join('<p>' + e(t) + '</p>' for t in version['paragraphs'])
             articles.append('<details><summary>' + e(title) + '</summary>' + body + '</details>')
         title = codex['short'] + ' · 只读预览'
-        content = '<p><a href="../">三部法典预览目录</a> · <a href="' + formal + '">进入正式手机版</a></p><h1>' + e(title) + '</h1><p class="notice">仅供阅读，不提供添加笔记、上传、导入或保存功能。正式记笔记请进入正式手机版，或下载电脑网页版。</p><p>展示数据包最新文本（' + latest + ' 年版本），点击条文标题展开。条旨为研读草稿。</p>' + ''.join(articles)
+        content = '<p><a href="../">法典预览目录</a> · <a href="' + formal + '">进入正式手机版</a></p><h1>' + e(title) + '</h1><p class="notice">仅供阅读，不提供添加笔记、上传、导入或保存功能。正式记笔记请进入正式手机版，或下载电脑网页版。</p><p>展示数据包最新文本（' + latest + ' 年版本），点击条文标题展开。条旨的来源和性质请在正式版查看。</p>' + ''.join(articles)
         (target / 'index.html').write_text(document(title, content), encoding='utf-8')
         links.append('<li><a href="' + e(folder) + '/">' + e(codex['short']) + '</a></li>')
     (preview / 'index.html').write_text(document('法典笔记 · 只读预览', '<h1>法典笔记 · 只读预览</h1><p class="notice">这里只供阅读，不接收或保存任何笔记。正式使用请进入各法典的正式手机版，或下载电脑网页版。</p><ul>' + ''.join(links) + '</ul><p><a href="https://github.com/sunspearyb/code-notes/releases/latest">版本选择与下载</a></p>'), encoding='utf-8')

@@ -21,8 +21,8 @@ showScopedAnalysis=function(file,scope={kind:'constitution',year:LATEST,unitIds:
 };
 renderAI=function(){
   const old=renderModelSettings(),form=old.slice(old.indexOf('<form id="ai-settings-form"'));
-  const task=state.preferences.assistantTask||{},enabled=service.status?.config.agentEnabled;
-  return `${pageHead('智能辅助','与本地助手一起研读，或请模型协助整理材料；判断由自己作出。',`<button class="btn" data-action="relation-candidates">审阅建议（${service.proposals.filter(p=>p.status==='pending').length}）</button>`)}${typeof learningPrinciples==='function'?learningPrinciples():''}${connectionNotice()}${service.error?`<p class="service-error">${esc(service.error)}</p>`:''}<section class="assistant-panel"><div class="assistant-heading"><div><span class="eyebrow">使用已有的智能体工具</span><h3>本地助手接入</h3><p>在 Codex、WorkBuddy、Claude Code 等工具中打开本项目。工具需具有本机文件及命令权限；接入后可检索条文与笔记、导入材料、提交笔记和关联建议。</p></div><div><span class="connection-badge">${enabled?'已允许本地助手接入':'尚未开启'}</span><button class="btn" data-action="agent-toggle" ${!service.status?.agentSupported?'disabled':''}>${enabled?'关闭接入':'允许本地助手接入'}</button></div></div>${service.connected&&!service.status?.agentSupported?'<p class="service-error">当前本机服务是旧版本。请关闭启动终端后重新打开法典笔记。</p>':''}<p class="note-source">这里不需要填写模型 API Key。助手仍使用原有工具的账号和额度；若工具使用云端模型，交给它的内容可能发送至其服务商。建议先审阅，再收入个人笔记。</p><form id="assistant-task-form">${task.source?`<div class="hint-panel"><strong>选定材料：${esc(task.source.name)}</strong><p>${esc(scopeTitle(task.source.scope))}</p><button class="text-btn" type="button" data-action="assistant-clear-source">移除此任务中的材料</button></div>`:''}${thinkingFields('assistant',task)}<div class="row wrap"><button class="btn primary" type="submit" ${!enabled?'disabled':''}>生成给助手的任务</button><button class="btn" type="button" data-action="relation-candidates">审阅助手建议</button></div></form><details class="source-note"><summary>接入范围与功能扩展</summary><p>本轮支持书库读取、检索、材料导入及建议提交。请把下面的任务交给能运行本机命令的工具；普通聊天网页不能直接连接。</p><p>如果需要新增软件功能，可让代码助手在本项目的独立副本中开发。自动修改、安装和回退功能尚未加入，先看改动方案，再决定是否采用。</p><a href="./本地助手接入.html" target="_blank" rel="noopener">接入说明 ↗</a></details></section><details class="model-settings"><summary>模型接口与自动检索设置（可选）</summary><p class="note-source">使用本地助手时，无需填写下面的接口。需要由软件直接调用模型或定期检索时，再单独配置。</p>${form}</details>`;
+  const task=state.preferences.assistantTask||{},level=service.status?.config.aiAccess||'vault',enabled=level!=='vault';
+  return `${pageHead('智能辅助','与本地助手一起研读，或请模型协助整理材料；判断由自己作出。',`<button class="btn" data-action="relation-candidates">审阅建议（${service.proposals.filter(p=>p.status==='pending').length}）</button>`)}${typeof learningPrinciples==='function'?learningPrinciples():''}${connectionNotice()}${service.error?`<p class="service-error">${esc(service.error)}</p>`:''}<section class="assistant-panel"><div class="assistant-heading"><div><span class="eyebrow">使用已有的智能体工具</span><h3>本地助手接入</h3><p>在 Codex、WorkBuddy、Claude Code 等工具中打开本项目。工具需具有本机文件及命令权限；接入后可检索条文与笔记、导入材料、提交笔记和关联建议。</p></div></div><fieldset class="ai-access" ${!service.status?.agentSupported?'disabled':''}><legend>助手对${esc(CODEX.short)}的权限</legend>${[['vault','保险箱','助手读不到条文和笔记，也写不进来。这里只保存你自己的思考。'],['read','只读','助手可以读条文；是否可以读你的笔记，在下面单独决定。'],['collab','协作','助手还可以导入材料、提交候选笔记；你审阅后才收入，并一直标明来自助手。']].map(([v,name,hint])=>`<label class="ai-level ${level===v?'active':''}"><input type="radio" name="ai-access" value="${v}" ${level===v?'checked':''}><span><strong>${name}</strong><small>${hint}</small></span></label>`).join('')}<label class="check ai-notes"><input type="checkbox" id="ai-read-notes" ${service.status?.config.aiReadNotes?'checked':''} ${level==='vault'?'disabled':''}> 允许读取我的笔记、关联和材料</label><p class="note-source">每部法典分别设置。单独一则笔记可以在它下方点“对助手隐藏”，任何情况下助手都读不到。</p></fieldset>${service.connected&&!service.status?.agentSupported?'<p class="service-error">当前本机服务是旧版本。请关闭启动终端后重新打开法典笔记。</p>':''}<p class="note-source">这里不需要填写模型 API Key。助手仍使用原有工具的账号和额度；若工具使用云端模型，交给它的内容可能发送至其服务商。建议先审阅，再收入个人笔记。</p><form id="assistant-task-form">${task.source?`<div class="hint-panel"><strong>选定材料：${esc(task.source.name)}</strong><p>${esc(scopeTitle(task.source.scope))}</p><button class="text-btn" type="button" data-action="assistant-clear-source">移除此任务中的材料</button></div>`:''}${thinkingFields('assistant',task)}<div class="row wrap"><button class="btn primary" type="submit" ${!enabled?'disabled':''}>生成给助手的任务</button><button class="btn" type="button" data-action="relation-candidates">审阅助手建议</button></div></form><details class="source-note"><summary>接入范围与功能扩展</summary><p>本轮支持书库读取、检索、材料导入及建议提交。请把下面的任务交给能运行本机命令的工具；普通聊天网页不能直接连接。</p><p>如果需要新增软件功能，可让代码助手在本项目的独立副本中开发。自动修改、安装和回退功能尚未加入，先看改动方案，再决定是否采用。</p><a href="./本地助手接入.html" target="_blank" rel="noopener">接入说明 ↗</a></details></section><details class="model-settings"><summary>模型接口与自动检索设置（可选）</summary><p class="note-source">使用本地助手时，无需填写下面的接口。需要由软件直接调用模型或定期检索时，再单独配置。</p>${form}</details>`;
 };
 document.addEventListener('input',event=>{
   if(event.target.closest('#assistant-task-form')){
@@ -39,10 +39,7 @@ document.addEventListener('click',async event=>{
       button.textContent=skip?'展开思考提示':'暂时跳过思考提示';button.setAttribute('aria-expanded',String(!skip));
       if(button.closest('#assistant-task-form')){state.preferences.assistantTask={...state.preferences.assistantTask,...readThinking(button.closest('form'))};persist();}
     }
-    if(button.dataset.action==='agent-toggle'){
-      await api('settings',{agentEnabled:!service.status?.config.agentEnabled});await refreshService();render();
-      toast(service.status.config.agentEnabled?'本地助手可以接入了。':'已关闭本地助手入口。');
-    }
+
     if(button.dataset.action==='assistant-copy'){
       const text=document.getElementById('assistant-instruction').value;
       try{await navigator.clipboard.writeText(text);toast('已复制，可粘贴给本地助手。');}
@@ -92,3 +89,19 @@ appendWorkspaceMarkdown=function(lines){
   }
 };
 render();
+
+// ---------- What assistants may do with this code: 保险箱 / 只读 / 协作, and notes hidden from them ----------
+document.addEventListener('change',async event=>{
+  const t=event.target;if(t.name!=='ai-access'&&t.id!=='ai-read-notes')return;
+  try{
+    await api('settings',t.name==='ai-access'?{aiAccess:t.value,...(t.value==='vault'?{aiReadNotes:false}:{})}:{aiReadNotes:t.checked});
+    await refreshService();render();
+    const c=service.status.config;toast(c.aiAccess==='vault'?'已设为保险箱：助手不能读取。':`已设为${c.aiAccess==='read'?'只读':'协作'}，${c.aiReadNotes?'助手可以读你的笔记':'助手不能读你的笔记'}。`);
+  }catch(error){toast(error.message);render();}
+});
+document.addEventListener('click',event=>{
+  const el=event.target.closest('[data-action="note-private"]');if(!el)return;
+  const n=state.notes.find(n=>n.id===el.dataset.id);if(!n)return;
+  if(n.private)delete n.private;else n.private=true;
+  n.updatedAt=now();persist();render();toast(n.private?'这则笔记已对助手隐藏。':'这则笔记不再对助手隐藏。');
+});

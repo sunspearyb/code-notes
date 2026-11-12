@@ -6,12 +6,13 @@ from html import escape
 import os
 from edition import EDITION_FILE, CONTENT_CODEX, effective, load_codex, pack_names, page_name
 from help_page import render_help
+from compose import compose
 
 root = Path(__file__).resolve().parent
 # marks.js, focus.js and settings.js come right after app.js: the first render (learning.js) may already
 # need them, for instance when the app reopens on 设置.
 SCRIPTS = ['model.js', 'notebook.js', 'learning-model.js', 'app.js', 'marks.js', 'focus.js', 'settings.js', 'local-files.js', 'workspace.js',
-           'learning.js', 'relations.js', 'readings.js', 'statutes.js', 'smart.js', 'storage.js', 'analysis.js']
+           'learning.js', 'relations.js', 'readings.js', 'statutes.js', 'smart.js', 'storage.js', 'analysis.js', 'games.js']
 
 
 def load_data(name):
@@ -25,10 +26,17 @@ def load_data(name):
         data[key] = json.loads((root / 'codes' / name / file).read_text(encoding='utf-8'))
     # Analysis frameworks (e.g. 法权分析) are shared by every code; frameworks/<id>.json.
     data['frameworks'] = {path.stem: json.loads(path.read_text(encoding='utf-8')) for path in sorted((root / 'frameworks').glob('*.json'))}
+    # Study games (e.g. 塔罗研读) are shared by every code too; games/<id>.json, shown by src/games.js.
+    data['games'] = {path.stem: json.loads(path.read_text(encoding='utf-8')) for path in sorted((root / 'games').glob('*.json'))}
+    # Pictures of a game: games/<id>/<name>.jpg or .png (for 塔罗研读, 0.jpg … 21.jpg), put into the page.
+    kinds = {'.jpg': 'jpeg', '.jpeg': 'jpeg', '.png': 'png', '.webp': 'webp'}
+    data['gameImages'] = {folder.name: {p.stem: f'data:image/{kinds[p.suffix.lower()]};base64,' + base64.b64encode(p.read_bytes()).decode()
+                                        for p in sorted(folder.iterdir()) if p.suffix.lower() in kinds}
+                          for folder in sorted((root / 'games').iterdir()) if folder.is_dir()}
     # Every code in this folder, so that one code's page can open an article of another.
     data['codes'] = [{'name': other, 'id': (c := load_codex(other))['id'], 'short': c.get('short', other), 'fullName': c['name'],
                       'page': page_name(other), 'webFolder': '' if other == CONTENT_CODEX else c.get('webFolder', other),
-                      'aliases': c.get('citation', {}).get('aliases', [])} for other in pack_names()]
+                      'aliases': [*c.get('citation', {}).get('aliases', []), *(x for n in c.get('structure', []) if n.get('law') for x in (n['law']['name'], n['law']['short'], *n['law'].get('aliases', [])))]} for other in pack_names()]
     return data
 
 
@@ -38,7 +46,7 @@ def check_font(names):
     if not covered.exists():
         return
     have = set(covered.read_text(encoding='utf-8'))
-    need = {c for name in names for path in (root / 'codes' / name).glob('*.json')
+    need = {c for path in [*(p for name in names for p in (root / 'codes' / name).glob('*.json')), *(root / 'games').glob('*.json')]
             for c in path.read_text(encoding='utf-8') if '\u3400' <= c <= '\u9fff'}
     missing = sorted(need - have)
     if missing:
@@ -72,6 +80,9 @@ def build_page(name):
 # Every data pack gets its own page (法典笔记.html for the default, 法典笔记-<名称>.html for the others);
 # FADIAN_CODEX=<名称> builds only that one.
 names = [os.environ['FADIAN_CODEX']] if os.environ.get('FADIAN_CODEX') else pack_names()
+# Codes that list modules in codex.json are put together first (compose.py).
+for name in names:
+    compose(name)
 check_font(names)
 for name in names:
     build_page(name)

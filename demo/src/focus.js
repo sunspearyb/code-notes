@@ -71,7 +71,7 @@ function focusSwitch(){return `<label class="focus-switch" title="${focusTitle()
 renderPage=function(){
   renderPageBeforeFocus();if(!focusAvailable)return;
   const bar=document.querySelector('.topbar');if(bar&&!bar.querySelector('.focus-toggle'))bar.insertAdjacentHTML('beforeend',focusButton());
-  const spot=document.querySelector('main .outline-toolbar,main .reader-tools,main .practice-side');
+  const spot=document.querySelector('main .reader-tools,main .practice-side');
   if(spot&&!spot.querySelector('.focus-switch'))spot.insertAdjacentHTML(spot.matches('.practice-side')?'afterbegin':'beforeend',focusSwitch());
 };
 if(focusAvailable){edgeZones();let saved='0';try{saved=localStorage.getItem(FOCUS_KEY)||'0';}catch{}setFocus(saved==='1');}

@@ -37,6 +37,7 @@ import posixpath
 from html import escape
 import tempfile
 import zipfile
+from datetime import datetime
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -106,6 +107,21 @@ def checksum(path):
         hashlib.sha256(path.read_bytes()).hexdigest() + '  ' + path.name + '\n', encoding='utf-8')
 
 
+def native_versions(tag):
+    """Keep a date-based build number above the former releases; display SemVer to users."""
+    semantic = re.fullmatch(r'v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)', tag)
+    legacy = re.fullmatch(r'(\d{4})(\d{4})(?:-r(\d+))?', tag)
+    if semantic:
+        display = '.'.join(semantic.groups())
+        now = datetime.now()
+        build = f'{now.year}.{int(now.strftime("%m%d"))}.{int(now.strftime("%H%M"))}'
+    elif legacy:
+        display = build = f'{legacy[1]}.{int(legacy[2])}.{legacy[3] or 0}'
+    else:
+        raise ValueError('应用版本号应为 X.Y.Z 或 YYYYMMDD-rN')
+    return display, build
+
+
 def make_pc(page, tag, pack=None):
     """The pure edition folder as one ZIP. It unpacks to 法典笔记/, a name that stays the same
     across versions, so the folder can live in a cloud drive and be replaced on upgrade."""
@@ -161,7 +177,7 @@ def make_web(page, tag, pack, out=None, layout=None):
         if code['name'] != pack.name:
             other = Pack(page.parent.parent, code['name'])
             make_web(other.page, tag, other, site_root, folders)
-    archive = out.with_suffix('.zip')
+    archive = out.with_name(out.name + '.zip')
     with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
         for path in sorted(out.rglob('*')):
             z.write(path, Path(out.name) / path.relative_to(out))
@@ -192,8 +208,8 @@ def make_android(page, tag, pack):
 
 
 def make_windows(page, tag, pack):
-    numbers = re.match(r'(\d{4})(\d{4})(?:-r(\d+))?', tag)
-    version = f'{numbers[1]}.{int(numbers[2])}.{numbers[3] or 0}.0' if numbers else '1.0.0.0'
+    _, build_version = native_versions(tag)
+    version = build_version + '.0'
     pages = CACHE / 'pages'
     shutil.rmtree(pages, ignore_errors=True)
     pages.mkdir(parents=True)
@@ -257,8 +273,7 @@ def make_mac(page, tag, pack):
         android.run('cargo', 'build', '--release', '--target', target, cwd=WINDOWS_APP, env=env)
         binaries.append(mac_cache / 'target' / target / 'release' / 'fadian-notes')
     dmg = DIST / f'{pack.file}-Mac版-{tag}.dmg'
-    numbers = re.match(r'(\d{4})(\d{4})(?:-r(\d+))?', tag)
-    version = f'{numbers[1]}.{int(numbers[2])}.{numbers[3] or 0}' if numbers else '1.0.0'
+    version, build_version = native_versions(tag)
     with tempfile.TemporaryDirectory() as tmp:
         work = Path(tmp)
         app = work / 'dmg' / '法典笔记.app'
@@ -269,7 +284,7 @@ def make_mac(page, tag, pack):
         with open(app / 'Contents/Info.plist', 'wb') as f:
             plistlib.dump({'CFBundleName': '法典笔记', 'CFBundleDisplayName': '法典笔记', 'CFBundleIdentifier': 'cn.fadian.notes',
                            'CFBundleExecutable': 'fadian-notes', 'CFBundleIconFile': 'AppIcon', 'CFBundlePackageType': 'APPL',
-                           'CFBundleShortVersionString': version, 'CFBundleVersion': version, 'LSMinimumSystemVersion': '11.0',
+                           'CFBundleShortVersionString': version, 'CFBundleVersion': build_version, 'LSMinimumSystemVersion': '11.0',
                            'NSHighResolutionCapable': True, 'LSApplicationCategoryType': 'public.app-category.education'}, f)
         android.run('codesign', '--force', '--deep', '--sign', '-', app)
         os.symlink('/Applications', work / 'dmg' / '应用程序')

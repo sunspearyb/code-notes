@@ -41,10 +41,15 @@
 python3 demo/build.py                 # 生成页面
 node demo/test-clean.cjs              # 分发版检查：空白书库、保存后重开、条文完整
 node demo/test-learning.cjs           # 数据模型
+node demo/test-marks.cjs              # 高亮、下划线、加粗与备份合并
 node demo/test-reflection.cjs         # 助手建议的审阅流程
 node demo/test-codex.cjs              # 其他数据包：几部法律合编、多层目录、千位条号
+node demo/test-games.cjs             # 记忆卡片配牌
+node demo/test-modules.cjs           # 模块与暂存记录
+node demo/codes/civil-code/test_pack.cjs
+node demo/codes/cyber-law/test_pack.cjs
 python3 demo/codes/check_pack.py <名称>   # 改动了某个数据包时
-cd demo && python3 -m unittest test_service test_agent test_help
+(cd demo && PYTHONDONTWRITEBYTECODE=1 python3 -m unittest test_service test_agent test_help test_compose)
 ```
 
 测试全部通过后，用浏览器打开 `demo/法典笔记.html`，在电脑宽度和手机宽度（约 390 像素）下检查改动的页面。新功能请补测试。
@@ -55,6 +60,12 @@ cd demo && python3 -m unittest test_service test_agent test_help
 
 - **新增一个功能页**：参考 `demo/src/readings.js`（比较阅读、备案审查、英文本）。
 - **新增一类材料**（如司法解释、指导性案例）：在数据包的 `codex.json` 中声明 `relationCategories`，不必改代码。
-- **扩展到其他法典**：按 `demo/codes/README.md` 新建数据包，未完成时文件夹名以 `_` 开头。正文取自国家法律法规数据库，逐条核对，用 `check_pack.py` 检查。用 `python3 demo/launch.py --open --codex <名称>` 连本机服务试用。每部法典的浏览器记录、端口和数据文件夹各自分开，不要合并。
-- **设置页、外观和字号**：见 `demo/src/settings.js`。这些是设备设置，存在 localStorage 的 `fadian-settings` 中，不进笔记和备份。高亮标记见 `marks.js`，专注模式见 `focus.js`。
-- **改变导出或同步**：见 `demo/src/storage.js` 和 `demo/数据格式.md`；两边内容不同时保留两个版本，不要覆盖。
+- **扩展到其他法典**：将文本放进 `新法典/<简称>/`，先读 `新法典/给助手的说明.md`，运行 `python3 demo/add_code.py 新法典/<简称>`；格式见 `demo/codes/README.md`，未完成时文件夹名以 `_` 开头。正文取自国家法律法规数据库，逐条核对，用 `check_pack.py` 检查。用 `python3 demo/launch.py --open --codex <名称>` 连本机服务试用。每部法典的浏览器记录、端口和数据文件夹各自分开，不要合并。
+- **设置页、外观和字号**：见 `demo/src/settings.js`。这些是设备设置，存在 localStorage 的 `fadian-settings` 中；用本机服务时另存共用设置文件，供各法典读取，不进笔记备份。高亮标记见 `marks.js`，专注模式见 `focus.js`。
+- **改变导出或同步**：见 `demo/src/storage.js` 和 `demo/数据格式.md`；同一笔记或材料关联采用较晚版本，较早版本进入修改记录；删除记录和暂存记录也须保留。
+
+## 条旨、罪名与发布边界
+
+不得自行编写罪名。官方条旨和罪名必须回到依据文件核对，并注明出处；没有核对的不得写入。拟定条旨须经使用者同意，不得冒充罪名。刑法条旨应修改 `新法典/刑法及历次修正案/` 中的输入文件，再重新生成，不直接改生成的 `subtitles.json`。
+
+默认助手权限为保险箱；不得绕过权限、单则笔记隐藏或候选审阅。不要启用合并、拆分法典。本次重新制作前，已按使用者确认运行自动测试并通过；尚未做人工功能试用和真机测试。

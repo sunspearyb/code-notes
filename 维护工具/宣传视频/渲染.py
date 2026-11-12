@@ -85,6 +85,10 @@ def frames(work, url, start, end, fps):
     return sorted(out.glob('*.png'))
 
 
+def films_base(name):
+    return json.loads((HERE / '场景.json').read_text(encoding='utf-8'))['films'][name].get('base')
+
+
 def main():
     parser = argparse.ArgumentParser(description='制作法典笔记宣传片')
     parser.add_argument('--film', required=True, help='场景.json 中的片名，如 A、B、C、D')
@@ -102,16 +106,24 @@ def main():
     if not Path(CHROME).exists():
         sys.exit('需要 Google Chrome。')
     global W, H
-    if args.portrait:
+    if args.portrait or films_base(args.film):
         W, H = 1080, 1920
     os.environ['FRAME_SIZE'] = f'{W}x{H}'
-    film = json.loads((HERE / '场景.json').read_text(encoding='utf-8'))['films'][args.film]
+    films = json.loads((HERE / '场景.json').read_text(encoding='utf-8'))['films']
+    film = films[args.film]
+    # A short clip (短片, base: A|B|D) is always portrait and takes the texts of its film, the film's
+    # portrait texts, and its own, in that order.
+    base = film.get('base')
+    if base:
+        parent = films[base]
+        film = {**film, 'short': True, 'text': {**parent['text'], **parent.get('portrait', {}).get('text', {}), **film.get('text', {})}}
+        args.portrait = True
     # A portrait film may set its own scenes, texts, accents and cover (portrait: {scenes, text, …});
     # with short: true it is the short-video version, with scenes of its own (v… in 渲染.html).
     if args.portrait and film.get('portrait'):
         film = {**film, **{k: v for k, v in film['portrait'].items() if k != 'text'}, 'text': {**film['text'], **film['portrait'].get('text', {})}}
     # A portrait output name that already says 竖屏 (the short-video version) is used as it is.
-    suffix = '-竖屏' if args.portrait and '竖屏' not in film['output'] else ''
+    suffix = '-竖屏' if args.portrait and not base and '竖屏' not in film['output'] else ''
     out = args.out or PROJECT / '分发' / f'{film["output"]}{suffix}.mp4'
     out = out if out.is_absolute() else PROJECT / out
     # Scene lengths are in 场景.json; cuts, accents and the cover are given relative to a scene.
@@ -128,10 +140,10 @@ def main():
     sfx = [f'{starts[scene] + offset:g}:{kind}' for scene, offset, kind in film.get('sfx', [])]
     with tempfile.TemporaryDirectory(prefix='fadian-promo-') as temp:
         work = Path(temp)
-        url = page(work, {**film_data(args.film, film), 'PORTRAIT': args.portrait, 'VIEWS': film.get('views', {}), 'SHORT': bool(film.get('short')), 'CHAPTERS': film.get('chapters', [])}, fps)
+        url = page(work, {**film_data(base or args.film, film), 'PORTRAIT': args.portrait, 'VIEWS': film.get('views', {}), 'SHORT': bool(film.get('short')), 'CHAPTERS': film.get('chapters', [])}, fps)
         if args.cover_only:
             cover = out.with_suffix('.png')
-            shutil.copy(frames(work, page(work, {**film_data(args.film, film), 'COVER': True, 'PORTRAIT': args.portrait, 'VIEWS': film.get('views', {}), 'SHORT': bool(film.get('short')), 'CHAPTERS': film.get('chapters', [])}, fps), cover_at, cover_at + 1 / fps, fps)[0], cover)
+            shutil.copy(frames(work, page(work, {**film_data(base or args.film, film), 'COVER': True, 'PORTRAIT': args.portrait, 'VIEWS': film.get('views', {}), 'SHORT': bool(film.get('short')), 'CHAPTERS': film.get('chapters', [])}, fps), cover_at, cover_at + 1 / fps, fps)[0], cover)
             print(f'封面：{cover}')
             return
         if args.stills:
@@ -156,13 +168,21 @@ def main():
             shutil.copy(video, out)
         else:
             audio = work / 'sound.wav'
-            run(sys.executable, HERE / '配乐.py', audio, duration,
-                '--style', args.film, '--cuts', ','.join(f'{c:g}' for c in cuts), '--accents', ','.join(f'{a:g}' for a in accents), '--sfx', ','.join(sfx))
+            music = film.get('music', {})
+            at = lambda ref: f'{starts[ref[0]] + ref[1]:g}'
+            extra = []
+            if music:
+                extra = ['--drop', at(music['drop']), '--end', f'{bounds[-2]:g}', '--hits', ','.join(at(h) for h in music.get('hits', []))]
+                if music.get('heart'):
+                    scene, a, b = music['heart']
+                    extra += ['--heart', f'{starts[scene] + a:g},{starts[scene] + b:g}']
+            run(sys.executable, HERE / '配乐.py', audio, duration, *extra,
+                '--style', music.get('style', base or args.film), '--cuts', ','.join(f'{c:g}' for c in cuts), '--accents', ','.join(f'{a:g}' for a in accents), '--sfx', ','.join(sfx))
             run('ffmpeg', '-v', 'error', '-y', '-i', video, '-i', audio, '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k',
                 '-shortest', '-movflags', '+faststart', '-metadata', f'title=法典笔记：{film["title"]}', out)
             # The cover is drawn with 法典笔记 and the film's title over the chosen moment.
             cover = out.with_suffix('.png')
-            cover_url = page(work, {**film_data(args.film, film), 'COVER': True, 'PORTRAIT': args.portrait, 'VIEWS': film.get('views', {}), 'SHORT': bool(film.get('short')), 'CHAPTERS': film.get('chapters', [])}, fps)
+            cover_url = page(work, {**film_data(base or args.film, film), 'COVER': True, 'PORTRAIT': args.portrait, 'VIEWS': film.get('views', {}), 'SHORT': bool(film.get('short')), 'CHAPTERS': film.get('chapters', [])}, fps)
             shutil.copy(frames(work, cover_url, cover_at, cover_at + 1 / fps, fps)[0], cover)
     print(f'完成：{out}（{end - start:.0f} 秒，{out.stat().st_size / 1e6:.1f} MB）')
 

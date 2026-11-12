@@ -1,0 +1,161 @@
+{
+  "id": "legislation-law",
+  "name": "立法法",
+  "about": "中华人民共和国立法法，由 make_pack.py 自 中华人民共和国立法法_2023年.md 生成，文字待与原件核对。",
+  "years": [
+    2000,
+    2015,
+    2023
+  ],
+  "books": [
+    "user-legislation-law"
+  ],
+  "law": {
+    "name": "中华人民共和国立法法",
+    "short": "立法法",
+    "aliases": [],
+    "citation": {
+      "latest": "《中华人民共和国立法法》",
+      "original": "《中华人民共和国立法法》（{year} 年）",
+      "amended": "《中华人民共和国立法法》（{year} 年修正）",
+      "aliases": [
+        "中华人民共和国立法法",
+        "立法法"
+      ],
+      "note": "引用时注明文件全称、条款；引用以往文本时注明版本年份。"
+    }
+  },
+  "levels": {
+    "chapter": {
+      "name": "章",
+      "numbered": true
+    },
+    "section": {
+      "name": "节",
+      "numbered": true
+    }
+  },
+  "structure": [
+    {
+      "id": "lf-node-1",
+      "level": "chapter",
+      "name": "总则",
+      "title": "第一章　总则",
+      "from": "lf1",
+      "number": 1,
+      "to": "lf9"
+    },
+    {
+      "id": "lf-node-2",
+      "level": "chapter",
+      "name": "法律",
+      "title": "第二章　法律",
+      "from": "lf10",
+      "number": 2,
+      "children": [
+        {
+          "id": "lf-node-3",
+          "level": "section",
+          "name": "立法权限",
+          "title": "第一节　立法权限",
+          "from": "lf10",
+          "number": 1,
+          "to": "lf16"
+        },
+        {
+          "id": "lf-node-4",
+          "level": "section",
+          "name": "全国人民代表大会立法程序",
+          "title": "第二节　全国人民代表大会立法程序",
+          "from": "lf17",
+          "number": 2,
+          "to": "lf28"
+        },
+        {
+          "id": "lf-node-5",
+          "level": "section",
+          "name": "全国人民代表大会常务委员会立法程序",
+          "title": "第三节　全国人民代表大会常务委员会立法程序",
+          "from": "lf29",
+          "number": 3,
+          "to": "lf47"
+        },
+        {
+          "id": "lf-node-6",
+          "level": "section",
+          "name": "法律解释",
+          "title": "第四节　法律解释",
+          "from": "lf48",
+          "number": 4,
+          "to": "lf53"
+        },
+        {
+          "id": "lf-node-7",
+          "level": "section",
+          "name": "其他规定",
+          "title": "第五节　其他规定",
+          "from": "lf54",
+          "number": 5,
+          "to": "lf71"
+        }
+      ],
+      "to": "lf71"
+    },
+    {
+      "id": "lf-node-8",
+      "level": "chapter",
+      "name": "行政法规",
+      "title": "第三章　行政法规",
+      "from": "lf72",
+      "number": 3,
+      "to": "lf79"
+    },
+    {
+      "id": "lf-node-9",
+      "level": "chapter",
+      "name": "地方性法规、自治条例和单行条例、规章",
+      "title": "第四章　地方性法规、自治条例和单行条例、规章",
+      "from": "lf80",
+      "number": 4,
+      "children": [
+        {
+          "id": "lf-node-10",
+          "level": "section",
+          "name": "地方性法规、自治条例和单行条例",
+          "title": "第一节　地方性法规、自治条例和单行条例",
+          "from": "lf80",
+          "number": 1,
+          "to": "lf90"
+        },
+        {
+          "id": "lf-node-11",
+          "level": "section",
+          "name": "规章",
+          "title": "第二节　规章",
+          "from": "lf91",
+          "number": 2,
+          "to": "lf97"
+        }
+      ],
+      "to": "lf97"
+    },
+    {
+      "id": "lf-node-12",
+      "level": "chapter",
+      "name": "适用与备案审查",
+      "title": "第五章　适用与备案审查",
+      "from": "lf98",
+      "number": 5,
+      "to": "lf116"
+    },
+    {
+      "id": "lf-node-13",
+      "level": "chapter",
+      "name": "附则",
+      "title": "第六章　附则",
+      "from": "lf117",
+      "number": 6,
+      "to": "lf120"
+    }
+  ]
+}

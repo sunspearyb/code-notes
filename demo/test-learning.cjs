@@ -95,8 +95,11 @@ assert.equal(relationState.materialRelations.at(-1).ai.verification,'reviewed');
 const relationRestore=M.migrate(JSON.parse(JSON.stringify(relationState)));assert.equal(relationRestore.materialRelations.length,4);
 assert.equal(M.merge(M.fresh(),relationRestore).state.materialRelations.length,4);
 const relationEdit=M.migrate(relationRestore);M.editMaterialRelation(relationEdit,wholeRelation.id,{text:'另一份备份中的修改'});
-const relationMerge=M.merge(relationRestore,relationEdit).state;assert.equal(relationMerge.materialRelations.length,5);
-assert.equal(M.merge(relationMerge,relationEdit).state.materialRelations.length,5);
+// An edited relation replaces the earlier one instead of standing beside it; the earlier wording is in its history.
+const relationMerge=M.merge(relationRestore,relationEdit).state;assert.equal(relationMerge.materialRelations.length,4);
+assert.equal(relationMerge.materialRelations.find(r=>r.id===wholeRelation.id).text,'另一份备份中的修改');
+assert.equal(M.merge(relationMerge,relationEdit).state.materialRelations.length,4);
+assert.equal(M.merge(relationEdit,relationRestore).state.materialRelations.find(r=>r.id===wholeRelation.id).text,'另一份备份中的修改','the order of merging does not matter');
 assert.throws(()=>M.validateScope({kind:'articles',year:2018,unitIds:[]}));
 assert.throws(()=>M.validateScope({kind:'articles',year:1982,unitIds:['a123']}));
 assert.throws(()=>M.validateScope({kind:'amendment',year:1982,unitIds:[]}));
@@ -170,3 +173,73 @@ const same=(a,b)=>assert.equal(JSON.stringify(a),JSON.stringify(b));
   assert(M.categories().crosscode&&M.categories().related);
 }
 console.log('Passed: data-pack structure tree and scopes, 比较阅读, 备案审查 and course cases, 宪法相关法, 法权分析, official English text.');
+
+// ---------- Merging between devices: the later version stands, deletions hold, turning pages is not a change ----------
+{
+  const clone=x=>JSON.parse(JSON.stringify(x)),at=min=>new Date(Date.UTC(2026,10,1,8,min)).toISOString();
+  const same=(a,b)=>assert.deepEqual(clone(a),b); // values from the model live in the VM context
+  const sorted=xs=>[...xs].sort((a,b)=>a.id<b.id?-1:1),contentSorted=st=>JSON.stringify(['notes','links','materials','groups','groupLinks','materialRelations','marks','deleted'].map(k=>sorted(st[k])));
+  const base0=M.fresh(),n1=M.addNote(base0,{unitId:'a33',year:2018,text:'第一版'}),n2=M.addNote(base0,{unitId:'a34',year:2018,text:'另一则'});
+  n1.updatedAt=n1.createdAt=n2.updatedAt=n2.createdAt=at(0);
+  const own=st=>st.notes.filter(n=>[n1.id,n2.id].includes(n.id)),count=base0.notes.length;
+  // 1. Edited on one device: one note, the earlier wording in its history, and no “conflict”.
+  const edited=clone(base0);M.addNote(edited,{unitId:'a33',year:2018,text:'第二版',editId:n1.id}).updatedAt=at(5);
+  let r=M.merge(base0,edited);
+  assert.equal(r.state.notes.length,count);assert.equal(own(r.state).find(n=>n.id===n1.id).text,'第二版');
+  same(r.state.notes.find(n=>n.id===n1.id).history.map(h=>h.text),['第一版']);same([r.added,r.updated,r.conflicts],[0,1,0]);
+  assert.equal(M.merge(edited,base0).state.notes.find(n=>n.id===n1.id).text,'第二版','the older copy never replaces the newer one');
+  // Edited on both devices: still one note; the later stands and the other wording is kept in the history.
+  const editedToo=clone(base0);M.addNote(editedToo,{unitId:'a33',year:2018,text:'另一台的第二版',editId:n1.id}).updatedAt=at(3);
+  r=M.merge(edited,editedToo);
+  assert.equal(r.state.notes.length,count);assert.equal(r.conflicts,1);assert.equal(r.state.notes.find(n=>n.id===n1.id).text,'第二版');
+  same(r.state.notes.find(n=>n.id===n1.id).history.map(h=>h.text),['第一版','另一台的第二版']);
+  // 6. The order of merging does not matter, and merging again changes nothing.
+  assert.equal(contentSorted(M.merge(editedToo,edited).state),contentSorted(r.state));
+  const again=M.merge(r.state,editedToo);assert.equal(contentSorted(again.state),contentSorted(r.state));same([again.added,again.updated,again.conflicts],[0,0,0]);
+  // 2. Deleted on one device: merging with a copy that still has the note does not bring it back, either way round.
+  const removed=clone(base0);assert.equal(M.remove(removed,'notes',n1.id),true);assert.equal(removed.deleted.length,1);
+  for(const result of [M.merge(removed,base0),M.merge(base0,removed)]){
+    assert.equal(result.state.notes.some(n=>n.id===n1.id),false,'a deleted note stays deleted');assert.equal(result.state.notes.length,count-1);
+    same(result.state.deleted.map(d=>d.id),[n1.id]);
+  }
+  // 3. Changed on another device after the deletion: the change stands and the deletion is dropped.
+  const revived=clone(base0);M.addNote(revived,{unitId:'a33',year:2018,text:'删除之后又改',editId:n1.id}).updatedAt=new Date(Date.now()+60000).toISOString();
+  for(const result of [M.merge(removed,revived),M.merge(revived,removed)]){
+    assert.equal(result.state.notes.find(n=>n.id===n1.id)?.text,'删除之后又改');assert.equal(result.state.deleted.length,0);
+  }
+  // Links, materials and marks hold their deletion too.
+  const rich=clone(base0),p=M.version('a33',2018).paragraphs[2],word=M.anchor('a33',2018,2,p.indexOf('人权'),p.indexOf('人权')+2);
+  const link=M.addLink(rich,{from:[word],to:[M.whole('p7',2018)],reason:'测试'});M.toggleMark(rich,[word],'yellow');
+  const stripped=clone(rich);M.remove(stripped,'links',link.id);M.toggleMark(stripped,[word],'yellow');
+  r=M.merge(rich,stripped);assert.equal(r.state.links.some(l=>l.id===link.id),false);assert.equal(r.state.links.length,base0.links.length);assert.equal(r.state.marks.length,0);assert.equal(r.state.deleted.length,2);
+  // 7. A parent part deleted on one device, merged with a copy that still has parent and child.
+  const parts=clone(base0),parent=M.saveGroup(parts,{name:'上级部分',description:'',anchors:[M.whole('a33',2018)]}),child=M.saveGroup(parts,{name:'下级部分',description:'',anchors:[M.whole('a34',2018)],parentId:parent.id});
+  const other=M.saveGroup(parts,{name:'旁的部分',description:'',anchors:[M.whole('a35',2018)]});M.connectGroups(parts,{fromId:parent.id,toId:other.id,relation:'对照',reason:'测试'});
+  for(const g of parts.groups)g.updatedAt=g.createdAt=at(0);
+  const partsGone=clone(parts);M.deleteGroup(partsGone,parent.id);
+  same(partsGone.deleted.map(d=>d.kind).sort(),['groupLinks','groups']);
+  for(const result of [M.merge(partsGone,parts),M.merge(parts,partsGone)]){
+    same(result.state.groups.map(g=>g.name).sort(),['下级部分','旁的部分']);
+    assert.equal(result.state.groups.find(g=>g.id===child.id).parentId,null);assert.equal(result.state.groupLinks.length,0);
+  }
+  // A part changed on both devices: the later one stands, and no second copy of it appears.
+  const renamed=clone(parts);Object.assign(renamed.groups.find(g=>g.id===other.id),{name:'改名后的部分',updatedAt:at(9)});
+  for(const result of [M.merge(parts,renamed),M.merge(renamed,parts)])same(result.state.groups.map(g=>g.name).sort(),['上级部分','下级部分','改名后的部分']);
+  // 5. Turning pages and reading preferences are not a change to what is shared.
+  const moved=clone(base0);Object.assign(moved,{current:'a40',year:1982,preferences:{...moved.preferences,noteMode:'hidden'}});M.validate(moved);
+  assert.equal(M.contentOf(moved),M.contentOf(base0));assert.notEqual(M.contentOf(edited),M.contentOf(base0));assert.notEqual(M.contentOf(removed),M.contentOf(base0));
+  // 8. A backup from before deletions were recorded is read as before.
+  const older=clone(edited);delete older.deleted;
+  same(M.migrate(older).deleted,[]);r=M.merge(M.fresh(),older);assert.equal(r.state.notes.find(n=>n.id===n1.id).text,'第二版');
+  assert.throws(()=>M.validate({...clone(base0),deleted:[{id:'x',kind:'unknown',deletedAt:at(0)}]}));
+  // A draft with nothing written does not become a note when two copies of the same notebook are merged.
+  const drafts=clone(base0);drafts.drafts['a5@2018']={text:'',anchors:[],methods:['法权分析']};drafts.drafts['a10@2018']={text:'正在写的草稿',anchors:[],quote:'',editId:n2.id,year:2018,question:'',methods:[],evidenceIds:[]};
+  r=M.merge(drafts,clone(drafts));assert.equal(r.state.notes.length,count);same([r.added,r.updated,r.conflicts],[0,0,0]);
+  // 4. An explicitly supplied test copy merged with itself stays as it is. Never discover a live notebook.
+  const realFile=process.env.FADIAN_TEST_NOTEBOOK;
+  if(realFile&&fs.existsSync(realFile)){
+    const real=JSON.parse(fs.readFileSync(realFile,'utf8')).state;
+    if(real?.bookId===data.codex.id){const before=M.migrate(real);r=M.merge(real,real);assert.equal(r.state.notes.length,before.notes.length);same([r.added,r.updated,r.conflicts],[0,0,0]);assert.equal(M.contentOf(r.state),M.contentOf(before));}
+  }
+  console.log('Passed: the later version of a note, relation or part stands with the earlier wording in its history; deletions hold across devices unless changed later; merge order does not matter; turning pages is not a change; old backups without deletion records.');
+}

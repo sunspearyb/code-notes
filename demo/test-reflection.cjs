@@ -29,6 +29,7 @@ const disk=M.fresh();const draft=M.addNote(disk,{unitId:'a37',year:2018,text:'�
 M.addNote(local,{unitId:'a37',year:2018,editId:draft.id,text:'尚未写入本机文件的新文本'});
 const quickReopen=M.reconcileSnapshot(local,{revision:5,state:disk},{hasLocal:true,clean:false,revision:5});assert.equal(quickReopen.notes.length,1);assert.equal(quickReopen.notes[0].text,'尚未写入本机文件的新文本');assert.equal(quickReopen.notes[0].history.length,1);
 M.addNote(disk,{unitId:'a37',year:2018,editId:draft.id,text:'另一窗口的不同修改'});
-const concurrent=M.reconcileSnapshot(local,{revision:6,state:disk},{hasLocal:true,clean:false,revision:5});assert.equal(concurrent.notes.length,2);
+const concurrent=M.reconcileSnapshot(local,{revision:6,state:disk},{hasLocal:true,clean:false,revision:5});assert.equal(concurrent.notes.length,1);
+assert.deepEqual([concurrent.notes[0].text,...concurrent.notes[0].history.map(h=>h.text)].sort(),['上次已保存的文本','另一窗口的不同修改','尚未写入本机文件的新文本'].sort(),'both windows’ wording survives in one note');
 const freshWindow=M.reconcileSnapshot(local,{revision:6,state:disk},{hasLocal:false,clean:false,revision:0});assert.equal(freshWindow.notes.length,1);assert.equal(freshWindow.notes[0].text,'另一窗口的不同修改');
 console.log('PASS: explicit review before acceptance; original suggestions retained; personal edits and whole-book edits recorded; no duplicate saves; history survives reopen and backup merge; manual notes remain personal.');
